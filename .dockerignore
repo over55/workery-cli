@@ -1,0 +1,27 @@
+bin
+.git
+**/.git
+.dockerignore
+.env
+Dockerfile
+Dockerfile.dev
+docker-compose.yml
+dev.docker-compose.yml
+dev.Dockerfile
+
+# Private project related files.
+todo.txt
+data/workery_db.backup
+data/workery_v2_db.backup
+data
+data/*
+*/data
+*/data/*
+**/data
+**/data/*
+workery_v2_db.backup
+private_docker.md
+private.dev.md
+private.md
+private.prod.md
+private.txt
