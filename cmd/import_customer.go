@@ -295,8 +295,8 @@ func importCustomer(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.U
 	// Empty arrays
 	//
 
-	cc := []*c_ds.CustomerComment{}
-	at := []*c_ds.CustomerTag{}
+	cc := make([]*c_ds.CustomerComment, 0)
+	at := make([]*c_ds.CustomerTag, 0)
 
 	//
 	// Insert our `Customer` data.

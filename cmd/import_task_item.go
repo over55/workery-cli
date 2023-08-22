@@ -244,7 +244,7 @@ func importTaskItem(
 	var associateLexicalName string
 	var associateGender string
 	var associateBirthdate time.Time
-	var associateTags []*ti_ds.TaskItemAssociateTag
+	var associateTags = make([]*ti_ds.TaskItemAssociateTag, 0)
 
 	a, err := aStorer.GetByID(ctx, order.AssociateID)
 	if err != nil {

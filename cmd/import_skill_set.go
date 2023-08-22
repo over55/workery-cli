@@ -139,7 +139,7 @@ func importSkillSet(ctx context.Context, ssStorer ss_ds.SkillSetStorer, tenant *
 		SubCategory:           t.SubCategory,
 		Description:           t.Description,
 		Status:                state,
-		InsuranceRequirements: []*ss_ds.SkillSetInsuranceRequirement{},
+		InsuranceRequirements: make([]*ss_ds.SkillSetInsuranceRequirement, 0),
 	}
 	if err := ssStorer.Create(ctx, m); err != nil {
 		log.Panic(err)

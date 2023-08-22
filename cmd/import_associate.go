@@ -313,12 +313,12 @@ func importAssociate(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.
 	// Empty arrays
 	//
 
-	cc := []*a_ds.AssociateComment{}
-	sss := []*a_ds.AssociateSkillSet{}
-	irs := []*a_ds.AssociateInsuranceRequirement{}
-	vts := []*a_ds.AssociateVehicleType{}
-	al := []*a_ds.AssociateAwayLog{}
-	at := []*a_ds.AssociateTag{}
+	cc := make([]*a_ds.AssociateComment, 0)
+	sss := make([]*a_ds.AssociateSkillSet, 0)
+	irs := make([]*a_ds.AssociateInsuranceRequirement, 0)
+	vts := make([]*a_ds.AssociateVehicleType, 0)
+	al := make([]*a_ds.AssociateAwayLog, 0)
+	at := make([]*a_ds.AssociateTag, 0)
 
 	//
 	// Insert our `Associate` data.

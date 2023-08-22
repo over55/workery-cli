@@ -4,8 +4,11 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"io"
 	"log"
 	"mime/multipart"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -26,6 +29,10 @@ type S3Storager interface {
 	GetDownloadablePresignedURL(ctx context.Context, key string, duration time.Duration) (string, error)
 	GetPresignedURL(ctx context.Context, key string, duration time.Duration) (string, error)
 	DeleteByKeys(ctx context.Context, key []string) error
+	GetBinaryData(ctx context.Context, objectKey string) (io.ReadCloser, error)
+	DownloadToLocalfile(ctx context.Context, objectKey string, filePath string) (string, error)
+	ListAllObjects(ctx context.Context) (*s3.ListObjectsOutput, error)
+	FindMatchingObjectKey(s3Objects *s3.ListObjectsOutput, partialKey string) string
 }
 
 type s3Storager struct {
@@ -33,6 +40,58 @@ type s3Storager struct {
 	PresignClient *s3.PresignClient
 	Logger        *slog.Logger
 	BucketName    string
+}
+
+func NewStorageWithCustom(logger *slog.Logger, endpoint, region, accessKey, secretKey, bucketName string) S3Storager {
+	// DEVELOPERS NOTE:
+	// How can I use the AWS SDK v2 for Go with DigitalOcean Spaces? via https://stackoverflow.com/a/74284205
+	logger.Debug("s3 initializing...")
+
+	// STEP 1: initialize the custom `endpoint` we will connect to.
+	customResolver := aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
+		return aws.Endpoint{
+			URL: endpoint,
+		}, nil
+	})
+
+	// STEP 2: Configure.
+	sdkConfig, err := config.LoadDefaultConfig(
+		context.TODO(), config.WithRegion(region),
+		config.WithEndpointResolverWithOptions(customResolver),
+		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(accessKey, secretKey, "")),
+	)
+	if err != nil {
+		log.Fatal(err) // We need to crash the program at start to satisfy google wire requirement of having no errors.
+	}
+
+	// STEP 3\: Load up s3 instance.
+	s3Client := s3.NewFromConfig(sdkConfig)
+
+	// For debugging purposes only.
+	logger.Debug("s3 connected to remote service")
+
+	// Create our storage handler.
+	s3Storage := &s3Storager{
+		S3Client:      s3Client,
+		PresignClient: s3.NewPresignClient(s3Client),
+		Logger:        logger,
+		BucketName:    bucketName,
+	}
+
+	// STEP 4: Connect to the s3 bucket instance and confirm that bucket exists.
+	doesExist, err := s3Storage.BucketExists(context.TODO(), bucketName)
+	if err != nil {
+		log.Fatal(err) // We need to crash the program at start to satisfy google wire requirement of having no errors.
+	}
+	if !doesExist {
+		log.Fatal("bucket name does not exist") // We need to crash the program at start to satisfy google wire requirement of having no errors.
+	}
+
+	// For debugging purposes only.
+	logger.Debug("s3 initialized")
+
+	// Return our s3 storage handler.
+	return s3Storage
 }
 
 // NewStorage connects to a specific S3 bucket instance and returns a connected
@@ -191,4 +250,65 @@ func (s *s3Storager) DeleteByKeys(ctx context.Context, objectKeys []string) erro
 		log.Printf("Couldn't delete objects from bucket %v. Here's why: %v\n", s.BucketName, err)
 	}
 	return err
+}
+
+// GetBinaryData function will return the binary data for the particular key.
+func (s *s3Storager) GetBinaryData(ctx context.Context, objectKey string) (io.ReadCloser, error) {
+	input := &s3.GetObjectInput{
+		Bucket: aws.String(s.BucketName),
+		Key:    aws.String(objectKey),
+	}
+
+	s3object, err := s.S3Client.GetObject(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+	return s3object.Body, nil
+}
+
+func (s *s3Storager) DownloadToLocalfile(ctx context.Context, objectKey string, filePath string) (string, error) {
+	responseBin, err := s.GetBinaryData(ctx, objectKey)
+	if err != nil {
+		return filePath, err
+	}
+	out, err := os.Create(filePath)
+	if err != nil {
+		return filePath, err
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, responseBin)
+	if err != nil {
+		return "", err
+	}
+	return filePath, err
+}
+
+func (s *s3Storager) ListAllObjects(ctx context.Context) (*s3.ListObjectsOutput, error) {
+	input := &s3.ListObjectsInput{
+		Bucket: aws.String(s.BucketName),
+	}
+
+	objects, err := s.S3Client.ListObjects(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+
+	return objects, nil
+}
+
+// Function will iterate over all the s3 objects to match the partial key with
+// the actual key found in the S3 bucket.
+func (s *s3Storager) FindMatchingObjectKey(s3Objects *s3.ListObjectsOutput, partialKey string) string {
+	for _, obj := range s3Objects.Contents {
+
+		match := strings.Contains(*obj.Key, partialKey)
+
+		// If a match happens then it means we have found the ACTUAL KEY in the
+		// s3 objects inside the bucket.
+		if match == true {
+			return *obj.Key
+		}
+	}
+	return ""
 }

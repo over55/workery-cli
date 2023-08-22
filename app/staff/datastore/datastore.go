@@ -41,6 +41,7 @@ type Staff struct {
 	Name                                 string                       `bson:"name" json:"name"`
 	LexicalName                          string                       `bson:"lexical_name" json:"lexical_name"`
 	Email                                string                       `bson:"email" json:"email"`
+	PersonalEmail                        string                       `bson:"personal_email" json:"personal_email"`
 	Phone                                string                       `bson:"phone" json:"phone,omitempty"`
 	PhoneTypeOf                          int8                         `bson:"phone_type_of" json:"phone_type_of"`
 	PhoneExtension                       string                       `bson:"phone_extension" json:"phone_extension"`

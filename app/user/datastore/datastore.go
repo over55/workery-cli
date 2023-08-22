@@ -130,6 +130,8 @@ type UserStorer interface {
 	GetByVerificationCode(ctx context.Context, verificationCode string) (*User, error)
 	CheckIfExistsByEmail(ctx context.Context, email string) (bool, error)
 	UpdateByID(ctx context.Context, m *User) error
+	UpsertByID(ctx context.Context, m *User) error
+	UpsertByEmail(ctx context.Context, m *User) error
 	ListByFilter(ctx context.Context, f *UserListFilter) (*UserListResult, error)
 	ListAsSelectOptionByFilter(ctx context.Context, f *UserListFilter) ([]*UserAsSelectOption, error)
 	ListAllExecutives(ctx context.Context) (*UserListResult, error)

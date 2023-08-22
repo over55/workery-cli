@@ -368,13 +368,13 @@ func importOrder(
 	// Set empty order tags.
 	//
 
-	var orderTags []*o_ds.OrderTag
+	var orderTags = make([]*o_ds.OrderTag, 0)
 
 	//
 	// Set empty order skill sets.
 	//
 
-	var orderSkillSets []*o_ds.OrderSkillSet
+	var orderSkillSets = make([]*o_ds.OrderSkillSet, 0)
 
 	//
 	// Insert the record

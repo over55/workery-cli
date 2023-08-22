@@ -59,8 +59,7 @@ type HowHearAboutUsItemStorer interface {
 	Create(ctx context.Context, m *HowHearAboutUsItem) error
 	GetByID(ctx context.Context, id primitive.ObjectID) (*HowHearAboutUsItem, error)
 	GetByOldID(ctx context.Context, oldID uint64) (*HowHearAboutUsItem, error)
-	GetByEmail(ctx context.Context, email string) (*HowHearAboutUsItem, error)
-	GetByVerificationCode(ctx context.Context, verificationCode string) (*HowHearAboutUsItem, error)
+	GetByText(ctx context.Context, text string) (*HowHearAboutUsItem, error)
 	CheckIfExistsByEmail(ctx context.Context, email string) (bool, error)
 	UpdateByID(ctx context.Context, m *HowHearAboutUsItem) error
 	ListByFilter(ctx context.Context, f *HowHearAboutUsItemListFilter) (*HowHearAboutUsItemListResult, error)

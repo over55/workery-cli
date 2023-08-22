@@ -33,21 +33,9 @@ clear; go run main.go import_order_tag;
 clear; go run main.go import_order_invoice;
 clear; go run main.go import_order_deposit;
 clear; go run main.go import_task_item;
-clear; go run main.go import_staff; <<<<<<-------- CONTNINUE HERE
-
+clear; go run main.go import_staff;
 clear; go run main.go import_staff_comment;
-
-clear; go run main.go import_staff_comment;
-
-clear; go run main.go import_staff_type_of;
-
-clear; go run main.go import_ongoing_work_order;
-
-clear; go run main.go import_ongoing_work_order_comment;
-
-clear; go run main.go import_public_image_upload --schema_name=london;
-
-clear; go run main.go import_private_file_download_to_tmp_dir --schema_name=london;
+clear; go run main.go import_private_file_download_to_tmp_dir;
 
 clear; go run main.go import_private_file_upload_from_tmp_dir --schema_name=london;
 ```

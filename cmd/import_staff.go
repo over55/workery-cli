@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 	"time"
 
@@ -192,31 +193,156 @@ func RunImportStaff(cfg *config.Conf, public *sql.DB, london *sql.DB, tenantStor
 	fmt.Println("Finished importing staffs")
 }
 
-func importStaff(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.UserStorer, sStorer s_ds.StaffStorer, hhStorer hh_ds.HowHearAboutUsItemStorer, tenant *tenant_ds.Tenant, ou *OldStaff) {
+func importStaff(
+	ctx context.Context,
+	ts tenant_ds.TenantStorer,
+	us user_ds.UserStorer,
+	sStorer s_ds.StaffStorer,
+	hhStorer hh_ds.HowHearAboutUsItemStorer,
+	tenant *tenant_ds.Tenant,
+	ou *OldStaff,
+) {
+	//
+	// Set the `state`.
+	//
+
 	var status int8 = s_ds.StaffStatusArchived
 	if ou.IsArchived == true {
 		status = s_ds.StaffStatusActive
 	}
 
-	// // BUGFIX: If no user tenant account staffd with the account then
-	// //         assign it to london. This is why id=2.
-	// tenantID := sql.NullInt64{Int64: 2, Valid: true}
-	// if ou.TenantID.Valid == true {
-	// 	tenantID = sql.NullInt64{Int64: ou.TenantID.Int64, Valid: true}
-	// }
 	//
-	// tenant, err := ts.GetByOldID(ctx, uint64(tenantID.Int64))
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// if tenant == nil {
-	// 	log.Fatal("missing tenant", tenantID)
-	// }
+	// Variable used to keep the ID of the user record in our database.
+	//
 
-	lexicalName := ou.LastName.ValueOrZero() + ", " + ou.GivenName.ValueOrZero()
+	ownerUserID := uint64(ou.OwnerID.Int64)
+	var userRoleID int8
+
+	//
+	// Generate our full name / lexical full name.
+	//
+
+	var name string
+	var lexicalName string
+	if ou.MiddleName.Valid {
+		name = ou.GivenName.String + " " + ou.MiddleName.String + " " + ou.LastName.String
+		lexicalName = ou.LastName.String + ", " + ou.MiddleName.String + ", " + ou.GivenName.String
+	} else {
+		name = ou.GivenName.String + " " + ou.LastName.String
+		lexicalName = ou.LastName.String + ", " + ou.GivenName.String
+	}
 	lexicalName = strings.Replace(lexicalName, ", ,", ",", 0)
 	lexicalName = strings.Replace(lexicalName, "  ", " ", 0)
 	lexicalName = strings.Replace(lexicalName, ", , ", ", ", 0)
+
+	//
+	// Get user.
+	//
+
+	var ownerUser *user_ds.User
+
+	// CASE 1: User record exists in our database.
+	if ou.OwnerID.Valid {
+		user, err := us.GetByOldID(ctx, ownerUserID)
+		if err != nil {
+			log.Fatal("(A)", err)
+		}
+		if user == nil {
+			log.Fatal("(B) User is null")
+		}
+		ownerUser = user
+
+		// CASE 2: Record D.N.E.
+	} else {
+		var email string
+
+		// CASE 2A: Email specified
+		if ou.Email.Valid {
+			email = ou.Email.String
+
+			// CASE 2B: Email is not specified
+		} else {
+			staffIdStr := strconv.FormatUint(ou.ID, 10)
+			email = "staff+" + staffIdStr + "@workery.ca"
+		}
+
+		user, err := us.GetByEmail(ctx, email)
+		if err != nil {
+			log.Panic("(C)", err)
+		}
+
+		if user == nil {
+			um := &user_ds.User{
+				ID:          primitive.NewObjectID(),
+				FirstName:   ou.GivenName.String,
+				LastName:    ou.LastName.String,
+				Name:        name,
+				LexicalName: lexicalName,
+				Email:       email,
+				// JoinedTime:        ou.DateJoined,
+				Status:   status,
+				Timezone: "America/Toronto",
+				// CreatedTime:       ou.DateJoined,
+				// ModifiedTime:      ou.LastModified,
+				Salt:             "",
+				WasEmailVerified: false,
+				PrAccessCode:     "",
+				PrExpiryTime:     time.Now(),
+				TenantID:         tenant.ID,
+				RoleID:           5, // Staff
+			}
+			err = us.UpsertByEmail(ctx, um)
+			if err != nil {
+				log.Panic("(D)", err)
+			}
+			user = um
+		}
+
+		ownerUser = user
+	}
+
+	userRoleID = ownerUser.RoleID
+
+	// //
+	// // Get `createdByID` and `createdByName` values.
+	// //
+	//
+	// var createdByID primitive.ObjectID = primitive.NilObjectID
+	// var createdByName string
+	// if ou.CreatedByID.ValueOrZero() > 0 {
+	// 	user, err := us.GetByOldID(ctx, uint64(ou.CreatedByID.ValueOrZero()))
+	// 	if err != nil {
+	// 		log.Fatal("ur.GetByOldID", err)
+	// 	}
+	// 	if user != nil {
+	// 		createdByID = user.ID
+	// 		createdByName = user.Name
+	// 	}
+	// }
+	//
+	// //
+	// // Get `lastModifiedById` and `lastModifiedByName` values.
+	// //
+	//
+	// var lastModifiedById null.Int
+	// var lastModifiedByName null.String
+	// if ou.LastModifiedByID.ValueOrZero() > 0 {
+	// 	userId, err := ur.GetIdByOldID(ctx, uint64(ou.LastModifiedByID.ValueOrZero()))
+	// 	if err != nil {
+	// 		log.Panic("ur.GetIdByOldId", err)
+	// 	}
+	// 	user, err := ur.GetById(ctx, tid, userId)
+	// 	if err != nil {
+	// 		log.Panic("ur.GetById", err)
+	// 	}
+	//
+	// 	if user != nil {
+	// 		lastModifiedById = null.IntFrom(int64(userId))
+	// 		lastModifiedByName = null.StringFrom(user.Name)
+	// 	} else {
+	// 		log.Println("WARNING: D.N.E.")
+	// 	}
+	// }
 
 	//
 	// Compile the `full address` and `address url`.
@@ -249,21 +375,34 @@ func importStaff(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.User
 	// Compile the `how hear` text.
 	//
 
-	howHearID := uint64(ou.HowHearID.Int64)
+	howHearId := uint64(ou.HowHearID.Int64)
 	howHearText := ""
-	howHear, err := hhStorer.GetByOldID(ctx, uint64(howHearID))
+	howHear, err := hhStorer.GetByOldID(ctx, uint64(howHearId))
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
-	if howHearID == 1 {
-		// if ou.HowHearOther == "" {
-		// 	howHearText = "-"
-		// } else {
-		// 	howHearText = ou.HowHearOther
-		// }
+	if howHear != nil {
+		if howHearId == 1 {
+			if ou.HowHearOther.ValueOrZero() == "" {
+				howHearText = "-"
+			} else {
+				howHearText = ou.HowHearOther.ValueOrZero()
+			}
+		} else {
+			howHearText = howHear.Text
+		}
 	} else {
-		howHearText = howHear.Text
+		howHear, err = hhStorer.GetByText(ctx, "Other")
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+	}
+
+	// Defensive code.
+	if howHear == nil {
+		log.Fatal("how hear does not exist")
 	}
 
 	//
@@ -294,12 +433,12 @@ func importStaff(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.User
 	// Empty arrays
 	//
 
-	cc := []*s_ds.StaffComment{}
-	sss := []*s_ds.StaffSkillSet{}
-	irs := []*s_ds.StaffInsuranceRequirement{}
-	vts := []*s_ds.StaffVehicleType{}
-	al := []*s_ds.StaffAwayLog{}
-	at := []*s_ds.StaffTag{}
+	cc := make([]*s_ds.StaffComment, 0)
+	sss := make([]*s_ds.StaffSkillSet, 0)
+	irs := make([]*s_ds.StaffInsuranceRequirement, 0)
+	vts := make([]*s_ds.StaffVehicleType, 0)
+	al := make([]*s_ds.StaffAwayLog, 0)
+	at := make([]*s_ds.StaffTag, 0)
 
 	//
 	// Insert our `Staff` data.
@@ -311,7 +450,7 @@ func importStaff(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.User
 		TenantID:                     tenant.ID,
 		FirstName:                    ou.GivenName.ValueOrZero(),
 		LastName:                     ou.LastName.ValueOrZero(),
-		Name:                         ou.GivenName.ValueOrZero() + " " + ou.LastName.ValueOrZero(),
+		Name:                         name,
 		LexicalName:                  lexicalName,
 		Email:                        ou.Email.ValueOrZero(),
 		Phone:                        ou.Telephone.ValueOrZero(),
@@ -348,10 +487,10 @@ func importStaff(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.User
 		JoinedTime:     ou.JoinDate.ValueOrZero(),
 		Timezone:       "American/Toronto",
 		HasUserAccount: false,
-		UserID:         primitive.NilObjectID,
-		// TypeOf:         ou.TypeOf, //TODO:IMPL.
-		IsOkToEmail: true,
-		IsOkToText:  true,
+		UserID:         ownerUser.ID,
+		TypeOf:         userRoleID,
+		IsOkToEmail:    true,
+		IsOkToText:     true,
 		// IsBusiness:     ou.IsBusiness,
 		// IsSenior:                ou.IsSenior,
 		// IsSupport:               ou.IsSupport,
@@ -370,14 +509,20 @@ func importStaff(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.User
 		Latitude:    ou.Elevation.ValueOrZero(),
 		Longitude:   ou.Longitude.ValueOrZero(),
 		// AreaServed:            ou.AreaServed.ValueOrZero(),
-		AvailableLanguage:     ou.AvailableLanguage.ValueOrZero(),
-		ContactType:           ou.ContactType.ValueOrZero(),
-		Tags:                  at,
-		Comments:              cc,
-		SkillSets:             sss,
-		InsuranceRequirements: irs,
-		VehicleTypes:          vts,
-		AwayLogs:              al,
+		AvailableLanguage:                    ou.AvailableLanguage.ValueOrZero(),
+		ContactType:                          ou.ContactType.ValueOrZero(),
+		Tags:                                 at,
+		Comments:                             cc,
+		SkillSets:                            sss,
+		InsuranceRequirements:                irs,
+		VehicleTypes:                         vts,
+		AwayLogs:                             al,
+		PersonalEmail:                        ou.PersonalEmail.ValueOrZero(),
+		EmergencyContactAlternativeTelephone: ou.EmergencyContactAlternativeTelephone.ValueOrZero(),
+		EmergencyContactName:                 ou.EmergencyContactName.ValueOrZero(),
+		EmergencyContactRelationship:         ou.EmergencyContactRelationship.ValueOrZero(),
+		EmergencyContactTelephone:            ou.EmergencyContactTelephone.ValueOrZero(),
+		PoliceCheck:                          ou.PoliceCheck.ValueOrZero(),
 	}
 	if err := sStorer.Create(ctx, m); err != nil {
 		log.Panic(err)

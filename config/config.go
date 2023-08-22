@@ -9,6 +9,8 @@ import (
 type Conf struct {
 	PostgresDB postgresDBConfig
 	DB         mongoDBConfig
+	AWS        awsConfig
+	OldAWS     awsConfig
 }
 
 type mongoDBConfig struct {
@@ -26,6 +28,14 @@ type postgresDBConfig struct {
 	DatabaseLondonSchemaName string
 }
 
+type awsConfig struct {
+	AccessKey  string
+	SecretKey  string
+	Endpoint   string
+	Region     string
+	BucketName string
+}
+
 func New() *Conf {
 	var c Conf
 
@@ -39,6 +49,16 @@ func New() *Conf {
 	c.PostgresDB.DatabaseName = getEnv("WORKERY_BACKEND_DB_NAME", true)
 	c.PostgresDB.DatabasePublicSchemaName = getEnv("WORKERY_BACKEND_PUBLIC_SCHEMA_NAME", true)
 	c.PostgresDB.DatabaseLondonSchemaName = getEnv("WORKERY_BACKEND_LONDON_SCHEMA_NAME", true)
+	c.AWS.AccessKey = getEnv("WORKERY_BACKEND_AWS_ACCESS_KEY", true)
+	c.AWS.SecretKey = getEnv("WORKERY_BACKEND_AWS_SECRET_KEY", true)
+	c.AWS.Endpoint = getEnv("WORKERY_BACKEND_AWS_ENDPOINT", true)
+	c.AWS.Region = getEnv("WORKERY_BACKEND_AWS_REGION", true)
+	c.AWS.BucketName = getEnv("WORKERY_BACKEND_AWS_BUCKET_NAME", true)
+	c.OldAWS.AccessKey = getEnv("WORKERY_BACKEND_OLD_AWS_ACCESS_KEY", true)
+	c.OldAWS.SecretKey = getEnv("WORKERY_BACKEND_OLD_AWS_SECRET_KEY", true)
+	c.OldAWS.Endpoint = getEnv("WORKERY_BACKEND_OLD_AWS_ENDPOINT", true)
+	c.OldAWS.Region = getEnv("WORKERY_BACKEND_OLD_AWS_REGION", true)
+	c.OldAWS.BucketName = getEnv("WORKERY_BACKEND_OLD_AWS_BUCKET_NAME", true)
 
 	return &c
 }
