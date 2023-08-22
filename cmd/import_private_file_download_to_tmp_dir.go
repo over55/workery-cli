@@ -60,47 +60,72 @@ func RunImportPrivateImage(
 	s3 s3storage.S3Storager,
 	oldS3 s3storage.S3Storager,
 ) {
-	fmt.Println("Beginning importing vehicle types")
-	data, err := ListAllOldPrivateFiles(london)
+	fmt.Println("Beginning importing private images")
+
+	// STEP 1: Fetch old database files.
+	oldData, err := ListAllOldPrivateFiles(london)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Fetch all the s3objects.
+	// STEP 2: Fetch all the s3objects.
 	allOldS3Objects, err := oldS3.ListAllObjects(context.Background())
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Iterate through all the objects.
+	// STEP 3: Iterate through all the s3objects.
 	for _, obj := range allOldS3Objects.Contents {
 		// Get the key.
 		objectKey := *obj.Key
 
-		// Get the filename.
-		segements := strings.Split(objectKey, "/")
-		fileName := segements[len(segements)-1]
+		// STEP 4: Iterate through all the old database files.
+		for _, oldDatum := range oldData {
 
-		// Get the directory to save.
-		directory := "./static/" + fileName
+			// Get the filename.
+			segements := strings.Split(oldDatum.DataFile, "/")
+			oldFileName := segements[len(segements)-1]
 
-		// Save and get the filepath.
-		localFilePath, err := oldS3.DownloadToLocalfile(context.Background(), objectKey, directory)
-		if err != nil {
-			// log.Fatal(err)
-			log.Println("DownloadToLocalfile", err)
-			return
+			// Check to see if the filenames match.
+			match := strings.Contains(objectKey, oldFileName)
+
+			// STEP 5:
+			// If a match happens then it means we have found the ACTUAL KEY in the
+			// s3 objects inside the bucket.
+			if match == true {
+				log.Println("FOUND!")
+				log.Println("objectKey ---->", objectKey, "<----")
+				log.Println("oldDatum.DataFile ---->", oldDatum.DataFile, "<----")
+
+				//TODO: IMPLEMENT CODE FOR DOWNLOADING.
+				return // Remove
+			}
 		}
+		return
 
-		// For debugging purposes only.
-		log.Println("---->", localFilePath, "<----")
+		// // Get the filename.
+		// segements := strings.Split(objectKey, "/")
+		// fileName := segements[len(segements)-1]
+		//
+		// // Get the directory to save.
+		// directory := "./static/" + fileName
+		//
+		// // Save and get the filepath.
+		// localFilePath, err := oldS3.DownloadToLocalfile(context.Background(), objectKey, directory)
+		// if err != nil {
+		// 	// log.Fatal(err)
+		// 	log.Println("DownloadToLocalfile", err)
+		// 	return
+		// }
+		//
+		// // For debugging purposes only.
+		// log.Println("---->", localFilePath, "<----")
 	}
-	return
 
-	for _, datum := range data {
-		importPrivateImage(context.Background(), irStorer, tenant, datum, s3, oldS3, allOldS3Objects)
-	}
-	fmt.Println("Finished importing vehicle types")
+	// for _, datum := range data {
+	// 	importPrivateImage(context.Background(), irStorer, tenant, datum, s3, oldS3, allOldS3Objects)
+	// }
+	fmt.Println("Finished importing private images")
 }
 
 type OldPrivateFile struct {
@@ -192,20 +217,6 @@ func importPrivateImage(
 	oldS3 s3storage.S3Storager,
 	allS3Objects *s3.ListObjectsOutput,
 ) {
-
-	foundObjectKey := oldS3.FindMatchingObjectKey(allS3Objects, oldFile.DataFile)
-	if foundObjectKey != "" {
-		directory := "./static"
-		localFilePath, err := oldS3.DownloadToLocalfile(ctx, foundObjectKey, directory)
-		if err != nil {
-			log.Fatal(err)
-		}
-		log.Println("---->", localFilePath, "<----")
-	}
-
-	log.Println(foundObjectKey)
-	log.Fatal("----> STOP <-----")
-
 	// var state int8 = 1
 	// if t.IsArchived == true {
 	// 	state = 2
