@@ -7,7 +7,7 @@ import (
 	"golang.org/x/exp/slog"
 )
 
-func (impl PrivateImageStorerImpl) CheckIfExistsByEmail(ctx context.Context, email string) (bool, error) {
+func (impl AttachmentStorerImpl) CheckIfExistsByEmail(ctx context.Context, email string) (bool, error) {
 	filter := bson.D{{"email", email}}
 	count, err := impl.Collection.CountDocuments(ctx, filter)
 	if err != nil {

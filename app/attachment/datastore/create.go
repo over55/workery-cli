@@ -7,7 +7,7 @@ import (
 	"golang.org/x/exp/slog"
 )
 
-func (impl PrivateImageStorerImpl) Create(ctx context.Context, u *PrivateImage) error {
+func (impl AttachmentStorerImpl) Create(ctx context.Context, u *Attachment) error {
 	// DEVELOPER NOTES:
 	// According to mongodb documentaiton:
 	//     Non-existent Databases and Collections

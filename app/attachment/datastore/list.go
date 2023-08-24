@@ -11,7 +11,7 @@ import (
 	"golang.org/x/exp/slog"
 )
 
-func (impl PrivateImageStorerImpl) ListByFilter(ctx context.Context, f *PrivateImageListFilter) (*PrivateImageListResult, error) {
+func (impl AttachmentStorerImpl) ListByFilter(ctx context.Context, f *AttachmentListFilter) (*AttachmentListResult, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
 	defer cancel()
 
@@ -27,7 +27,7 @@ func (impl PrivateImageStorerImpl) ListByFilter(ctx context.Context, f *PrivateI
 	}
 
 	if f.ExcludeArchived {
-		filter["status"] = bson.M{"$ne": PrivateImageStatusArchived} // Do not list archived items! This code
+		filter["status"] = bson.M{"$ne": AttachmentStatusArchived} // Do not list archived items! This code
 	}
 	if f.Status != 0 {
 		filter["status"] = f.Status
@@ -61,10 +61,10 @@ func (impl PrivateImageStorerImpl) ListByFilter(ctx context.Context, f *PrivateI
 	// }
 
 	// Retrieve the documents and check if there is a next page
-	results := []*PrivateImage{}
+	results := []*Attachment{}
 	hasNextPage := false
 	for cursor.Next(ctx) {
-		document := &PrivateImage{}
+		document := &Attachment{}
 		if err := cursor.Decode(document); err != nil {
 			return nil, err
 		}
@@ -86,14 +86,14 @@ func (impl PrivateImageStorerImpl) ListByFilter(ctx context.Context, f *PrivateI
 		nextCursor = results[len(results)-1].ID
 	}
 
-	return &PrivateImageListResult{
+	return &AttachmentListResult{
 		Results:     results,
 		NextCursor:  nextCursor,
 		HasNextPage: hasNextPage,
 	}, nil
 }
 
-func (impl PrivateImageStorerImpl) ListAsSelectOptionByFilter(ctx context.Context, f *PrivateImageListFilter) ([]*PrivateImageAsSelectOption, error) {
+func (impl AttachmentStorerImpl) ListAsSelectOptionByFilter(ctx context.Context, f *AttachmentListFilter) ([]*AttachmentAsSelectOption, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
 	defer cancel()
 
@@ -130,7 +130,7 @@ func (impl PrivateImageStorerImpl) ListAsSelectOptionByFilter(ctx context.Contex
 	}
 
 	if f.ExcludeArchived {
-		query["status"] = bson.M{"$ne": PrivateImageStatusArchived} // Do not list archived items! This code
+		query["status"] = bson.M{"$ne": AttachmentStatusArchived} // Do not list archived items! This code
 	}
 
 	// Full-text search
@@ -149,7 +149,7 @@ func (impl PrivateImageStorerImpl) ListAsSelectOptionByFilter(ctx context.Contex
 	}
 	defer cursor.Close(ctx)
 
-	var results = []*PrivateImageAsSelectOption{}
+	var results = []*AttachmentAsSelectOption{}
 	if err = cursor.All(ctx, &results); err != nil {
 		panic(err)
 	}

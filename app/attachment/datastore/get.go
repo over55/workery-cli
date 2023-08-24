@@ -9,10 +9,10 @@ import (
 	"golang.org/x/exp/slog"
 )
 
-func (impl PrivateImageStorerImpl) GetByID(ctx context.Context, id primitive.ObjectID) (*PrivateImage, error) {
+func (impl AttachmentStorerImpl) GetByID(ctx context.Context, id primitive.ObjectID) (*Attachment, error) {
 	filter := bson.D{{"_id", id}}
 
-	var result PrivateImage
+	var result Attachment
 	err := impl.Collection.FindOne(ctx, filter).Decode(&result)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -25,10 +25,10 @@ func (impl PrivateImageStorerImpl) GetByID(ctx context.Context, id primitive.Obj
 	return &result, nil
 }
 
-func (impl PrivateImageStorerImpl) GetByOldID(ctx context.Context, oldID uint64) (*PrivateImage, error) {
+func (impl AttachmentStorerImpl) GetByOldID(ctx context.Context, oldID uint64) (*Attachment, error) {
 	filter := bson.D{{"old_id", oldID}}
 
-	var result PrivateImage
+	var result Attachment
 	err := impl.Collection.FindOne(ctx, filter).Decode(&result)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -41,10 +41,10 @@ func (impl PrivateImageStorerImpl) GetByOldID(ctx context.Context, oldID uint64)
 	return &result, nil
 }
 
-func (impl PrivateImageStorerImpl) GetByEmail(ctx context.Context, email string) (*PrivateImage, error) {
+func (impl AttachmentStorerImpl) GetByEmail(ctx context.Context, email string) (*Attachment, error) {
 	filter := bson.D{{"email", email}}
 
-	var result PrivateImage
+	var result Attachment
 	err := impl.Collection.FindOne(ctx, filter).Decode(&result)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -57,10 +57,10 @@ func (impl PrivateImageStorerImpl) GetByEmail(ctx context.Context, email string)
 	return &result, nil
 }
 
-func (impl PrivateImageStorerImpl) GetByVerificationCode(ctx context.Context, verificationCode string) (*PrivateImage, error) {
+func (impl AttachmentStorerImpl) GetByVerificationCode(ctx context.Context, verificationCode string) (*Attachment, error) {
 	filter := bson.D{{"email_verification_code", verificationCode}}
 
-	var result PrivateImage
+	var result Attachment
 	err := impl.Collection.FindOne(ctx, filter).Decode(&result)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {

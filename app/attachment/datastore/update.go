@@ -7,7 +7,7 @@ import (
 	"golang.org/x/exp/slog"
 )
 
-func (impl PrivateImageStorerImpl) UpdateByID(ctx context.Context, m *PrivateImage) error {
+func (impl AttachmentStorerImpl) UpdateByID(ctx context.Context, m *Attachment) error {
 	filter := bson.D{{"_id", m.ID}}
 
 	update := bson.M{ // DEVELOPERS NOTE: https://stackoverflow.com/a/60946010
