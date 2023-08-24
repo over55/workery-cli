@@ -27,10 +27,10 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(importAttachmentCmd)
+	rootCmd.AddCommand(importAttachmentDownloadCmd)
 }
 
-var importAttachmentCmd = &cobra.Command{
+var importAttachmentDownloadCmd = &cobra.Command{
 	Use:   "import_attachment_download_to_tmp_dir",
 	Short: "Download private files from the old workery to a local temporary directory",
 	Long:  ``,
@@ -58,11 +58,11 @@ var importAttachmentCmd = &cobra.Command{
 			panic("get schema name")
 		}
 
-		RunImportAttachment(cfg, defaultLogger, ppc, lpc, aStorer, uStorer, cStorer, asStorer, oStorer, sStorer, tenant, s3, oldS3)
+		RunImportAttachmentDownload(cfg, defaultLogger, ppc, lpc, aStorer, uStorer, cStorer, asStorer, oStorer, sStorer, tenant, s3, oldS3)
 	},
 }
 
-func RunImportAttachment(
+func RunImportAttachmentDownload(
 	cfg *config.Conf,
 	logger *slog.Logger,
 	private *sql.DB,

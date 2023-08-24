@@ -36,6 +36,5 @@ clear; go run main.go import_task_item;
 clear; go run main.go import_staff;
 clear; go run main.go import_staff_comment;
 clear; go run main.go import_attachment_download_to_tmp_dir;
-
-clear; go run main.go import_private_file_upload_from_tmp_dir --schema_name=london;
+clear; go run main.go import_attachment_upload_from_tmp_dir;
 ```
