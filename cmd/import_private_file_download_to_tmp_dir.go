@@ -10,6 +10,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/spf13/cobra"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/exp/slog"
 	"gopkg.in/guregu/null.v4"
 
@@ -93,33 +94,63 @@ func RunImportPrivateImage(
 			// If a match happens then it means we have found the ACTUAL KEY in the
 			// s3 objects inside the bucket.
 			if match == true {
-				log.Println("FOUND!")
-				log.Println("objectKey ---->", objectKey, "<----")
-				log.Println("oldDatum.DataFile ---->", oldDatum.DataFile, "<----")
+				//
+				// DEVELOPERS NOTE:
+				// If this code block runs then the private file gets imported.
+				// The following code will save to local directory.
+				//
 
-				//TODO: IMPLEMENT CODE FOR DOWNLOADING.
-				return // Remove
+				// Get the filename.
+				segements := strings.Split(objectKey, "/")
+				fileName := segements[len(segements)-1]
+
+				// Get the directory to save.
+				directory := "./static/" + fileName
+
+				// Save and get the filepath.
+				localFilePath, err := oldS3.DownloadToLocalfile(context.Background(), objectKey, directory)
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				// For debugging purposes only.
+				log.Println("---->", localFilePath, "<----")
+
+				//
+				// Lookup related files.
+				//
+
+				m := &pi_ds.PrivateImage{
+
+					ID:                    primitive.NewObjectID(),
+					TenantID:              tenant.ID,
+					ObjectKey:             localFilePath,
+					Title:                 oldDatum.Title,
+					Description:           oldDatum.Description,
+					CreatedAt:             oldDatum.CreatedAt,
+					CreatedByUserID:       primitive.NilObjectID,
+					CreatedByUserName:     "",
+					CreatedFromIPAddress:  oldDatum.CreatedFrom.ValueOrZero(),
+					ModifiedAt:            oldDatum.LastModifiedAt,
+					ModifiedByUserID:      primitive.NilObjectID,
+					ModifiedByUserName:    "",
+					ModifiedFromIPAddress: oldDatum.LastModifiedFrom.ValueOrZero(),
+					AssociateID:           primitive.NilObjectID,
+					CustomerID:            primitive.NilObjectID,
+					StaffID:               primitive.NilObjectID,
+					OrderID:               primitive.NilObjectID,
+					Status:                1,
+					OldID:                 oldDatum.ID,
+				}
+
+				if err := irStorer.Create(context.Background(), m); err != nil {
+					log.Panic(err)
+				}
+				fmt.Println("Imported PrivateImage ID#", m.ID)
+
+				return
 			}
 		}
-		return
-
-		// // Get the filename.
-		// segements := strings.Split(objectKey, "/")
-		// fileName := segements[len(segements)-1]
-		//
-		// // Get the directory to save.
-		// directory := "./static/" + fileName
-		//
-		// // Save and get the filepath.
-		// localFilePath, err := oldS3.DownloadToLocalfile(context.Background(), objectKey, directory)
-		// if err != nil {
-		// 	// log.Fatal(err)
-		// 	log.Println("DownloadToLocalfile", err)
-		// 	return
-		// }
-		//
-		// // For debugging purposes only.
-		// log.Println("---->", localFilePath, "<----")
 	}
 
 	// for _, datum := range data {
