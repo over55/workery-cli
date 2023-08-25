@@ -58,12 +58,12 @@ type User struct {
 	HowDidYouHearAboutUsOther string             `bson:"how_did_you_hear_about_us_other" json:"how_did_you_hear_about_us_other,omitempty"`
 	AgreeTOS                  bool               `bson:"agree_tos" json:"agree_tos,omitempty"`
 	AgreePromotionsEmail      bool               `bson:"agree_promotions_email" json:"agree_promotions_email,omitempty"`
-	CreatedByUserID           primitive.ObjectID `bson:"created_by_user_id" json:"created_by_user_id"`
 	CreatedAt                 time.Time          `bson:"created_at" json:"created_at,omitempty"`
-	CreatedByName             string             `bson:"created_by_name" json:"created_by_name"`
-	ModifiedByUserID          primitive.ObjectID `bson:"modified_by_user_id" json:"modified_by_user_id"`
+	CreatedByUserID           primitive.ObjectID `bson:"created_by_user_id" json:"created_by_user_id"`
+	CreatedByUserName         string             `bson:"created_by_user_name" json:"created_by_user_name"`
 	ModifiedAt                time.Time          `bson:"modified_at" json:"modified_at,omitempty"`
-	ModifiedByName            string             `bson:"modified_by_name" json:"modified_by_name"`
+	ModifiedByUserID          primitive.ObjectID `bson:"modified_by_user_id" json:"modified_by_user_id"`
+	ModifiedByUserName        string             `bson:"modified_by_user_name" json:"modified_by_user_name"`
 	Status                    int8               `bson:"status" json:"status"`
 	Comments                  []*UserComment     `bson:"comments" json:"comments"`
 	Salt                      string             `bson:"salt" json:"salt,omitempty"`

@@ -24,9 +24,9 @@ const (
 	CustomerDeactivationReasonDeceased      = 4
 	CustomerDeactivationReasonDoNotConstact = 5
 
-	CustomerTypeOfUnassigned  = 1
-	CustomerTypeOfResidential = 2
-	CustomerTypeOfCommercial  = 3
+	CustomerTypeUnassigned  = 1
+	CustomerTypeResidential = 2
+	CustomerTypeCommercial  = 3
 
 	CustomerPhoneTypeLandline = 1
 	CustomerPhoneTypeMobile   = 2
@@ -42,12 +42,12 @@ type Customer struct {
 	LexicalName                          string             `bson:"lexical_name" json:"lexical_name"`
 	Email                                string             `bson:"email" json:"email"`
 	Phone                                string             `bson:"phone" json:"phone,omitempty"`
-	PhoneTypeOf                          int8               `bson:"phone_type_of" json:"phone_type_of"`
+	PhoneType                            int8               `bson:"phone_type" json:"phone_type"`
 	PhoneExtension                       string             `bson:"phone_extension" json:"phone_extension"`
 	FaxNumber                            string             `bson:"fax_number" json:"fax_number"`
 	OtherPhone                           string             `bson:"other_phone" json:"other_phone"`
 	OtherPhoneExtension                  string             `bson:"other_phone_extension" json:"other_phone_extension"`
-	OtherPhoneTypeOf                     int8               `bson:"other_phone_type_of" json:"other_phone_type_of"`
+	OtherPhoneType                       int8               `bson:"other_phone_type" json:"other_phone_type"`
 	Country                              string             `bson:"country" json:"country,omitempty"`
 	Region                               string             `bson:"region" json:"region,omitempty"`
 	City                                 string             `bson:"city" json:"city,omitempty"`
@@ -92,7 +92,7 @@ type Customer struct {
 	Timezone                             string             `bson:"timezone" json:"timezone,omitempty"`
 	HasUserAccount                       bool               `bson:"has_user_account" json:"has_user_account,omitempty"`
 	UserID                               primitive.ObjectID `bson:"user_id" json:"user_id,omitempty"`
-	TypeOf                               int8               `bson:"type_of" json:"type_of"`
+	Type                                 int8               `bson:"type" json:"type"`
 	IsOkToEmail                          bool               `bson:"is_ok_to_email" json:"is_ok_to_email"`
 	IsOkToText                           bool               `bson:"is_ok_to_text" json:"is_ok_to_text"`
 	IsBusiness                           bool               `bson:"is_business" json:"is_business"`
@@ -116,6 +116,8 @@ type Customer struct {
 	AreaServed                           string             `bson:"area_served" json:"area_served"`
 	AvailableLanguage                    string             `bson:"available_language" json:"available_language"`
 	ContactType                          string             `bson:"contact_type" json:"contact_type"`
+	OrganizationName                     string             `bson:"organization_name" json:"organization_name"`
+	OrganizationType                     int8               `bson:"organization_type" json:"organization_type"`
 	OldID                                uint64             `bson:"old_id" json:"old_id,omitempty"`
 	Comments                             []*CustomerComment `bson:"comments" json:"comments"`
 	Tags                                 []*CustomerTag     `bson:"tags" json:"tags"`
@@ -241,9 +243,9 @@ var CustomerStateLabels = map[int8]string{
 }
 
 var CustomerTypeOfLabels = map[int8]string{
-	CustomerTypeOfResidential: "Residential",
-	CustomerTypeOfCommercial:  "Commercial",
-	CustomerTypeOfUnassigned:  "Unassigned",
+	CustomerTypeResidential: "Residential",
+	CustomerTypeCommercial:  "Commercial",
+	CustomerTypeUnassigned:  "Unassigned",
 }
 
 var CustomerDeactivationReasonLabels = map[int8]string{
