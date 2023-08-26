@@ -14,14 +14,14 @@ import (
 )
 
 const (
-	ActivitySheetStatusPending    = 5
-	ActivitySheetStatusDeclined   = 4
-	ActivitySheetStatusAccepted   = 3
-	ActivitySheetStatusError      = 2
-	ActivitySheetStatusArchived   = 1
-	ActivitySheetTypeOfUnassigned = 1
-	ActivitySheetTypeOfResidentia = 2
-	ActivitySheetTypeOfCommercial = 3
+	ActivitySheetStatusPending  = 5
+	ActivitySheetStatusDeclined = 4
+	ActivitySheetStatusAccepted = 3
+	ActivitySheetStatusError    = 2
+	ActivitySheetStatusArchived = 1
+	ActivitySheetTypeUnassigned = 1
+	ActivitySheetTypeResidentia = 2
+	ActivitySheetTypeCommercial = 3
 )
 
 type ActivitySheet struct {
@@ -41,7 +41,7 @@ type ActivitySheet struct {
 	AssociateLexicalName  string             `bson:"associate_lexical_name" json:"associate_lexical_name"`
 	OrderID               primitive.ObjectID `bson:"order_id" json:"order_id"`
 	Status                int8               `bson:"status" json:"status"`
-	TypeOf                int8               `bson:"type_of" json:"type_of"`
+	Type                  int8               `bson:"type_of" json:"type_of"`
 	OldID                 uint64             `bson:"old_id" json:"old_id"`
 	// OngoingOrderID        primitive.ObjectID `bson:"ongoing_order_id" json:"ongoing_order_id"`
 }

@@ -269,7 +269,7 @@ func importOrder(
 		customerName = c.Name
 		customerLexicalName = c.LexicalName
 		customerGender = c.Gender
-		customerDOB = c.Birthdate
+		customerDOB = c.BirthDate
 	}
 
 	//
@@ -401,7 +401,7 @@ func importOrder(
 		StartDate:                         wo.StartDate,
 		CompletionDate:                    wo.CompletionDate.ValueOrZero(),
 		Hours:                             wo.Hours,
-		TypeOf:                            wo.TypeOf,
+		Type:                              wo.TypeOf,
 		IndexedText:                       wo.IndexedText,
 		ClosingReason:                     wo.ClosingReason,
 		ClosingReasonOther:                wo.ClosingReasonOther.ValueOrZero(),

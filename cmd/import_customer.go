@@ -342,7 +342,6 @@ func importCustomer(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.U
 		ModifiedFromIPAddress:        ou.LastModifiedFrom.String,
 		Status:                       status,
 		Comments:                     cc,
-		JoinedTime:                   ou.JoinDate.ValueOrZero(),
 		Timezone:                     "American/Toronto",
 		HasUserAccount:               false,
 		UserID:                       primitive.NilObjectID,
@@ -359,7 +358,7 @@ func importCustomer(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.U
 		// AvatarObjectKey                      string             `bson:"avatar_object_key" json:"avatar_object_key"`
 		// AvatarFileType                       string             `bson:"avatar_file_type" json:"avatar_file_type"`
 		// AvatarFileName                       string             `bson:"avatar_file_name" json:"avatar_file_name"`
-		Birthdate:         ou.Birthdate.ValueOrZero(),
+		BirthDate:         ou.Birthdate.ValueOrZero(),
 		JoinDate:          ou.JoinDate.ValueOrZero(),
 		Nationality:       ou.Nationality.ValueOrZero(),
 		Gender:            ou.Gender.ValueOrZero(),

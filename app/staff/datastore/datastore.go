@@ -24,9 +24,9 @@ const (
 	StaffDeactivationReasonDeceased      = 4
 	StaffDeactivationReasonDoNotConstact = 5
 
-	StaffTypeOfUnassigned  = 1
-	StaffTypeOfResidential = 2
-	StaffTypeOfCommercial  = 3
+	StaffTypeUnassigned  = 1
+	StaffTypeResidential = 2
+	StaffTypeCommercial  = 3
 
 	StaffPhoneTypeLandline = 1
 	StaffPhoneTypeMobile   = 2
@@ -43,12 +43,12 @@ type Staff struct {
 	Email                                string                       `bson:"email" json:"email"`
 	PersonalEmail                        string                       `bson:"personal_email" json:"personal_email"`
 	Phone                                string                       `bson:"phone" json:"phone,omitempty"`
-	PhoneTypeOf                          int8                         `bson:"phone_type_of" json:"phone_type_of"`
+	PhoneType                            int8                         `bson:"phone_type" json:"phone_type"`
 	PhoneExtension                       string                       `bson:"phone_extension" json:"phone_extension"`
 	FaxNumber                            string                       `bson:"fax_number" json:"fax_number"`
 	OtherPhone                           string                       `bson:"other_phone" json:"other_phone"`
 	OtherPhoneExtension                  string                       `bson:"other_phone_extension" json:"other_phone_extension"`
-	OtherPhoneTypeOf                     int8                         `bson:"other_phone_type_of" json:"other_phone_type_of"`
+	OtherPhoneType                       int8                         `bson:"other_phone_type" json:"other_phone_type"`
 	Country                              string                       `bson:"country" json:"country,omitempty"`
 	Region                               string                       `bson:"region" json:"region,omitempty"`
 	City                                 string                       `bson:"city" json:"city,omitempty"`
@@ -93,7 +93,7 @@ type Staff struct {
 	Timezone                             string                       `bson:"timezone" json:"timezone,omitempty"`
 	HasUserAccount                       bool                         `bson:"has_user_account" json:"has_user_account,omitempty"`
 	UserID                               primitive.ObjectID           `bson:"user_id" json:"user_id,omitempty"`
-	TypeOf                               int8                         `bson:"type_of" json:"type_of"`
+	Type                                 int8                         `bson:"type" json:"type"`
 	IsOkToEmail                          bool                         `bson:"is_ok_to_email" json:"is_ok_to_email"`
 	IsOkToText                           bool                         `bson:"is_ok_to_text" json:"is_ok_to_text"`
 	IsBusiness                           bool                         `bson:"is_business" json:"is_business"`
@@ -313,10 +313,10 @@ var StaffStateLabels = map[int8]string{
 	StaffStatusArchived: "Archived",
 }
 
-var StaffTypeOfLabels = map[int8]string{
-	StaffTypeOfResidential: "Residential",
-	StaffTypeOfCommercial:  "Commercial",
-	StaffTypeOfUnassigned:  "Unassigned",
+var StaffTypeLabels = map[int8]string{
+	StaffTypeResidential: "Residential",
+	StaffTypeCommercial:  "Commercial",
+	StaffTypeUnassigned:  "Unassigned",
 }
 
 var StaffDeactivationReasonLabels = map[int8]string{
@@ -328,14 +328,14 @@ var StaffDeactivationReasonLabels = map[int8]string{
 	StaffDeactivationReasonDoNotConstact: "Do not contact",
 }
 
-var StaffTelephoneTypeOfLabels = map[int8]string{
+var StaffTelephoneTypeLabels = map[int8]string{
 	1: "Landline",
 	2: "Mobile",
 	3: "Work",
 }
 
 //---------------------
-// organization_type_of
+// organization_type
 //---------------------
 // 1 = Unknown Organization Type | UNKNOWN_ORGANIZATION_TYPE_OF_ID
 // 2 = Private Organization Type | PRIVATE_ORGANIZATION_TYPE_OF_ID

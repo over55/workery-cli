@@ -298,7 +298,7 @@ func importAttachment(
 		if customer != nil {
 			customerID = customer.ID
 			customerName = customer.Name
-			typeOf = pi_ds.AttachmentTypeOfCustomer
+			typeOf = pi_ds.AttachmentTypeCustomer
 		}
 	}
 
@@ -317,7 +317,7 @@ func importAttachment(
 		if associate != nil {
 			associateID = associate.ID
 			associateName = associate.Name
-			typeOf = pi_ds.AttachmentTypeOfAssociate
+			typeOf = pi_ds.AttachmentTypeAssociate
 		}
 	}
 
@@ -333,7 +333,7 @@ func importAttachment(
 		}
 		if order != nil {
 			orderID = order.ID
-			typeOf = pi_ds.AttachmentTypeOfOrder
+			typeOf = pi_ds.AttachmentTypeOrder
 		}
 	}
 
@@ -352,7 +352,7 @@ func importAttachment(
 		if staff != nil {
 			staffID = staff.ID
 			staffName = staff.Name
-			typeOf = pi_ds.AttachmentTypeOfStaff
+			typeOf = pi_ds.AttachmentTypeStaff
 		}
 	}
 
@@ -382,7 +382,7 @@ func importAttachment(
 		StaffName:             staffName,
 		OrderID:               orderID,
 		Status:                1,
-		TypeOf:                typeOf,
+		Type:                  typeOf,
 		OldID:                 oldDatum.ID,
 	}
 

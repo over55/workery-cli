@@ -210,7 +210,7 @@ func importActivitySheet(ctx context.Context, aStorer a_ds.AssociateStorer, asSt
 		AssociateLexicalName:  associate.LexicalName,
 		OrderID:               orderID,
 		Status:                state,
-		TypeOf:                associate.TypeOf,
+		Type:                  associate.Type,
 		OldID:                 asi.ID,
 	}
 

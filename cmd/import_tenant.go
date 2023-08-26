@@ -206,7 +206,7 @@ func RunImportTenant(cfg *config.Conf, public *sql.DB, london *sql.DB, tenantSto
 
 func importTenant(ctx context.Context, tenantStorer datastore.TenantStorer, t *OldTenant) {
 	m := &datastore.Tenant{
-		OldId:              t.Id,
+		OldID:              t.Id,
 		ID:                 primitive.NewObjectID(),
 		AlternateName:      t.AlternateName,
 		Description:        t.Description,
@@ -214,8 +214,8 @@ func importTenant(ctx context.Context, tenantStorer datastore.TenantStorer, t *O
 		Url:                t.Url.String,
 		Status:             1,
 		Timezone:           "America/Toronto",
-		CreatedTime:        t.Created,
-		ModifiedTime:       t.LastModified,
+		CreatedAt:          t.Created,
+		ModifiedAt:         t.LastModified,
 		AddressCountry:     t.AddressCountry,
 		AddressRegion:      t.AddressRegion,
 		AddressLocality:    t.AddressLocality,

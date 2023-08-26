@@ -191,14 +191,14 @@ func (impl UserStorerImpl) ListAsSelectOptionByFilter(ctx context.Context, f *Us
 
 func (impl UserStorerImpl) ListAllExecutives(ctx context.Context) (*UserListResult, error) {
 	f := &UserListFilter{
-		Role: UserExecutiveRoleId,
+		Role: UserRoleExecutive,
 	}
 	return impl.ListByFilter(ctx, f)
 }
 
 func (impl UserStorerImpl) ListAllStaffForTenantID(ctx context.Context, organizationID primitive.ObjectID) (*UserListResult, error) {
 	f := &UserListFilter{
-		Role:           UserStaffRoleId,
+		Role:           UserRoleStaff,
 		OrganizationID: organizationID,
 	}
 	return impl.ListByFilter(ctx, f)

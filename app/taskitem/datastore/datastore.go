@@ -12,21 +12,21 @@ import (
 )
 
 const (
-	TaskItemStatusActive                                      = 1
-	TaskItemStatusArchived                                    = 2
-	TaskItemTypeOfAssignedAssociate                           = 1
-	TaskItemTypeOfFollowUpDidAssociateAndCustomerAgreedToMeet = 2
-	TaskItemTypeOfFollowUpCustomerSurvey                      = 3 // DEPRECATED
-	TaskItemTypeOfFollowUpDidAssociateAcceptJob               = 4
-	TaskItemTypeOfUpdateOngoingJob                            = 5
-	TaskItemTypeOfFollowUpDidAssociateCompleteJob             = 6
-	TaskItemTypeOfFollowUpDidCustomerReviewAssociateAfterJob  = 7
+	TaskItemStatusActive                                    = 1
+	TaskItemStatusArchived                                  = 2
+	TaskItemTypeAssignedAssociate                           = 1
+	TaskItemTypeFollowUpDidAssociateAndCustomerAgreedToMeet = 2
+	TaskItemTypeFollowUpCustomerSurvey                      = 3 // DEPRECATED
+	TaskItemTypeFollowUpDidAssociateAcceptJob               = 4
+	TaskItemTypeUpdateOngoingJob                            = 5
+	TaskItemTypeFollowUpDidAssociateCompleteJob             = 6
+	TaskItemTypeFollowUpDidCustomerReviewAssociateAfterJob  = 7
 )
 
 type TaskItem struct {
 	ID                 primitive.ObjectID `bson:"_id" json:"id"`                                    // 01
 	TenantID           primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`             // 03
-	TypeOf             int8               `bson:"type_of" json:"type_of"`                           // 04
+	Type               int8               `bson:"type" json:"type"`                                 // 04
 	Title              string             `bson:"title" json:"title"`                               // 05
 	Description        string             `bson:"description" json:"description"`                   // 06
 	DueDate            time.Time          `bson:"due_date" json:"due_date"`                         // 07
@@ -44,9 +44,9 @@ type TaskItem struct {
 	ModifiedByUserID      primitive.ObjectID      `bson:"modified_by_user_id" json:"modified_by_user_id,omitempty"`
 	ModifiedByUserName    string                  `bson:"modified_by_user_name" json:"modified_by_user_name"`
 	ModifiedFromIPAddress string                  `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
-	Status                int8                    `bson:"status" json:"status"`               // 20
-	OldID                 uint64                  `bson:"old_id" json:"old_id"`               // 21
-	OrderTypeOf           int8                    `bson:"order_type_of" json:"order_type_of"` // 28
+	Status                int8                    `bson:"status" json:"status"`         // 20
+	OldID                 uint64                  `bson:"old_id" json:"old_id"`         // 21
+	OrderType             int8                    `bson:"order_type" json:"order_type"` // 28
 	CustomerID            primitive.ObjectID      `bson:"customer_id" json:"customer_id"`
 	CustomerName          string                  `bson:"customer_name" json:"customer_name,omitempty"`
 	CustomerLexicalName   string                  `bson:"customer_lexical_name" json:"customer_lexical_name,omitempty"`

@@ -14,7 +14,7 @@ import (
 
 const (
 	OrderStatusActive   = 1
-	OrderStatusArchived = 100
+	OrderStatusArchived = 2
 )
 
 const (
@@ -27,10 +27,10 @@ const (
 	OrderInProgressState           = 6
 	OrderCompletedButUnpaidState   = 7
 	OrderCompletedAndPaidState     = 8
-	OrderAnotherUnassignedTypeOf   = 0
-	OrderResidentialTypeOf         = 1
-	OrderCommercialTypeOf          = 2
-	OrderUnassignedTypeOf          = 3
+	OrderAnotherUnassignedType     = 0
+	OrderResidentialType           = 1
+	OrderCommercialType            = 2
+	OrderUnassignedType            = 3
 	OrderAssociateInvoicePaidTo    = 1
 	OrderOrganizationInvoicePaidTo = 2
 )
@@ -40,11 +40,11 @@ var OrderOrganizationInvoicePaidToLabels = map[int8]string{
 	OrderOrganizationInvoicePaidTo: "Organization",
 }
 
-var OrderTypeOfLabels = map[int8]string{
-	OrderResidentialTypeOf:       "Residential",
-	OrderCommercialTypeOf:        "Commercial",
-	OrderUnassignedTypeOf:        "Unassigned",
-	OrderAnotherUnassignedTypeOf: "-",
+var OrderTypeLabels = map[int8]string{
+	OrderResidentialType:       "Residential",
+	OrderCommercialType:        "Commercial",
+	OrderUnassignedType:        "Unassigned",
+	OrderAnotherUnassignedType: "-",
 }
 
 var OrderStateLabels = map[int8]string{
@@ -98,7 +98,7 @@ type Order struct {
 	StartDate                         time.Time          `bson:"start_date" json:"start_date"`
 	CompletionDate                    time.Time          `bson:"completion_date" json:"completion_date"`
 	Hours                             float64            `bson:"hours" json:"hours"`
-	TypeOf                            int8               `bson:"type_of" json:"type_of"`
+	Type                              int8               `bson:"type" json:"type"`
 	IndexedText                       string             `bson:"indexed_text" json:"indexed_text"`
 	ClosingReason                     int8               `bson:"closing_reason" json:"closing_reason"`
 	ClosingReasonOther                string             `bson:"closing_reason_other" json:"closing_reason_other"`

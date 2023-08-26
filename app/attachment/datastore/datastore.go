@@ -12,12 +12,12 @@ import (
 )
 
 const (
-	AttachmentStatusActive    = 1
-	AttachmentStatusArchived  = 2
-	AttachmentTypeOfCustomer  = 1
-	AttachmentTypeOfAssociate = 2
-	AttachmentTypeOfOrder     = 3
-	AttachmentTypeOfStaff     = 4
+	AttachmentStatusActive   = 1
+	AttachmentStatusArchived = 2
+	AttachmentTypeCustomer   = 1
+	AttachmentTypeAssociate  = 2
+	AttachmentTypeOrder      = 3
+	AttachmentTypeStaff      = 4
 )
 
 type Attachment struct {
@@ -43,7 +43,7 @@ type Attachment struct {
 	OrderID               primitive.ObjectID `bson:"order_id" json:"order_id"` // 18
 	Status                int8               `bson:"status" json:"status"`     // 19
 	OldID                 uint64             `bson:"old_id" json:"old_id"`     // 20
-	TypeOf                int8               `bson:"type_of" json:"type_of"`   // 19
+	Type                  int8               `bson:"type" json:"type"`         // 19
 }
 
 type AttachmentListFilter struct {

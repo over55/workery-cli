@@ -32,8 +32,14 @@ type Tenant struct {
 	Url                     string             `bson:"url" json:"url"`
 	Status                  int8               `bson:"status" json:"status"`
 	Timezone                string             `bson:"timestamp" json:"timestamp"`
-	CreatedTime             time.Time          `bson:"created_time" json:"created_time"`
-	ModifiedTime            time.Time          `bson:"modified_time" json:"modified_time"`
+	CreatedAt               time.Time          `bson:"created_at" json:"created_at"`
+	CreatedByUserID         primitive.ObjectID `bson:"created_by_user_id" json:"created_by_user_id,omitempty"`
+	CreatedByUserName       string             `bson:"created_by_user_name" json:"created_by_user_name"`
+	CreatedFromIPAddress    string             `bson:"created_from_ip_address" json:"created_from_ip_address"`
+	ModifiedAt              time.Time          `bson:"modified_at" json:"modified_at"`
+	ModifiedByUserID        primitive.ObjectID `bson:"modified_by_user_id" json:"modified_by_user_id,omitempty"`
+	ModifiedByUserName      string             `bson:"modified_by_user_name" json:"modified_by_user_name"`
+	ModifiedFromIPAddress   string             `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
 	AddressCountry          string             `bson:"address_country" json:"address_country"`
 	AddressRegion           string             `bson:"address_region" json:"address_region"`
 	AddressLocality         string             `bson:"address_locality" json:"address_locality"`
@@ -50,12 +56,12 @@ type Tenant struct {
 	Email                   string             `bson:"email" json:"email"`
 	FaxNumber               string             `bson:"fax_number" json:"fax_number"`
 	Telephone               string             `bson:"telephone" json:"telephone"`
-	TelephoneTypeOf         int8               `bson:"telephone_type_of" json:"telephone_type_of"`
+	TelephoneType           int8               `bson:"telephone_type" json:"telephone_type"`
 	TelephoneExtension      string             `bson:"telephone_extension" json:"telephone_extension"`
 	OtherTelephone          string             `bson:"other_telephone" json:"other_telephone"`
 	OtherTelephoneExtension string             `bson:"other_telephone_extension" json:"other_telephone_extension"`
-	OtherTelephoneTypeOf    int8               `bson:"other_telephone_type_of" json:"other_telephone_type_of"`
-	OldId                   uint64             `bson:"old_id" json:"old_id"`
+	OtherTelephoneType      int8               `bson:"other_telephone_type" json:"other_telephone_type"`
+	OldID                   uint64             `bson:"old_id" json:"old_id"`
 }
 
 type TenantListFilter struct {

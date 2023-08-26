@@ -288,7 +288,7 @@ func importTaskItem(
 		customerName = c.Name
 		customerLexicalName = c.LexicalName
 		customerGender = c.Gender
-		customerDOB = c.Birthdate
+		customerDOB = c.BirthDate
 
 		for _, tag := range c.Tags {
 			customerTags = append(customerTags, &ti_ds.TaskItemCustomerTag{
@@ -307,7 +307,7 @@ func importTaskItem(
 
 	m := &ti_ds.TaskItem{
 		ID:                    primitive.NewObjectID(),
-		TypeOf:                ti.TypeOf,
+		Type:                  ti.TypeOf,
 		Title:                 ti.Title,
 		Description:           ti.Description,
 		DueDate:               ti.DueDate,

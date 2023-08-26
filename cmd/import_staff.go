@@ -289,7 +289,7 @@ func importStaff(
 				PrAccessCode:     "",
 				PrExpiryTime:     time.Now(),
 				TenantID:         tenant.ID,
-				RoleID:           5, // Staff
+				Role:             5, // Staff
 			}
 			err = us.UpsertByEmail(ctx, um)
 			if err != nil {
@@ -301,7 +301,7 @@ func importStaff(
 		ownerUser = user
 	}
 
-	userRoleID = ownerUser.RoleID
+	userRoleID = ownerUser.Role
 
 	// //
 	// // Get `createdByID` and `createdByName` values.
@@ -454,11 +454,11 @@ func importStaff(
 		LexicalName:                  lexicalName,
 		Email:                        ou.Email.ValueOrZero(),
 		Phone:                        ou.Telephone.ValueOrZero(),
-		PhoneTypeOf:                  ou.TelephoneTypeOf,
+		PhoneType:                    ou.TelephoneTypeOf,
 		PhoneExtension:               ou.TelephoneExtension.ValueOrZero(),
 		FaxNumber:                    ou.FaxNumber.ValueOrZero(),
 		OtherPhone:                   ou.OtherTelephone.ValueOrZero(),
-		OtherPhoneTypeOf:             ou.OtherTelephoneTypeOf,
+		OtherPhoneType:               ou.OtherTelephoneTypeOf,
 		OtherPhoneExtension:          ou.OtherTelephoneExtension.ValueOrZero(),
 		Country:                      ou.AddressCountry,
 		Region:                       ou.AddressRegion,
@@ -488,7 +488,7 @@ func importStaff(
 		Timezone:       "American/Toronto",
 		HasUserAccount: false,
 		UserID:         ownerUser.ID,
-		TypeOf:         userRoleID,
+		Type:           userRoleID,
 		IsOkToEmail:    true,
 		IsOkToText:     true,
 		// IsBusiness:     ou.IsBusiness,

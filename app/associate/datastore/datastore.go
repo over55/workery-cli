@@ -24,9 +24,9 @@ const (
 	AssociateDeactivationReasonDeceased      = 4
 	AssociateDeactivationReasonDoNotConstact = 5
 
-	AssociateTypeOfUnassigned  = 1
-	AssociateTypeOfResidential = 2
-	AssociateTypeOfCommercial  = 3
+	AssociateTypeUnassigned  = 1
+	AssociateTypeResidential = 2
+	AssociateTypeCommercial  = 3
 
 	AssociatePhoneTypeLandline = 1
 	AssociatePhoneTypeMobile   = 2
@@ -42,12 +42,12 @@ type Associate struct {
 	LexicalName                          string                           `bson:"lexical_name" json:"lexical_name"`
 	Email                                string                           `bson:"email" json:"email"`
 	Phone                                string                           `bson:"phone" json:"phone,omitempty"`
-	PhoneTypeOf                          int8                             `bson:"phone_type_of" json:"phone_type_of"`
+	PhoneType                            int8                             `bson:"phone_type" json:"phone_type"`
 	PhoneExtension                       string                           `bson:"phone_extension" json:"phone_extension"`
 	FaxNumber                            string                           `bson:"fax_number" json:"fax_number"`
 	OtherPhone                           string                           `bson:"other_phone" json:"other_phone"`
 	OtherPhoneExtension                  string                           `bson:"other_phone_extension" json:"other_phone_extension"`
-	OtherPhoneTypeOf                     int8                             `bson:"other_phone_type_of" json:"other_phone_type_of"`
+	OtherPhoneType                       int8                             `bson:"other_phone_type" json:"other_phone_type"`
 	Country                              string                           `bson:"country" json:"country,omitempty"`
 	Region                               string                           `bson:"region" json:"region,omitempty"`
 	City                                 string                           `bson:"city" json:"city,omitempty"`
@@ -92,7 +92,7 @@ type Associate struct {
 	Timezone                             string                           `bson:"timezone" json:"timezone,omitempty"`
 	HasUserAccount                       bool                             `bson:"has_user_account" json:"has_user_account,omitempty"`
 	UserID                               primitive.ObjectID               `bson:"user_id" json:"user_id,omitempty"`
-	TypeOf                               int8                             `bson:"type_of" json:"type_of"`
+	Type                                 int8                             `bson:"type" json:"type"`
 	IsOkToEmail                          bool                             `bson:"is_ok_to_email" json:"is_ok_to_email"`
 	IsOkToText                           bool                             `bson:"is_ok_to_text" json:"is_ok_to_text"`
 	IsBusiness                           bool                             `bson:"is_business" json:"is_business"`
@@ -312,10 +312,10 @@ var AssociateStateLabels = map[int8]string{
 	AssociateStatusArchived: "Archived",
 }
 
-var AssociateTypeOfLabels = map[int8]string{
-	AssociateTypeOfResidential: "Residential",
-	AssociateTypeOfCommercial:  "Commercial",
-	AssociateTypeOfUnassigned:  "Unassigned",
+var AssociateTypeLabels = map[int8]string{
+	AssociateTypeResidential: "Residential",
+	AssociateTypeCommercial:  "Commercial",
+	AssociateTypeUnassigned:  "Unassigned",
 }
 
 var AssociateDeactivationReasonLabels = map[int8]string{
@@ -327,14 +327,14 @@ var AssociateDeactivationReasonLabels = map[int8]string{
 	AssociateDeactivationReasonDoNotConstact: "Do not contact",
 }
 
-var AssociateTelephoneTypeOfLabels = map[int8]string{
+var AssociateTelephoneTypeLabels = map[int8]string{
 	1: "Landline",
 	2: "Mobile",
 	3: "Work",
 }
 
 //---------------------
-// organization_type_of
+// organization_type
 //---------------------
 // 1 = Unknown Organization Type | UNKNOWN_ORGANIZATION_TYPE_OF_ID
 // 2 = Private Organization Type | PRIVATE_ORGANIZATION_TYPE_OF_ID

@@ -85,10 +85,8 @@ type Customer struct {
 	ModifiedFromIPAddress                string             `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
 	Status                               int8               `bson:"status" json:"status"`
 	Salt                                 string             `bson:"salt" json:"salt,omitempty"`
-	JoinedTime                           time.Time          `bson:"joined_time" json:"joined_time,omitempty"`
 	PrAccessCode                         string             `bson:"pr_access_code" json:"pr_access_code,omitempty"`
 	PrExpiryTime                         time.Time          `bson:"pr_expiry_time" json:"pr_expiry_time,omitempty"`
-	RoleID                               int8               `bson:"role_id" json:"role_id,omitempty"`
 	Timezone                             string             `bson:"timezone" json:"timezone,omitempty"`
 	HasUserAccount                       bool               `bson:"has_user_account" json:"has_user_account,omitempty"`
 	UserID                               primitive.ObjectID `bson:"user_id" json:"user_id,omitempty"`
@@ -105,7 +103,7 @@ type Customer struct {
 	AvatarObjectKey                      string             `bson:"avatar_object_key" json:"avatar_object_key"`
 	AvatarFileType                       string             `bson:"avatar_file_type" json:"avatar_file_type"`
 	AvatarFileName                       string             `bson:"avatar_file_name" json:"avatar_file_name"`
-	Birthdate                            time.Time          `bson:"birthdate" json:"birthdate"`
+	BirthDate                            time.Time          `bson:"birth_date" json:"birth_date"`
 	JoinDate                             time.Time          `bson:"join_date" json:"join_date"`
 	Nationality                          string             `bson:"nationality" json:"nationality"`
 	Gender                               string             `bson:"gender" json:"gender"`
@@ -242,7 +240,7 @@ var CustomerStateLabels = map[int8]string{
 	CustomerStatusArchived: "Archived",
 }
 
-var CustomerTypeOfLabels = map[int8]string{
+var CustomerTypeLabels = map[int8]string{
 	CustomerTypeResidential: "Residential",
 	CustomerTypeCommercial:  "Commercial",
 	CustomerTypeUnassigned:  "Unassigned",
@@ -257,14 +255,14 @@ var CustomerDeactivationReasonLabels = map[int8]string{
 	CustomerDeactivationReasonDoNotConstact: "Do not contact",
 }
 
-var CustomerTelephoneTypeOfLabels = map[int8]string{
+var CustomerTelephoneTypeLabels = map[int8]string{
 	1: "Landline",
 	2: "Mobile",
 	3: "Work",
 }
 
 //---------------------
-// organization_type_of
+// organization_type
 //---------------------
 // 1 = Unknown Organization Type | UNKNOWN_ORGANIZATION_TYPE_OF_ID
 // 2 = Private Organization Type | PRIVATE_ORGANIZATION_TYPE_OF_ID

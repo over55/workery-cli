@@ -3,8 +3,9 @@
 2. Run the following.
 
 ```bash
-go run main.go import_tenant
-go run main.go import_user
+clear; go run main.go import_tenant;
+clear; go run main.go import_user;
+clear; go run main.go import_user_role;
 clear; go run main.go change_password --email="bart@mikasoftware.com" --password="xxx";
 clear; go run main.go import_insurance_requirement;
 clear; go run main.go import_how_hear_about_us_item;

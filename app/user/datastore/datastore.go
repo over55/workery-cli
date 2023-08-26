@@ -14,14 +14,14 @@ import (
 )
 
 const (
-	UserStatusActive         = 1
-	UserStatusArchived       = 100
-	UserExecutiveRoleId      = 1
-	UserManagementRoleId     = 2
-	UserFrontlineStaffRoleId = 3
-	UserStaffRoleId          = 3
-	UserAssociateRoleId      = 4
-	UserCustomerRoleId       = 5
+	UserStatusActive       = 1
+	UserStatusArchived     = 2
+	UserRoleExecutive      = 1
+	UserRoleManagement     = 2
+	UserRoleFrontlineStaff = 3
+	UserRoleStaff          = 3
+	UserRoleAssociate      = 4
+	UserRoleCustomer       = 5
 )
 
 type User struct {
@@ -71,7 +71,6 @@ type User struct {
 	PrAccessCode              string             `bson:"pr_access_code" json:"pr_access_code,omitempty"`
 	PrExpiryTime              time.Time          `bson:"pr_expiry_time" json:"pr_expiry_time,omitempty"`
 	OldID                     uint64             `bson:"old_id" json:"old_id,omitempty"`
-	RoleID                    int8               `bson:"role_id" json:"role_id,omitempty"`
 	Timezone                  string             `bson:"timezone" json:"timezone,omitempty"`
 	// AccessToken       string             `bson:"access_token" json:"access_token,omitempty"`
 	// RefreshToken      string             `bson:"refresh_token" json:"refresh_token,omitempty"`
