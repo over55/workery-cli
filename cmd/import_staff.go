@@ -377,6 +377,7 @@ func importStaff(
 
 	howHearId := uint64(ou.HowHearID.Int64)
 	howHearText := ""
+	isHowHearOther := false
 	howHear, err := hhStorer.GetByOldID(ctx, uint64(howHearId))
 	if err != nil {
 		log.Fatal(err)
@@ -388,6 +389,7 @@ func importStaff(
 				howHearText = "-"
 			} else {
 				howHearText = ou.HowHearOther.ValueOrZero()
+				isHowHearOther = true
 			}
 		} else {
 			howHearText = howHear.Text
@@ -472,7 +474,8 @@ func importStaff(
 		FullAddressURL:               fullAddressUrl,
 		HowDidYouHearAboutUsID:       howHear.ID,
 		HowDidYouHearAboutUsOther:    howHearText,
-		HowDidYouHearAboutUsValue:    howHear.Text,
+		IsHowDidYouHearAboutUsOther:  isHowHearOther,
+		HowDidYouHearAboutUsText:     howHear.Text,
 		AgreeTOS:                     true,
 		CreatedAt:                    ou.Created,
 		CreatedByUserID:              createdByUserID,

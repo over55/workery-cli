@@ -252,6 +252,7 @@ func importCustomer(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.U
 
 	howHearId := uint64(ou.HowHearId.Int64)
 	howHearText := ""
+	isHowHearOther := false
 	howHear, err := hhStorer.GetByOldID(ctx, uint64(howHearId))
 	if err != nil {
 		log.Fatal(err)
@@ -262,6 +263,7 @@ func importCustomer(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.U
 			howHearText = "-"
 		} else {
 			howHearText = ou.HowHearOther
+			isHowHearOther = true
 		}
 	} else {
 		howHearText = howHear.Text
@@ -330,7 +332,8 @@ func importCustomer(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.U
 		FullAddressURL:               fullAddressUrl,
 		HowDidYouHearAboutUsID:       howHear.ID,
 		HowDidYouHearAboutUsOther:    howHearText,
-		HowDidYouHearAboutUsValue:    howHear.Text,
+		IsHowDidYouHearAboutUsOther:  isHowHearOther,
+		HowDidYouHearAboutUsText:     howHear.Text,
 		AgreeTOS:                     true,
 		CreatedAt:                    ou.Created,
 		CreatedByUserID:              createdByUserID,

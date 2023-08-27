@@ -270,6 +270,7 @@ func importAssociate(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.
 
 	howHearID := uint64(ou.HowHearID.Int64)
 	howHearText := ""
+	isHowHearOther := false
 	howHear, err := hhStorer.GetByOldID(ctx, uint64(howHearID))
 	if err != nil {
 		log.Fatal(err)
@@ -280,6 +281,7 @@ func importAssociate(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.
 			howHearText = "-"
 		} else {
 			howHearText = ou.HowHearOther
+			isHowHearOther = true
 		}
 	} else {
 		howHearText = howHear.Text
@@ -352,7 +354,8 @@ func importAssociate(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.
 		FullAddressURL:               fullAddressUrl,
 		HowDidYouHearAboutUsID:       howHear.ID,
 		HowDidYouHearAboutUsOther:    howHearText,
-		HowDidYouHearAboutUsValue:    howHear.Text,
+		IsHowDidYouHearAboutUsOther:  isHowHearOther,
+		HowDidYouHearAboutUsText:     howHear.Text,
 		AgreeTOS:                     true,
 		CreatedAt:                    ou.Created,
 		CreatedByUserID:              createdByUserID,

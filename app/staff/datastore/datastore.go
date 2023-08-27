@@ -73,8 +73,9 @@ type Staff struct {
 	ShippingFullAddressWithPostalCode    string                       `bson:"shipping_full_address_with_postal_code" json:"shipping_full_address_with_postal_code,omitempty"`       // Compiled value
 	ShippingFullAddressURL               string                       `bson:"shipping_full_address_url" json:"shipping_full_address_url,omitempty"`                                 // Compiled value
 	HowDidYouHearAboutUsID               primitive.ObjectID           `bson:"how_did_you_hear_about_us_id" json:"how_did_you_hear_about_us_id,omitempty"`
+	HowDidYouHearAboutUsText             string                       `bson:"how_did_you_hear_about_us_text" json:"how_did_you_hear_about_us_text,omitempty"`
+	IsHowDidYouHearAboutUsOther          bool                         `bson:"is_how_did_you_hear_about_us_other" json:"is_how_did_you_hear_about_us_other,omitempty"`
 	HowDidYouHearAboutUsOther            string                       `bson:"how_did_you_hear_about_us_other" json:"how_did_you_hear_about_us_other,omitempty"`
-	HowDidYouHearAboutUsValue            string                       `bson:"how_did_you_hear_about_us_value" json:"how_did_you_hear_about_us_value,omitempty"`
 	AgreeTOS                             bool                         `bson:"agree_tos" json:"agree_tos,omitempty"`
 	CreatedAt                            time.Time                    `bson:"created_at" json:"created_at,omitempty"`
 	CreatedByUserID                      primitive.ObjectID           `bson:"created_by_user_id" json:"created_by_user_id"`
