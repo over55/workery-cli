@@ -33,7 +33,7 @@ type Comment struct {
 	ModifiedByUserID      primitive.ObjectID `bson:"modified_by_user_id" json:"modified_by_user_id,omitempty"`
 	ModifiedByUserName    string             `bson:"modified_by_user_name" json:"modified_by_user_name"`
 	ModifiedFromIPAddress string             `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
-	Text                  string             `bson:"text" json:"text"`
+	Content               string             `bson:"content" json:"content"`
 	Status                int8               `bson:"status" json:"status"`
 	OldID                 uint64             `bson:"old_id" json:"old_id"`
 	BelongsTo             int8               `bson:"belongs_to" json:"belongs_to"`

@@ -145,7 +145,7 @@ func importCustomerComment(ctx context.Context, ts tenant_ds.TenantStorer, us us
 		ModifiedByUserID:      comment.ModifiedByUserID,
 		ModifiedByUserName:    comment.ModifiedByUserName,
 		ModifiedFromIPAddress: comment.ModifiedFromIPAddress,
-		Text:                  comment.Text,
+		Content:               comment.Content,
 		Status:                comment.Status,
 		OldID:                 comment.OldID,
 	}

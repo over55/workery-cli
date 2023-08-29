@@ -187,7 +187,7 @@ func importComment(ctx context.Context, cStorer comment_ds.CommentStorer, userSt
 		ModifiedByUserID:      modifiedByID,
 		ModifiedByUserName:    modifiedByName,
 		ModifiedFromIPAddress: oir.LastModifiedFrom.ValueOrZero(),
-		Text:                  oir.Text,
+		Content:               oir.Text,
 		Status:                state,
 		OldID:                 oir.ID,
 	}
