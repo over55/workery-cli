@@ -7,7 +7,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/exp/slog"
-	"gopkg.in/guregu/null.v4"
 
 	c "github.com/over55/workery-cli/config"
 )
@@ -311,9 +310,9 @@ type OrderDeposit struct {
 	ID                    primitive.ObjectID `bson:"_id" json:"id"`
 	TenantID              primitive.ObjectID `bson:"tenant_id" json:"tenant_id"`
 	OrderID               primitive.ObjectID `bson:"order_id" json:"order_id"`
-	PaidAt                null.Time          `jbson:"paid_at" son:"paid_at"`
+	PaidAt                time.Time          `jbson:"paid_at" son:"paid_at"`
 	DepositMethod         int8               `bson:"deposit_method" json:"deposit_method"`
-	PaidTo                null.Int           `bson:"paid_to" json:"paid_to"`
+	PaidTo                int8               `bson:"paid_to" json:"paid_to"`
 	Currency              string             `bson:"currency" json:"currency"`
 	Amount                float64            `bson:"amount" json:"amount"`
 	PaidFor               int8               `bson:"paid_for" json:"paid_for"`
