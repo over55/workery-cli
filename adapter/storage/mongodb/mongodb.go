@@ -7,12 +7,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"golang.org/x/exp/slog"
 
 	c "github.com/over55/workery-cli/config"
 )
 
 func NewStorage(appCfg *c.Conf) *mongo.Client {
-	log.Println("storage mongodb initializing...")
+	log.Println("storage mongodb initializing...", slog.String("URI", appCfg.DB.URI))
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(appCfg.DB.URI))
 	if err != nil {
 		log.Fatal(err)

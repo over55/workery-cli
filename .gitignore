@@ -201,6 +201,8 @@ todo.txt
 private_docker.md
 private.dev.md
 private.prod.md
+private_prod.md
+private_readme.md
 
 # Executable
 bin/
