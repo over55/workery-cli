@@ -255,7 +255,7 @@ func importTaskItem(
 		associateName = a.Name
 		associateLexicalName = a.LexicalName
 		associateGender = a.Gender
-		associateBirthdate = a.Birthdate
+		associateBirthdate = a.BirthDate
 
 		for _, tag := range a.Tags {
 			associateTags = append(associateTags, &ti_ds.TaskItemAssociateTag{

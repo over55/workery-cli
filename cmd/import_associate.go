@@ -17,6 +17,7 @@ import (
 	"github.com/over55/workery-cli/adapter/storage/postgres"
 	a_ds "github.com/over55/workery-cli/app/associate/datastore"
 	hh_ds "github.com/over55/workery-cli/app/howhear/datastore"
+	sf_ds "github.com/over55/workery-cli/app/servicefee/datastore"
 	tenant_ds "github.com/over55/workery-cli/app/tenant/datastore"
 	user_ds "github.com/over55/workery-cli/app/user/datastore"
 	"github.com/over55/workery-cli/config"
@@ -40,13 +41,14 @@ var importAssociateCmd = &cobra.Command{
 		userStorer := user_ds.NewDatastore(cfg, defaultLogger, mc)
 		aStorer := a_ds.NewDatastore(cfg, defaultLogger, mc)
 		hhStorer := hh_ds.NewDatastore(cfg, defaultLogger, mc)
+		sfStorer := sf_ds.NewDatastore(cfg, defaultLogger, mc)
 
 		tenant, err := tenantStorer.GetBySchemaName(context.Background(), cfg.PostgresDB.DatabaseLondonSchemaName)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		RunImportAssociate(cfg, ppc, lpc, tenantStorer, userStorer, aStorer, hhStorer, tenant)
+		RunImportAssociate(cfg, ppc, lpc, tenantStorer, userStorer, aStorer, hhStorer, sfStorer, tenant)
 	},
 }
 
@@ -198,7 +200,7 @@ func ListAllAssociates(db *sql.DB) ([]*OldAssociate, error) {
 	return arr, err
 }
 
-func RunImportAssociate(cfg *config.Conf, public *sql.DB, london *sql.DB, tenantStorer tenant_ds.TenantStorer, userStorer user_ds.UserStorer, aStorer a_ds.AssociateStorer, hhStorer hh_ds.HowHearAboutUsItemStorer, tenant *tenant_ds.Tenant) {
+func RunImportAssociate(cfg *config.Conf, public *sql.DB, london *sql.DB, tenantStorer tenant_ds.TenantStorer, userStorer user_ds.UserStorer, aStorer a_ds.AssociateStorer, hhStorer hh_ds.HowHearAboutUsItemStorer, sfStorer sf_ds.ServiceFeeStorer, tenant *tenant_ds.Tenant) {
 	fmt.Println("Beginning importing associates")
 	data, err := ListAllAssociates(london)
 	if err != nil {
@@ -206,15 +208,15 @@ func RunImportAssociate(cfg *config.Conf, public *sql.DB, london *sql.DB, tenant
 	}
 
 	for _, datum := range data {
-		importAssociate(context.Background(), tenantStorer, userStorer, aStorer, hhStorer, tenant, datum)
+		importAssociate(context.Background(), tenantStorer, userStorer, aStorer, hhStorer, sfStorer, tenant, datum)
 	}
 	fmt.Println("Finished importing associates")
 }
 
-func importAssociate(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.UserStorer, aStorer a_ds.AssociateStorer, hhStorer hh_ds.HowHearAboutUsItemStorer, tenant *tenant_ds.Tenant, ou *OldAssociate) {
-	var status int8 = a_ds.AssociateStatusArchived
+func importAssociate(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.UserStorer, aStorer a_ds.AssociateStorer, hhStorer hh_ds.HowHearAboutUsItemStorer, sfStorer sf_ds.ServiceFeeStorer, tenant *tenant_ds.Tenant, ou *OldAssociate) {
+	var status int8 = a_ds.AssociateStatusActive
 	if ou.IsArchived == true {
-		status = a_ds.AssociateStatusActive
+		status = a_ds.AssociateStatusArchived
 	}
 
 	// // BUGFIX: If no user tenant account associated with the account then
@@ -366,14 +368,12 @@ func importAssociate(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.
 		ModifiedByUserName:           modifiedByUserName,
 		ModifiedFromIPAddress:        ou.LastModifiedFrom.String,
 		Status:                       status,
-		// Comments:              Comments // SKIP
-		JoinedTime:     ou.JoinDate.ValueOrZero(),
-		Timezone:       "American/Toronto",
-		HasUserAccount: false,
-		UserID:         primitive.NilObjectID,
-		Type:           ou.TypeOf,
-		IsOkToEmail:    ou.IsOkToEmail,
-		IsOkToText:     ou.IsOkToText,
+		Timezone:                     "American/Toronto",
+		HasUserAccount:               false,
+		UserID:                       primitive.NilObjectID,
+		Type:                         ou.TypeOf,
+		IsOkToEmail:                  ou.IsOkToEmail,
+		IsOkToText:                   ou.IsOkToText,
 		// IsBusiness:     ou.IsBusiness,
 		// IsSenior:                ou.IsSenior,
 		// IsSupport:               ou.IsSupport,
@@ -383,24 +383,62 @@ func importAssociate(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.
 		// AvatarObjectKey                      string             `bson:"avatar_object_key" json:"avatar_object_key"`
 		// AvatarFileType                       string             `bson:"avatar_file_type" json:"avatar_file_type"`
 		// AvatarFileName                       string             `bson:"avatar_file_name" json:"avatar_file_name"`
-		Birthdate:             ou.Birthdate.ValueOrZero(),
-		JoinDate:              ou.JoinDate.ValueOrZero(),
-		Nationality:           ou.Nationality.ValueOrZero(),
-		Gender:                ou.Gender.ValueOrZero(),
-		TaxID:                 ou.TaxID.ValueOrZero(),
-		Elevation:             ou.Elevation.ValueOrZero(),
-		Latitude:              ou.Elevation.ValueOrZero(),
-		Longitude:             ou.Longitude.ValueOrZero(),
-		AreaServed:            ou.AreaServed.ValueOrZero(),
-		AvailableLanguage:     ou.AvailableLanguage.ValueOrZero(),
-		ContactType:           ou.ContactType.ValueOrZero(),
-		Tags:                  at,
-		Comments:              cc,
-		SkillSets:             sss,
-		InsuranceRequirements: irs,
-		VehicleTypes:          vts,
-		AwayLogs:              al,
+		BirthDate:                     ou.Birthdate.ValueOrZero(),
+		JoinDate:                      ou.JoinDate.ValueOrZero(),
+		Nationality:                   ou.Nationality.ValueOrZero(),
+		Gender:                        ou.Gender.ValueOrZero(),
+		TaxID:                         ou.TaxID.ValueOrZero(),
+		Elevation:                     ou.Elevation.ValueOrZero(),
+		Latitude:                      ou.Elevation.ValueOrZero(),
+		Longitude:                     ou.Longitude.ValueOrZero(),
+		AreaServed:                    ou.AreaServed.ValueOrZero(),
+		AvailableLanguage:             ou.AvailableLanguage.ValueOrZero(),
+		ContactType:                   ou.ContactType.ValueOrZero(),
+		OrganizationName:              ou.OrganizationName.ValueOrZero(),
+		OrganizationType:              ou.OrganizationTypeOf,
+		HourlySalaryDesired:           ou.HourlySalaryDesired.ValueOrZero(),
+		LimitSpecial:                  ou.LimitSpecial.ValueOrZero(),
+		DuesDate:                      ou.DuesDate.ValueOrZero(),
+		CommercialInsuranceExpiryDate: ou.CommercialInsuranceExpiryDate.ValueOrZero(),
+		AutoInsuranceExpiryDate:       ou.AutoInsuranceExpiryDate.ValueOrZero(),
+		WsibNumber:                    ou.WsibNumber.ValueOrZero(),
+		WsibInsuranceDate:             ou.WsibInsuranceDate.ValueOrZero(),
+		PoliceCheck:                   ou.PoliceCheck.ValueOrZero(),
+		DriversLicenseClass:           ou.DriversLicenseClass.ValueOrZero(),
+		// ServiceFeeID:                   ou.ServiceFeeID,
+		BalanceOwingAmount:                   ou.BalanceOwingAmount,
+		EmergencyContactName:                 ou.EmergencyContactName.ValueOrZero(),
+		EmergencyContactRelationship:         ou.EmergencyContactRelationship.ValueOrZero(),
+		EmergencyContactTelephone:            ou.EmergencyContactTelephone.ValueOrZero(),
+		EmergencyContactAlternativeTelephone: ou.EmergencyContactAlternativeTelephone.ValueOrZero(),
+		Tags:                                 at,
+		Comments:                             cc,
+		SkillSets:                            sss,
+		InsuranceRequirements:                irs,
+		VehicleTypes:                         vts,
+		AwayLogs:                             al,
 	}
+
+	//
+	// Get service fee
+	//
+
+	if !ou.ServiceFeeID.IsZero() {
+		sf, err := sfStorer.GetByOldID(ctx, uint64(ou.ServiceFeeID.ValueOrZero()))
+		if err != nil {
+			log.Panic(err)
+		}
+		if sf != nil {
+			m.ServiceFeeID = sf.ID
+			m.ServiceFeeText = sf.Text
+			m.ServiceFeePercentage = sf.Percentage
+		}
+	}
+
+	//
+	// Save the update.
+	//
+
 	if err := aStorer.Create(ctx, m); err != nil {
 		log.Panic(err)
 	}

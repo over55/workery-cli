@@ -248,7 +248,7 @@ func importOrder(
 		associateName = a.Name
 		associateLexicalName = a.LexicalName
 		associateGender = a.Gender
-		associateBirthdate = a.Birthdate
+		associateBirthdate = a.BirthDate
 	}
 
 	//
