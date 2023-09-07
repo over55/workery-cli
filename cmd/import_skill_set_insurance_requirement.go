@@ -125,7 +125,7 @@ func importSkillSetInsuranceRequirement(ctx context.Context, ssStorer ss_ds.Skil
 		SkillSetID:  ss.ID,
 		TenantID:    tenant.ID,
 		ID:          ir.ID,
-		Text:        ir.Text,
+		Name:        ir.Name,
 		Description: ir.Description,
 		Status:      1, // 1=Active
 		OldID:       ir.OldID,

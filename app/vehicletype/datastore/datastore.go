@@ -20,7 +20,7 @@ const (
 type VehicleType struct {
 	ID          primitive.ObjectID `bson:"_id" json:"id"`
 	TenantID    primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`
-	Text        string             `bson:"text" json:"text"`
+	Name        string             `bson:"name" json:"name"`
 	Description string             `bson:"description" json:"description"`
 	Status      int8               `bson:"status" json:"status"`
 	OldID       uint64             `bson:"old_id" json:"old_id"`
@@ -34,10 +34,9 @@ type VehicleTypeListFilter struct {
 	SortOrder int8 // 1=ascending | -1=descending
 
 	// Filter related.
-	TenantID        primitive.ObjectID
-	Status          int8
-	ExcludeArchived bool
-	SearchText      string
+	TenantID   primitive.ObjectID
+	Status     int8
+	SearchText string
 }
 
 type VehicleTypeListResult struct {
@@ -80,8 +79,7 @@ func NewDatastore(appCfg *c.Conf, loggerp *slog.Logger, client *mongo.Client) Ve
 	// colleciton.
 	indexModel := mongo.IndexModel{
 		Keys: bson.D{
-			{"tenant_name", "text"},
-			{"text", "text"},
+			{"name", "text"},
 			{"description", "text"},
 		},
 	}

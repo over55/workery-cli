@@ -20,7 +20,7 @@ const (
 type InsuranceRequirement struct {
 	ID          primitive.ObjectID `bson:"_id" json:"id"`
 	TenantID    primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`
-	Text        string             `bson:"text" json:"text"`
+	Name        string             `bson:"name" json:"name"`
 	Description string             `bson:"description" json:"description"`
 	Status      int8               `bson:"status" json:"status"`
 	OldID       uint64             `bson:"old_id" json:"old_id"`
@@ -80,7 +80,7 @@ func NewDatastore(appCfg *c.Conf, loggerp *slog.Logger, client *mongo.Client) In
 	// colleciton.
 	indexModel := mongo.IndexModel{
 		Keys: bson.D{
-			{"text", "text"},
+			{"name", "text"},
 			{"description", "text"},
 		},
 	}

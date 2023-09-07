@@ -26,9 +26,6 @@ func (impl VehicleTypeStorerImpl) ListByFilter(ctx context.Context, f *VehicleTy
 		filter["tenant_id"] = f.TenantID
 	}
 
-	if f.ExcludeArchived {
-		filter["status"] = bson.M{"$ne": VehicleTypeStatusArchived} // Do not list archived items! This code
-	}
 	if f.Status != 0 {
 		filter["status"] = f.Status
 	}
@@ -129,8 +126,8 @@ func (impl VehicleTypeStorerImpl) ListAsSelectOptionByFilter(ctx context.Context
 		query["_id"] = bson.M{"$gt": cursor.Lookup("_id").ObjectID()}
 	}
 
-	if f.ExcludeArchived {
-		query["status"] = bson.M{"$ne": VehicleTypeStatusArchived} // Do not list archived items! This code
+	if f.Status != 0 {
+		query["status"] = f.Status
 	}
 
 	// Full-text search

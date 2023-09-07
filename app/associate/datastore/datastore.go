@@ -167,7 +167,7 @@ type AssociateComment struct {
 type AssociateVehicleType struct {
 	ID          primitive.ObjectID `bson:"_id" json:"id"`
 	TenantID    primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`
-	Text        string             `bson:"text" json:"text"`
+	Name        string             `bson:"name" json:"name"`
 	Description string             `bson:"description" json:"description"`
 	Status      int8               `bson:"status" json:"status"`
 	OldID       uint64             `bson:"old_id" json:"old_id"`
@@ -186,7 +186,7 @@ type AssociateSkillSet struct {
 type AssociateInsuranceRequirement struct {
 	ID          primitive.ObjectID `bson:"_id" json:"id"`
 	TenantID    primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`
-	Text        string             `bson:"text" json:"text"`
+	Name        string             `bson:"name" json:"name"`
 	Description string             `bson:"description" json:"description"`
 	Status      int8               `bson:"status" json:"status"`
 	OldID       uint64             `bson:"old_id" json:"old_id"`

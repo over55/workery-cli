@@ -133,7 +133,7 @@ func importAssociateVehicleType(ctx context.Context, vtStorer vt_ds.VehicleTypeS
 	avt := &a_ds.AssociateVehicleType{
 		ID:          vt.ID,
 		TenantID:    vt.TenantID,
-		Text:        vt.Text,
+		Name:        vt.Name,
 		Description: vt.Description,
 		Status:      vt.Status,
 		OldID:       vt.OldID,

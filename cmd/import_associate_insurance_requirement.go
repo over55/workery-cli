@@ -134,7 +134,7 @@ func importAssociateInsuranceRequirement(ctx context.Context, ts tenant_ds.Tenan
 	air := &asso_ds.AssociateInsuranceRequirement{
 		ID:          ir.ID,
 		TenantID:    ir.TenantID,
-		Text:        ir.Text,
+		Name:        ir.Name,
 		Description: ir.Description,
 		Status:      ir.Status,
 		OldID:       ir.OldID,

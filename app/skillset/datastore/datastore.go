@@ -38,7 +38,7 @@ type SkillSetInsuranceRequirement struct {
 	TenantID    primitive.ObjectID `bson:"tenant_id" json:"tenant_id"`
 	ID          primitive.ObjectID `bson:"_id" json:"id"`
 	OldID       uint64             `bson:"old_id" json:"old_id"`
-	Text        string             `bson:"text" json:"text"`
+	Name        string             `bson:"name" json:"name"`
 	Description string             `bson:"description" json:"description"`
 	Status      int8               `bson:"status" json:"status"`
 }
