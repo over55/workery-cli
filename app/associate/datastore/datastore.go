@@ -131,7 +131,7 @@ type Associate struct {
 	DriversLicenseClass                  string                           `bson:"drivers_license_class" json:"drivers_license_class"`
 	Score                                float64                          `bson:"score" json:"score"`
 	ServiceFeeID                         primitive.ObjectID               `bson:"service_fee_id" json:"service_fee_id"`
-	ServiceFeeText                       string                           `bson:"service_fee_text" json:"service_fee_text"`
+	ServiceFeeName                       string                           `bson:"service_fee_name" json:"service_fee_name"`
 	ServiceFeePercentage                 float64                          `bson:"service_fee_percentage" json:"service_fee_percentage"`
 	BalanceOwingAmount                   float64                          `bson:"balance_owing_amount" json:"balance_owing_amount"`
 	EmergencyContactName                 string                           `bson:"emergency_contact_name" json:"emergency_contact_name"`

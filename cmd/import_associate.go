@@ -430,7 +430,7 @@ func importAssociate(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.
 		}
 		if sf != nil {
 			m.ServiceFeeID = sf.ID
-			m.ServiceFeeText = sf.Text
+			m.ServiceFeeName = sf.Name
 			m.ServiceFeePercentage = sf.Percentage
 		}
 	}

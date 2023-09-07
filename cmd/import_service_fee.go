@@ -127,7 +127,7 @@ func importServiceFee(ctx context.Context, irStorer sf_ds.ServiceFeeStorer, tena
 	m := &sf_ds.ServiceFee{
 		OldID:       t.ID,
 		ID:          primitive.NewObjectID(),
-		Text:        t.Title,
+		Name:        t.Title,
 		Percentage:  t.Percentage,
 		Description: t.Description,
 		Status:      state,

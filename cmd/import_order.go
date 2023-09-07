@@ -346,7 +346,7 @@ func importOrder(
 	}
 	if sf != nil {
 		invoiceServiceFeeID = sf.ID
-		invoiceServiceFeeName = sf.Text
+		invoiceServiceFeeName = sf.Name
 		invoiceServiceFeeDescription = sf.Description
 		invoiceServiceFeePercentage = sf.Percentage
 	}

@@ -20,7 +20,7 @@ const (
 type ServiceFee struct {
 	ID          primitive.ObjectID `bson:"_id" json:"id"`
 	TenantID    primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`
-	Text        string             `bson:"text" json:"text"`
+	Name        string             `bson:"name" json:"name"`
 	Description string             `bson:"description" json:"description"`
 	Percentage  float64            `bson:"percentage" json:"percentage"`
 	Status      int8               `bson:"status" json:"status"`
