@@ -115,7 +115,7 @@ func importOrderComment(ctx context.Context, ts tenant_ds.TenantStorer, us user_
 	// Lookup related.
 	//
 
-	order, err := oStorer.GetByOldID(ctx, ou.WorkOrderId)
+	order, err := oStorer.GetByWJID(ctx, ou.WorkOrderId)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -136,6 +136,9 @@ func importOrderComment(ctx context.Context, ts tenant_ds.TenantStorer, us user_
 
 	oc := &o_ds.OrderComment{
 		ID:                    comment.ID,
+		OrderID:               order.ID,
+		OrderWJID:             order.WJID,
+		OrderTenantIDWithWJID: fmt.Sprintf("%v_%v", order.TenantID.Hex(), order.WJID),
 		TenantID:              comment.TenantID,
 		CreatedAt:             comment.CreatedAt,
 		CreatedByUserID:       comment.CreatedByUserID,
@@ -163,6 +166,7 @@ func importOrderComment(ctx context.Context, ts tenant_ds.TenantStorer, us user_
 
 	comment.BelongsTo = comm_ds.BelongsToOrder
 	comment.OrderID = order.ID
+	comment.OrderWJID = order.WJID
 	if err := comStorer.UpdateByID(ctx, comment); err != nil {
 		log.Fatal(err)
 	}

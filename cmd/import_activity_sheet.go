@@ -185,7 +185,7 @@ func importActivitySheet(ctx context.Context, aStorer a_ds.AssociateStorer, asSt
 	}
 
 	var orderID primitive.ObjectID = primitive.NilObjectID
-	order, err := oStorer.GetByOldID(ctx, uint64(asi.JobID.ValueOrZero()))
+	order, err := oStorer.GetByWJID(ctx, uint64(asi.JobID.ValueOrZero()))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -195,7 +195,10 @@ func importActivitySheet(ctx context.Context, aStorer a_ds.AssociateStorer, asSt
 
 	m := &as_ds.ActivitySheet{
 		ID:                    primitive.NewObjectID(),
+		OrderID:               orderID,
+		OrderWJID:             uint64(asi.JobID.ValueOrZero()),
 		TenantID:              tenant.ID,
+		OrderTenantIDWithWJID: fmt.Sprintf("%v_%v", tenant.ID.Hex(), asi.JobID.ValueOrZero()),
 		Comment:               asi.Comment,
 		CreatedAt:             asi.CreatedAt,
 		CreatedByUserID:       createdByID,
@@ -208,7 +211,6 @@ func importActivitySheet(ctx context.Context, aStorer a_ds.AssociateStorer, asSt
 		AssociateID:           associate.ID,
 		AssociateName:         associate.Name,
 		AssociateLexicalName:  associate.LexicalName,
-		OrderID:               orderID,
 		Status:                state,
 		Type:                  associate.Type,
 		OldID:                 asi.ID,

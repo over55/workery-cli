@@ -180,7 +180,7 @@ func importTaskItem(
 	// Get our `OrderId` value.
 	//
 
-	order, err := oStorer.GetByOldID(ctx, ti.JobID)
+	order, err := oStorer.GetByWJID(ctx, ti.JobID)
 	if err != nil {
 		log.Fatal(err)
 	}

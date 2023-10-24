@@ -530,5 +530,5 @@ func importStaff(
 	if err := sStorer.Create(ctx, m); err != nil {
 		log.Panic(err)
 	}
-	fmt.Println("Imported user ID#", m.ID)
+	fmt.Println("Imported staff ID#", m.ID)
 }

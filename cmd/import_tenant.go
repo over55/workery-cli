@@ -113,6 +113,20 @@ type Tenant struct {
 	OldId                   uint64             `bson:"old_id" json:"old_id"`
 }
 
+func RunImportTenant(cfg *config.Conf, public *sql.DB, london *sql.DB, tenantStorer datastore.TenantStorer) {
+	log.Println("Beginning importing tenants")
+	tt, err := ListAllTenants(public)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, t := range tt {
+		importTenant(context.Background(), tenantStorer, t)
+		// runTenantInsert(v, r)
+	}
+	log.Println("Finished importing tenants")
+}
+
 // Function returns a paginated list of all type element items.
 func ListAllTenants(db *sql.DB) ([]*OldTenant, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -188,20 +202,6 @@ func ListAllTenants(db *sql.DB) ([]*OldTenant, error) {
 		panic(err)
 	}
 	return arr, err
-}
-
-func RunImportTenant(cfg *config.Conf, public *sql.DB, london *sql.DB, tenantStorer datastore.TenantStorer) {
-	fmt.Println("Beginning importing tenants")
-	tt, err := ListAllTenants(public)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, t := range tt {
-		importTenant(context.Background(), tenantStorer, t)
-		// runTenantInsert(v, r)
-	}
-	fmt.Println("Finished importing tenants")
 }
 
 func importTenant(ctx context.Context, tenantStorer datastore.TenantStorer, t *OldTenant) {

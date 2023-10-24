@@ -193,12 +193,14 @@ env/pip-selfcheck.json
 
 # Do not share production data used to populate the project's database.
 data
+./data
 
 # Do not share developer's private notebook
 private.txt
 private.md
 todo.txt
 private_docker.md
+private.db.md
 private.dev.md
 private.prod.md
 private_prod.md

@@ -45,7 +45,7 @@ func New() *Conf {
 	c.PostgresDB.DatabaseHost = getEnv("WORKERY_BACKEND_DB_HOST", true)
 	c.PostgresDB.DatabasePort = getEnv("WORKERY_BACKEND_DB_PORT", true)
 	c.PostgresDB.DatabaseUser = getEnv("WORKERY_BACKEND_DB_USER", true)
-	c.PostgresDB.DatabasePassword = getEnv("WORKERY_BACKEND_DB_PASSWORD", true)
+	c.PostgresDB.DatabasePassword = getEnv("WORKERY_BACKEND_DB_PASSWORD", false)
 	c.PostgresDB.DatabaseName = getEnv("WORKERY_BACKEND_DB_NAME", true)
 	c.PostgresDB.DatabasePublicSchemaName = getEnv("WORKERY_BACKEND_PUBLIC_SCHEMA_NAME", true)
 	c.PostgresDB.DatabaseLondonSchemaName = getEnv("WORKERY_BACKEND_LONDON_SCHEMA_NAME", true)

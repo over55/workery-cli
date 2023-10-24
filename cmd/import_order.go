@@ -356,7 +356,7 @@ func importOrder(
 	//
 
 	var clonedFromOrderID primitive.ObjectID = primitive.NilObjectID
-	clonedOrder, err := oStorer.GetByOldID(ctx, uint64(wo.ClonedFromID.ValueOrZero()))
+	clonedOrder, err := oStorer.GetByWJID(ctx, uint64(wo.ClonedFromID.ValueOrZero()))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -381,8 +381,9 @@ func importOrder(
 	//
 
 	m := &o_ds.Order{
-		OldID:                             wo.ID,
+		WJID:                              wo.ID,
 		TenantID:                          tenant.ID,
+		TenantIDWithWJID:                  fmt.Sprintf("%v_%v", tenant.ID.Hex(), wo.ID),
 		ID:                                primitive.NewObjectID(),
 		CustomerID:                        customerID,
 		CustomerName:                      customerName,

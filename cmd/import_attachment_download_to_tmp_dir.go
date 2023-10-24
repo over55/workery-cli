@@ -327,7 +327,7 @@ func importAttachment(
 
 	var orderID primitive.ObjectID = primitive.NilObjectID
 	if !oldDatum.WorkOrderID.IsZero() {
-		order, err := oStorer.GetByOldID(ctx, uint64(oldDatum.WorkOrderID.ValueOrZero()))
+		order, err := oStorer.GetByWJID(ctx, uint64(oldDatum.WorkOrderID.ValueOrZero()))
 		if err != nil {
 			log.Fatal(err)
 		}

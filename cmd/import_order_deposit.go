@@ -179,7 +179,7 @@ func importOrderDeposit(
 	// Get our `OrderId` value.
 	//
 
-	order, err := oStorer.GetByOldID(ctx, od.OrderID)
+	order, err := oStorer.GetByWJID(ctx, od.OrderID)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -217,6 +217,8 @@ func importOrderDeposit(
 
 	deposit := &order_ds.OrderDeposit{
 		OldID:                 od.ID,
+		OrderWJID:             order.WJID,
+		OrderID:               order.ID,
 		ID:                    primitive.NewObjectID(),
 		TenantID:              tenant.ID,
 		PaidAt:                od.PaidAt.ValueOrZero(),
@@ -231,7 +233,6 @@ func importOrderDeposit(
 		ModifiedByUserID:      modifiedByUserID,
 		ModifiedByUserName:    modifiedByUserName,
 		ModifiedAt:            od.LastModifiedAt,
-		OrderID:               order.ID,
 		CreatedFromIPAddress:  od.CreatedFrom.ValueOrZero(),
 		ModifiedFromIPAddress: od.LastModifiedFrom.ValueOrZero(),
 		Status:                state,

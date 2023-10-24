@@ -26,7 +26,11 @@ const (
 
 type ActivitySheet struct {
 	ID                    primitive.ObjectID `bson:"_id" json:"id"`
-	TenantID              primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`
+	OrderID               primitive.ObjectID `bson:"order_id" json:"order_id"`
+	OrderWJID             uint64             `bson:"order_wjid" json:"order_wjid"` // A.K.A. `Workery Job ID`
+	AssociateID           primitive.ObjectID `bson:"associate_id" json:"associate_id"`
+	AssociateName         string             `bson:"associate_name" json:"associate_name"`
+	AssociateLexicalName  string             `bson:"associate_lexical_name" json:"associate_lexical_name"`
 	Comment               string             `bson:"comment" json:"comment"`
 	CreatedAt             time.Time          `bson:"created_at" json:"created_at"`
 	CreatedByUserID       primitive.ObjectID `bson:"created_by_user_id" json:"created_by_user_id,omitempty"`
@@ -36,12 +40,10 @@ type ActivitySheet struct {
 	ModifiedByUserID      primitive.ObjectID `bson:"modified_by_user_id" json:"modified_by_user_id,omitempty"`
 	ModifiedByUserName    string             `bson:"modified_by_user_name" json:"modified_by_user_name"`
 	ModifiedFromIPAddress string             `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
-	AssociateID           primitive.ObjectID `bson:"associate_id" json:"associate_id"`
-	AssociateName         string             `bson:"associate_name" json:"associate_name"`
-	AssociateLexicalName  string             `bson:"associate_lexical_name" json:"associate_lexical_name"`
-	OrderID               primitive.ObjectID `bson:"order_id" json:"order_id"`
 	Status                int8               `bson:"status" json:"status"`
 	Type                  int8               `bson:"type_of" json:"type_of"`
+	TenantID              primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`
+	OrderTenantIDWithWJID string             `bson:"order_tenant_id_with_wjid" json:"order_tenant_id_with_wjid"` // OrderTenantIDWithWJID is a combination of `tenancy_id` and `wjid` values written in the following structure `%v_%v`.
 	OldID                 uint64             `bson:"old_id" json:"old_id"`
 	// OngoingOrderID        primitive.ObjectID `bson:"ongoing_order_id" json:"ongoing_order_id"`
 }

@@ -11,75 +11,9 @@ import (
 	c "github.com/over55/workery-cli/config"
 )
 
-const (
-	OrderStatusActive   = 1
-	OrderStatusArchived = 2
-)
-
-const (
-	OrderArchivedState             = 0
-	OrderNewState                  = 1
-	OrderDeclinedState             = 2
-	OrderPendingState              = 3
-	OrderCancelledState            = 4
-	OrderOngoingState              = 5
-	OrderInProgressState           = 6
-	OrderCompletedButUnpaidState   = 7
-	OrderCompletedAndPaidState     = 8
-	OrderAnotherUnassignedType     = 0
-	OrderResidentialType           = 1
-	OrderCommercialType            = 2
-	OrderUnassignedType            = 3
-	OrderAssociateInvoicePaidTo    = 1
-	OrderOrganizationInvoicePaidTo = 2
-)
-
-var OrderOrganizationInvoicePaidToLabels = map[int8]string{
-	OrderAssociateInvoicePaidTo:    "Associate",
-	OrderOrganizationInvoicePaidTo: "Organization",
-}
-
-var OrderTypeLabels = map[int8]string{
-	OrderResidentialType:       "Residential",
-	OrderCommercialType:        "Commercial",
-	OrderUnassignedType:        "Unassigned",
-	OrderAnotherUnassignedType: "-",
-}
-
-var OrderStateLabels = map[int8]string{
-	OrderArchivedState:           "Archived",
-	OrderNewState:                "New",
-	OrderDeclinedState:           "Declined",
-	OrderPendingState:            "Pending",
-	OrderCancelledState:          "Cancelled",
-	OrderOngoingState:            "Ongoing",
-	OrderInProgressState:         "In Progress",
-	OrderCompletedButUnpaidState: "Completed but Unpaid",
-	OrderCompletedAndPaidState:   "Completed and Paid",
-}
-
-var OrderClosingReasonLabels = map[int8]string{
-	1:  "Other",
-	2:  "Quote was too high",
-	3:  "Job completed by someone else",
-	4:  "Unspecified",
-	5:  "Work no longer needed",
-	6:  "Client not satisfied with Associate",
-	7:  "Client did work themselves",
-	8:  "No Associate available",
-	9:  "Work environment unsuitable",
-	10: "Client did not return call",
-	11: "Associate did not have necessary equipment",
-	12: "Repair not possible",
-	13: "Could not meet deadline",
-	14: "Associate did not call client",
-	15: "Member issue",
-	16: "Client billing issue",
-}
-
 type Order struct {
 	ID                                primitive.ObjectID `bson:"_id" json:"id"`
-	TenantID                          primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`
+	WJID                              uint64             `bson:"wjid" json:"wjid"` // A.K.A. `Workery Job ID`
 	CustomerID                        primitive.ObjectID `bson:"customer_id" json:"customer_id"`
 	CustomerName                      string             `bson:"customer_name" json:"customer_name,omitempty"`
 	CustomerLexicalName               string             `bson:"customer_lexical_name" json:"customer_lexical_name,omitempty"`
@@ -90,6 +24,8 @@ type Order struct {
 	AssociateLexicalName              string             `bson:"associate_lexical_name" json:"associate_lexical_name,omitempty"`
 	AssociateGender                   string             `bson:"associate_gender" json:"associate_gender"`
 	AssociateBirthdate                time.Time          `bson:"associate_birthdate" json:"associate_birthdate"`
+	TenantID                          primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`
+	TenantIDWithWJID                  string             `bson:"tenant_id_with_wjid" json:"-"` // TenantIDWithWJID is a combination of `tenancy_id` and `wjid` values written in the following structure `%v_%v`.
 	Description                       string             `bson:"description" json:"description"`
 	AssignmentDate                    time.Time          `bson:"assignment_date" json:"assignment_date"`
 	IsOngoing                         bool               `bson:"is_ongoing" json:"is_ongoing"`
@@ -125,7 +61,6 @@ type Order struct {
 	ModifiedByUserID                  primitive.ObjectID `bson:"modified_by_user_id" json:"modified_by_user_id,omitempty"`
 	ModifiedByUserName                string             `bson:"modified_by_user_name" json:"modified_by_user_name"`
 	ModifiedFromIPAddress             string             `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
-	OldID                             uint64             `bson:"old_id" json:"old_id"`
 	InvoiceServiceFeeID               primitive.ObjectID `bson:"invoice_service_fee_id" json:"invoice_service_fee_id"`
 	InvoiceServiceFeeName             string             `bson:"invoice_service_fee_name" json:"invoice_service_fee_name"`
 	InvoiceServiceFeeDescription      string             `bson:"invoice_service_fee_description" json:"invoice_service_fee_description"`
@@ -159,26 +94,33 @@ type Order struct {
 }
 
 type OrderTag struct {
-	OrderID     primitive.ObjectID `bson:"order_id" json:"order_id"`
-	ID          primitive.ObjectID `bson:"id" json:"id"` // A.k.a. "tag_id".
-	TenantID    primitive.ObjectID `bson:"tenant_id" json:"tenant_id"`
-	Text        string             `bson:"text" json:"text,omitempty"`               // Referenced value from 'tags'.
-	Description string             `bson:"description" json:"description,omitempty"` // Referenced value from 'tags'.
-	OldID       uint64             `bson:"old_id" json:"old_id,omitempty"`
+	ID                    primitive.ObjectID `bson:"id" json:"id"` // A.k.a. "tag_id".
+	OrderID               primitive.ObjectID `bson:"order_id" json:"order_id"`
+	OrderWJID             uint64             `bson:"order_wjid" json:"order_wjid"`                               // Workery Job ID
+	OrderTenantIDWithWJID string             `bson:"order_tenant_id_with_wjid" json:"order_tenant_id_with_wjid"` // OrderTenantIDWithWJID is a combination of `tenancy_id` and `wjid` values written in the following structure `%v_%v`.
+	TenantID              primitive.ObjectID `bson:"tenant_id" json:"tenant_id"`
+	Text                  string             `bson:"text" json:"text,omitempty"`               // Referenced value from 'tags'.
+	Description           string             `bson:"description" json:"description,omitempty"` // Referenced value from 'tags'.
+	OldID                 uint64             `bson:"old_id" json:"old_id"`
 }
 
 type OrderSkillSet struct {
-	ID          primitive.ObjectID `bson:"id" json:"id"`
-	TenantID    primitive.ObjectID `bson:"tenant_id" json:"tenant_id"`
-	OrderID     primitive.ObjectID `bson:"order_id" json:"order_id"`
-	Category    string             `bson:"category" json:"category,omitempty"`         // Referenced value from 'tags'.
-	SubCategory string             `bson:"sub_category" json:"sub_category,omitempty"` // Referenced value from 'tags'.
-	Description string             `bson:"description" json:"description,omitempty"`   // Referenced value from 'tags'.
-	OldID       uint64             `bson:"old_id" json:"old_id,omitempty"`
+	ID                    primitive.ObjectID `bson:"id" json:"id"`
+	OrderWJID             uint64             `bson:"order_wjid" json:"order_wjid"` // Workery Job ID
+	OrderID               primitive.ObjectID `bson:"order_id" json:"order_id"`
+	OrderTenantIDWithWJID string             `bson:"order_tenant_id_with_wjid" json:"order_tenant_id_with_wjid"` // OrderTenantIDWithWJID is a combination of `tenancy_id` and `wjid` values written in the following structure `%v_%v`.
+	TenantID              primitive.ObjectID `bson:"tenant_id" json:"tenant_id"`
+	Category              string             `bson:"category" json:"category,omitempty"`         // Referenced value from 'tags'.
+	SubCategory           string             `bson:"sub_category" json:"sub_category,omitempty"` // Referenced value from 'tags'.
+	Description           string             `bson:"description" json:"description,omitempty"`   // Referenced value from 'tags'.
+	OldID                 uint64             `bson:"old_id" json:"old_id"`
 }
 
 type OrderComment struct {
 	ID                    primitive.ObjectID `bson:"_id" json:"id"`
+	OrderID               primitive.ObjectID `bson:"order_id" json:"order_id"`
+	OrderWJID             uint64             `bson:"order_wjid" json:"order_wjid"`                               // Workery Job ID
+	OrderTenantIDWithWJID string             `bson:"order_tenant_id_with_wjid" json:"order_tenant_id_with_wjid"` // OrderTenantIDWithWJID is a combination of `tenancy_id` and `wjid` values written in the following structure `%v_%v`.
 	TenantID              primitive.ObjectID `bson:"tenant_id" json:"tenant_id"`
 	CreatedAt             time.Time          `bson:"created_at,omitempty" json:"created_at,omitempty"`
 	CreatedByUserID       primitive.ObjectID `bson:"created_by_user_id" json:"created_by_user_id"`
@@ -190,11 +132,14 @@ type OrderComment struct {
 	ModifiedFromIPAddress string             `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
 	Content               string             `bson:"content" json:"content"`
 	Status                int8               `bson:"status" json:"status"`
-	OldID                 uint64             `bson:"old_id" json:"old_id"`
+	OldID                 uint64             `bson:"old_id" json:"old_id"` // Workery Job ID
 }
 
 type OrderInvoice struct {
 	ID                       primitive.ObjectID `bson:"_id" json:"id"`
+	OrderID                  primitive.ObjectID `bson:"order_id" json:"order_id"`
+	OrderWJID                uint64             `bson:"order_wjid" json:"order_wjid"`                               // Workery Job ID
+	OrderTenantIDWithWJID    string             `bson:"order_tenant_id_with_wjid" json:"order_tenant_id_with_wjid"` // OrderTenantIDWithWJID is a combination of `tenancy_id` and `wjid` values written in the following structure `%v_%v`.
 	TenantID                 primitive.ObjectID `bson:"tenant_id" json:"tenant_id"`
 	CreatedAt                time.Time          `bson:"created_at,omitempty" json:"created_at,omitempty"`
 	CreatedByUserID          primitive.ObjectID `bson:"created_by_user_id" json:"created_by_user_id"`
@@ -204,7 +149,6 @@ type OrderInvoice struct {
 	ModifiedByUserID         primitive.ObjectID `bson:"modified_by_user_id" json:"modified_by_user_id"`
 	ModifiedByUserName       string             `bson:"modified_by_user_name" json:"modified_by_user_name"`
 	ModifiedFromIPAddress    string             `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
-	OrderID                  primitive.ObjectID `bson:"order_id" json:"order_id"`
 	InvoiceID                string             `bson:"invoice_id" json:"invoice_id"`
 	InvoiceDate              time.Time          `bson:"invoice_date" json:"invoice_date"`
 	AssociateName            string             `bson:"associate_name" json:"associate_name"`
@@ -308,11 +252,13 @@ type OrderInvoice struct {
 
 type OrderDeposit struct {
 	ID                    primitive.ObjectID `bson:"_id" json:"id"`
-	TenantID              primitive.ObjectID `bson:"tenant_id" json:"tenant_id"`
 	OrderID               primitive.ObjectID `bson:"order_id" json:"order_id"`
-	PaidAt                time.Time          `jbson:"paid_at" son:"paid_at"`
+	OrderWJID             uint64             `bson:"order_wjid" json:"order_wjid"`                               // Workery Job ID
+	OrderTenantIDWithWJID string             `bson:"order_tenant_id_with_wjid" json:"order_tenant_id_with_wjid"` // OrderTenantIDWithWJID is a combination of `tenancy_id` and `wjid` values written in the following structure `%v_%v`.
+	TenantID              primitive.ObjectID `bson:"tenant_id" json:"tenant_id"`
+	PaidAt                time.Time          `bson:"paid_at,omitempty" json:"paid_at"`
 	DepositMethod         int8               `bson:"deposit_method" json:"deposit_method"`
-	PaidTo                int8               `bson:"paid_to" json:"paid_to"`
+	PaidTo                int8               `bson:"paid_to,omitempty" json:"paid_to"`
 	Currency              string             `bson:"currency" json:"currency"`
 	Amount                float64            `bson:"amount" json:"amount"`
 	PaidFor               int8               `bson:"paid_for" json:"paid_for"`
@@ -337,6 +283,7 @@ type OrderListFilter struct {
 
 	// Filter related.
 	TenantID        primitive.ObjectID
+	CustomerID      primitive.ObjectID
 	Status          int8
 	ExcludeArchived bool
 	SearchText      string
@@ -357,7 +304,7 @@ type OrderAsSelectOption struct {
 type OrderStorer interface {
 	Create(ctx context.Context, m *Order) error
 	GetByID(ctx context.Context, id primitive.ObjectID) (*Order, error)
-	GetByOldID(ctx context.Context, oldID uint64) (*Order, error)
+	GetByWJID(ctx context.Context, wjID uint64) (*Order, error)
 	GetByEmail(ctx context.Context, email string) (*Order, error)
 	GetByVerificationCode(ctx context.Context, verificationCode string) (*Order, error)
 	CheckIfExistsByEmail(ctx context.Context, email string) (bool, error)

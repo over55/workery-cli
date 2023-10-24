@@ -24,6 +24,16 @@ const (
 
 type Comment struct {
 	ID                    primitive.ObjectID `bson:"_id" json:"id"`
+	BelongsTo             int8               `bson:"belongs_to" json:"belongs_to"`
+	CustomerID            primitive.ObjectID `bson:"customer_id" json:"customer_id,omitempty"`
+	CustomerName          string             `bson:"customer_name" json:"customer_name"`
+	AssociateID           primitive.ObjectID `bson:"associate_id" json:"associate_id,omitempty"`
+	AssociateName         string             `bson:"associate_name" json:"associate_name"`
+	OrderID               primitive.ObjectID `bson:"order_id" json:"order_id,omitempty"`
+	OrderWJID             uint64             `bson:"order_wjid" json:"order_wjid"`
+	OrderTenantIDWithWJID string             `bson:"order_tenant_id_with_wjid" json:"order_tenant_id_with_wjid"` // OrderTenantIDWithWJID is a combination of `tenancy_id` and `wjid` values written in the following structure `%v_%v`.
+	StaffID               primitive.ObjectID `bson:"staff_id" json:"staff_id,omitempty"`
+	StaffName             string             `bson:"staff_name" json:"staff_name"`
 	TenantID              primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`
 	CreatedAt             time.Time          `bson:"created_at" json:"created_at"`
 	CreatedByUserID       primitive.ObjectID `bson:"created_by_user_id" json:"created_by_user_id,omitempty"`
@@ -36,14 +46,6 @@ type Comment struct {
 	Content               string             `bson:"content" json:"content"`
 	Status                int8               `bson:"status" json:"status"`
 	OldID                 uint64             `bson:"old_id" json:"old_id"`
-	BelongsTo             int8               `bson:"belongs_to" json:"belongs_to"`
-	CustomerID            primitive.ObjectID `bson:"customer_id" json:"customer_id,omitempty"`
-	CustomerName          string             `bson:"customer_name" json:"customer_name"`
-	AssociateID           primitive.ObjectID `bson:"associate_id" json:"associate_id,omitempty"`
-	AssociateName         string             `bson:"associate_name" json:"associate_name"`
-	OrderID               primitive.ObjectID `bson:"order_id" json:"order_id,omitempty"`
-	StaffID               primitive.ObjectID `bson:"staff_id" json:"staff_id,omitempty"`
-	StaffName             string             `bson:"staff_name" json:"staff_name"`
 }
 
 type CommentListFilter struct {

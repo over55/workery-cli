@@ -109,5 +109,5 @@ func importUserRole(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.U
 	if err := us.UpdateByID(ctx, user); err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Imported user ID#", user.ID, "role", user.Role)
+	fmt.Println("Imported user role ID#", user.ID, "role", user.Role)
 }

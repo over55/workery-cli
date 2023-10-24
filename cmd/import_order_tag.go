@@ -114,7 +114,7 @@ func importOrderTag(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.U
 	// Lookup related.
 	//
 
-	order, err := oStorer.GetByOldID(ctx, ou.WorkOrderId)
+	order, err := oStorer.GetByWJID(ctx, ou.WorkOrderId)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -134,8 +134,9 @@ func importOrderTag(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.U
 	//
 
 	oc := &o_ds.OrderTag{
-		OrderID:     order.ID,
 		ID:          tag.ID,
+		OrderID:     order.ID,
+		OrderWJID:   order.WJID,
 		TenantID:    tag.TenantID,
 		Text:        tag.Text,
 		Description: tag.Description,

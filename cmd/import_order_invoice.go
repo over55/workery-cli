@@ -303,7 +303,7 @@ func importOrderInvoice(
 	// Lookup related.
 	//
 
-	order, err := oStorer.GetByOldID(ctx, oi.WorkOrderID)
+	order, err := oStorer.GetByWJID(ctx, oi.WorkOrderID)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -346,9 +346,10 @@ func importOrderInvoice(
 	//
 
 	oc := &o_ds.OrderInvoice{
-		ID:       primitive.NewObjectID(), // 1
-		TenantID: tenant.ID,               // 2
-		OldID:    oi.OrderID,              // 3
+		OrderWJID: order.WJID,
+		ID:        primitive.NewObjectID(), // 1
+		TenantID:  tenant.ID,               // 2
+		OldID:     oi.OrderID,              // 3
 		// InvoiceID: order.InvoiceID,         // 4
 		OrderID:                  order.ID,                             // 5
 		InvoiceDate:              oi.InvoiceDate,                       // 6

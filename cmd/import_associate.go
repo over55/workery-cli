@@ -442,5 +442,5 @@ func importAssociate(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.
 	if err := aStorer.Create(ctx, m); err != nil {
 		log.Panic(err)
 	}
-	fmt.Println("Imported user ID#", m.ID)
+	fmt.Println("Imported associate ID#", m.ID)
 }

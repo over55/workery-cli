@@ -25,8 +25,8 @@ func (impl OrderStorerImpl) GetByID(ctx context.Context, id primitive.ObjectID) 
 	return &result, nil
 }
 
-func (impl OrderStorerImpl) GetByOldID(ctx context.Context, oldID uint64) (*Order, error) {
-	filter := bson.D{{"old_id", oldID}}
+func (impl OrderStorerImpl) GetByWJID(ctx context.Context, wjID uint64) (*Order, error) {
+	filter := bson.D{{"wjid", wjID}}
 
 	var result Order
 	err := impl.Collection.FindOne(ctx, filter).Decode(&result)
@@ -35,7 +35,7 @@ func (impl OrderStorerImpl) GetByOldID(ctx context.Context, oldID uint64) (*Orde
 			// This error means your query did not match any documents.
 			return nil, nil
 		}
-		impl.Logger.Error("database get by user id error", slog.Any("error", err))
+		impl.Logger.Error("database get by wjid error", slog.Any("error", err))
 		return nil, err
 	}
 	return &result, nil

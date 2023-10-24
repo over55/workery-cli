@@ -22,6 +22,8 @@ func NewStorage(appCfg *c.Conf, schemaName string) *sql.DB {
 		schemaName,
 	)
 
+	log.Println("storage postgres config:", psqlInfo)
+
 	dbInstance, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		log.Fatal(err)

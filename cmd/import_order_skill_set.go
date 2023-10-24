@@ -111,7 +111,7 @@ func importOrderSkillSet(ctx context.Context, ssStorer ss_ds.SkillSetStorer, oSt
 	// Lookup related.
 	//
 
-	o, err := oStorer.GetByOldID(ctx, oa.OrderID)
+	o, err := oStorer.GetByWJID(ctx, oa.OrderID)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -132,8 +132,9 @@ func importOrderSkillSet(ctx context.Context, ssStorer ss_ds.SkillSetStorer, oSt
 
 	avt := &a_ds.OrderSkillSet{
 		ID:          ss.ID,
-		TenantID:    ss.TenantID,
 		OrderID:     o.ID,
+		OrderWJID:   o.WJID,
+		TenantID:    ss.TenantID,
 		Category:    ss.Category,
 		SubCategory: ss.SubCategory,
 		Description: ss.Description,
