@@ -115,7 +115,7 @@ type Associate struct {
 	Latitude                             float64                          `bson:"latitude" json:"latitude"`
 	Longitude                            float64                          `bson:"longitude" json:"longitude"`
 	AreaServed                           string                           `bson:"area_served" json:"area_served"`
-	AvailableLanguage                    string                           `bson:"available_language" json:"available_language"`
+	PreferredLanguage                    string                           `bson:"preferred_language" json:"preferred_language"`
 	ContactType                          string                           `bson:"contact_type" json:"contact_type"`
 	OrganizationName                     string                           `bson:"organization_name" json:"organization_name"`
 	OrganizationType                     int8                             `bson:"organization_type" json:"organization_type"`

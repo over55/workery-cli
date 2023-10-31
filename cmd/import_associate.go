@@ -392,7 +392,7 @@ func importAssociate(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.
 		Latitude:                      ou.Elevation.ValueOrZero(),
 		Longitude:                     ou.Longitude.ValueOrZero(),
 		AreaServed:                    ou.AreaServed.ValueOrZero(),
-		AvailableLanguage:             ou.AvailableLanguage.ValueOrZero(),
+		PreferredLanguage:             ou.AvailableLanguage.ValueOrZero(),
 		ContactType:                   ou.ContactType.ValueOrZero(),
 		OrganizationName:              ou.OrganizationName.ValueOrZero(),
 		OrganizationType:              ou.OrganizationTypeOf,
