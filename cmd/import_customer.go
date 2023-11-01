@@ -15,6 +15,7 @@ import (
 
 	"github.com/over55/workery-cli/adapter/storage/mongodb"
 	"github.com/over55/workery-cli/adapter/storage/postgres"
+	a_ds "github.com/over55/workery-cli/app/associate/datastore"
 	c_ds "github.com/over55/workery-cli/app/customer/datastore"
 	hh_ds "github.com/over55/workery-cli/app/howhear/datastore"
 	tenant_ds "github.com/over55/workery-cli/app/tenant/datastore"
@@ -294,6 +295,19 @@ func importCustomer(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.U
 	}
 
 	//
+	// Gender
+	//
+
+	var gender int8
+	if ou.Gender.ValueOrZero() == "male" {
+		gender = a_ds.AssociateGenderMan
+	} else if ou.Gender.ValueOrZero() == "female" {
+		gender = a_ds.AssociateGenderWoman
+	} else if ou.Gender.ValueOrZero() == "prefer not to say" {
+		gender = a_ds.AssociateGenderPreferNotToSay
+	}
+
+	//
 	// Empty arrays
 	//
 
@@ -364,7 +378,7 @@ func importCustomer(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.U
 		BirthDate:         ou.Birthdate.ValueOrZero(),
 		JoinDate:          ou.JoinDate.ValueOrZero(),
 		Nationality:       ou.Nationality.ValueOrZero(),
-		Gender:            ou.Gender.ValueOrZero(),
+		Gender:            gender,
 		TaxId:             ou.TaxId.ValueOrZero(),
 		Elevation:         ou.Elevation.ValueOrZero(),
 		Latitude:          ou.Elevation.ValueOrZero(),

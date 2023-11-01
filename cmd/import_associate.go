@@ -325,6 +325,19 @@ func importAssociate(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.
 	at := make([]*a_ds.AssociateTag, 0)
 
 	//
+	// Gender
+	//
+
+	var gender int8
+	if ou.Gender.ValueOrZero() == "male" {
+		gender = a_ds.AssociateGenderMan
+	} else if ou.Gender.ValueOrZero() == "female" {
+		gender = a_ds.AssociateGenderWoman
+	} else if ou.Gender.ValueOrZero() == "prefer not to say" {
+		gender = a_ds.AssociateGenderPreferNotToSay
+	}
+
+	//
 	// Insert our `Associate` data.
 	//
 
@@ -386,7 +399,7 @@ func importAssociate(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.
 		BirthDate:                     ou.Birthdate.ValueOrZero(),
 		JoinDate:                      ou.JoinDate.ValueOrZero(),
 		Nationality:                   ou.Nationality.ValueOrZero(),
-		Gender:                        ou.Gender.ValueOrZero(),
+		Gender:                        gender,
 		TaxID:                         ou.TaxID.ValueOrZero(),
 		Elevation:                     ou.Elevation.ValueOrZero(),
 		Latitude:                      ou.Elevation.ValueOrZero(),

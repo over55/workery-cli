@@ -237,7 +237,8 @@ func importOrder(
 	var associateID primitive.ObjectID = primitive.NilObjectID
 	var associateName string
 	var associateLexicalName string
-	var associateGender string
+	var associateGender int8
+	var associateGenderOther string
 	var associateBirthdate time.Time
 	a, err := aStorer.GetByOldID(ctx, uint64(wo.AssociateID.ValueOrZero()))
 	if err != nil {
@@ -248,6 +249,7 @@ func importOrder(
 		associateName = a.Name
 		associateLexicalName = a.LexicalName
 		associateGender = a.Gender
+		associateGenderOther = a.GenderOther
 		associateBirthdate = a.BirthDate
 	}
 
@@ -258,7 +260,8 @@ func importOrder(
 	var customerID primitive.ObjectID = primitive.NilObjectID
 	var customerName string
 	var customerLexicalName string
-	var customerGender string
+	var customerGender int8
+	var customerGenderOther string
 	var customerDOB time.Time
 	c, err := cStorer.GetByOldID(ctx, wo.CustomerID)
 	if err != nil {
@@ -269,6 +272,7 @@ func importOrder(
 		customerName = c.Name
 		customerLexicalName = c.LexicalName
 		customerGender = c.Gender
+		customerGenderOther = c.GenderOther
 		customerDOB = c.BirthDate
 	}
 
@@ -389,11 +393,13 @@ func importOrder(
 		CustomerName:                      customerName,
 		CustomerLexicalName:               customerLexicalName,
 		CustomerGender:                    customerGender,
+		CustomerGenderOther:               customerGenderOther,
 		CustomerBirthdate:                 customerDOB,
 		AssociateID:                       associateID,
 		AssociateName:                     associateName,
 		AssociateLexicalName:              associateLexicalName,
 		AssociateGender:                   associateGender,
+		AssociateGenderOther:              associateGenderOther,
 		AssociateBirthdate:                associateBirthdate,
 		Description:                       wo.Description,
 		AssignmentDate:                    wo.AssignmentDate.ValueOrZero(),

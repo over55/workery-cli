@@ -31,6 +31,15 @@ const (
 	CustomerPhoneTypeLandline = 1
 	CustomerPhoneTypeMobile   = 2
 	CustomerPhoneTypeWork     = 3
+
+	CustomerGenderOther          = 1
+	CustomerGenderMan            = 2
+	CustomerGenderWoman          = 3
+	CustomerGenderTransgender    = 4
+	CustomerGenderNonBinary      = 5
+	CustomerGenderTwoSpirit      = 6
+	CustomerGenderPreferNotToSay = 7
+	CustomerGenderDoNotKnow      = 8
 )
 
 type Customer struct {
@@ -107,7 +116,8 @@ type Customer struct {
 	BirthDate                            time.Time          `bson:"birth_date" json:"birth_date"`
 	JoinDate                             time.Time          `bson:"join_date" json:"join_date"`
 	Nationality                          string             `bson:"nationality" json:"nationality"`
-	Gender                               string             `bson:"gender" json:"gender"`
+	Gender                               int8               `bson:"gender" json:"gender"`
+	GenderOther                          string             `bson:"gender_other" json:"gender_other"`
 	TaxId                                string             `bson:"tax_id" json:"tax_id"`
 	Elevation                            float64            `bson:"elevation" json:"elevation"`
 	Latitude                             float64            `bson:"latitude" json:"latitude"`

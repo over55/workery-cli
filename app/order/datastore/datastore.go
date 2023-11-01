@@ -11,18 +11,31 @@ import (
 	c "github.com/over55/workery-cli/config"
 )
 
+const (
+	OrderGenderOther          = 1
+	OrderGenderMan            = 2
+	OrderGenderWoman          = 3
+	OrderGenderTransgender    = 4
+	OrderGenderNonBinary      = 5
+	OrderGenderTwoSpirit      = 6
+	OrderGenderPreferNotToSay = 7
+	OrderGenderDoNotKnow      = 8
+)
+
 type Order struct {
 	ID                                primitive.ObjectID `bson:"_id" json:"id"`
 	WJID                              uint64             `bson:"wjid" json:"wjid"` // A.K.A. `Workery Job ID`
 	CustomerID                        primitive.ObjectID `bson:"customer_id" json:"customer_id"`
 	CustomerName                      string             `bson:"customer_name" json:"customer_name,omitempty"`
 	CustomerLexicalName               string             `bson:"customer_lexical_name" json:"customer_lexical_name,omitempty"`
-	CustomerGender                    string             `bson:"customer_gender" json:"customer_gender"`
+	CustomerGender                    int8               `bson:"customer_gender" json:"customer_gender"`
+	CustomerGenderOther               string             `bson:"customer_gender_other" json:"customer_gender_other"`
 	CustomerBirthdate                 time.Time          `bson:"customer_birthdate" json:"customer_birthdate"`
 	AssociateID                       primitive.ObjectID `bson:"associate_id" json:"associate_id"`
 	AssociateName                     string             `bson:"associate_name" json:"associate_name,omitempty"`
 	AssociateLexicalName              string             `bson:"associate_lexical_name" json:"associate_lexical_name,omitempty"`
-	AssociateGender                   string             `bson:"associate_gender" json:"associate_gender"`
+	AssociateGender                   int8               `bson:"associate_gender" json:"associate_gender"`
+	AssociateGenderOther              string             `bson:"associate_gender_other" json:"associate_gender_other"`
 	AssociateBirthdate                time.Time          `bson:"associate_birthdate" json:"associate_birthdate"`
 	TenantID                          primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`
 	TenantIDWithWJID                  string             `bson:"tenant_id_with_wjid" json:"-"` // TenantIDWithWJID is a combination of `tenancy_id` and `wjid` values written in the following structure `%v_%v`.

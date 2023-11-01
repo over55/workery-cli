@@ -31,6 +31,15 @@ const (
 	AssociatePhoneTypeLandline = 1
 	AssociatePhoneTypeMobile   = 2
 	AssociatePhoneTypeWork     = 3
+
+	AssociateGenderOther          = 1
+	AssociateGenderMan            = 2
+	AssociateGenderWoman          = 3
+	AssociateGenderTransgender    = 4
+	AssociateGenderNonBinary      = 5
+	AssociateGenderTwoSpirit      = 6
+	AssociateGenderPreferNotToSay = 7
+	AssociateGenderDoNotKnow      = 8
 )
 
 type Associate struct {
@@ -109,7 +118,8 @@ type Associate struct {
 	BirthDate                            time.Time                        `bson:"birth_date" json:"birth_date"`
 	JoinDate                             time.Time                        `bson:"join_date" json:"join_date"`
 	Nationality                          string                           `bson:"nationality" json:"nationality"`
-	Gender                               string                           `bson:"gender" json:"gender"`
+	Gender                               int8                             `bson:"gender" json:"gender"`
+	GenderOther                          string                           `bson:"gender_other" json:"gender_other"`
 	TaxID                                string                           `bson:"tax_id" json:"tax_id"`
 	Elevation                            float64                          `bson:"elevation" json:"elevation"`
 	Latitude                             float64                          `bson:"latitude" json:"latitude"`

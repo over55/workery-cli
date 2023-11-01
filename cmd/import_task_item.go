@@ -242,7 +242,8 @@ func importTaskItem(
 	var associateID primitive.ObjectID = primitive.NilObjectID
 	var associateName string
 	var associateLexicalName string
-	var associateGender string
+	var associateGender int8
+	var associateGenderOther string
 	var associateBirthdate time.Time
 	var associateTags = make([]*ti_ds.TaskItemAssociateTag, 0)
 
@@ -255,6 +256,7 @@ func importTaskItem(
 		associateName = a.Name
 		associateLexicalName = a.LexicalName
 		associateGender = a.Gender
+		associateGenderOther = a.GenderOther
 		associateBirthdate = a.BirthDate
 
 		for _, tag := range a.Tags {
@@ -275,7 +277,8 @@ func importTaskItem(
 	var customerID primitive.ObjectID = primitive.NilObjectID
 	var customerName string
 	var customerLexicalName string
-	var customerGender string
+	var customerGender int8
+	var customerGenderOther string
 	var customerDOB time.Time
 	var customerTags []*ti_ds.TaskItemCustomerTag
 
@@ -288,6 +291,7 @@ func importTaskItem(
 		customerName = c.Name
 		customerLexicalName = c.LexicalName
 		customerGender = c.Gender
+		customerGenderOther = c.GenderOther
 		customerDOB = c.BirthDate
 
 		for _, tag := range c.Tags {
@@ -330,11 +334,13 @@ func importTaskItem(
 		AssociateName:         associateName,
 		AssociateLexicalName:  associateLexicalName,
 		AssociateGender:       associateGender,
+		AssociateGenderOther:  associateGenderOther,
 		AssociateBirthdate:    associateBirthdate,
 		CustomerID:            customerID,
 		CustomerName:          customerName,
 		CustomerLexicalName:   customerLexicalName,
 		CustomerGender:        customerGender,
+		CustomerGenderOther:   customerGenderOther,
 		CustomerBirthdate:     customerDOB,
 		CustomerTags:          customerTags,
 		AssociateTags:         associateTags,
