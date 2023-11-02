@@ -133,6 +133,13 @@ func importHowHearAboutUsItem(ctx context.Context, hhStorer hh_ds.HowHearAboutUs
 		state = 2
 	}
 
+	sortNumber := int8(1)
+
+	// Make 'other' option last.
+	if t.Text == "Other" || t.Text == "other" || t.ID == 0 {
+		sortNumber = 127
+	}
+
 	m := &hh_ds.HowHearAboutUsItem{
 		ID:             primitive.NewObjectID(),
 		OldID:          t.ID,
@@ -141,7 +148,7 @@ func importHowHearAboutUsItem(ctx context.Context, hhStorer hh_ds.HowHearAboutUs
 		IsForAssociate: t.IsForAssociate,
 		IsForCustomer:  t.IsForCustomer,
 		IsForStaff:     t.IsForStaff,
-		SortNumber:     1,
+		SortNumber:     sortNumber,
 		Status:         state,
 	}
 	err := hhStorer.Create(ctx, m)
