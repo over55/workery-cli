@@ -320,6 +320,7 @@ func importTaskItem(
 		ClosingReason:         ti.ClosingReason,
 		ClosingReasonOther:    ti.ClosingReasonOther,
 		OrderID:               order.ID,
+		OrderWJID:             order.WJID,
 		CreatedAt:             ti.CreatedAt,
 		CreatedByUserID:       createdByUserID,
 		CreatedByUserName:     createdByUserName,

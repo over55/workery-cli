@@ -35,6 +35,8 @@ type TaskItem struct {
 	ClosingReason      int8               `bson:"closing_reason" json:"closing_reason"`             // 10
 	ClosingReasonOther string             `bson:"closing_reason_other" json:"closing_reason_other"` // 11
 	OrderID            primitive.ObjectID `bson:"order_id" json:"order_id"`                         // 12
+	OrderWJID          uint64             `bson:"order_wjid" json:"order_wjid"`
+	OrderType          int8               `bson:"order_type" json:"order_type"` // 28
 	//OngoingOrderID       primitive.ObjectID `json:"ongoing_order_id"`                     // 13
 	CreatedAt             time.Time               `bson:"created_at" json:"created_at"`
 	CreatedByUserID       primitive.ObjectID      `bson:"created_by_user_id" json:"created_by_user_id,omitempty"`
@@ -44,9 +46,8 @@ type TaskItem struct {
 	ModifiedByUserID      primitive.ObjectID      `bson:"modified_by_user_id" json:"modified_by_user_id,omitempty"`
 	ModifiedByUserName    string                  `bson:"modified_by_user_name" json:"modified_by_user_name"`
 	ModifiedFromIPAddress string                  `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
-	Status                int8                    `bson:"status" json:"status"`         // 20
-	OldID                 uint64                  `bson:"old_id" json:"old_id"`         // 21
-	OrderType             int8                    `bson:"order_type" json:"order_type"` // 28
+	Status                int8                    `bson:"status" json:"status"` // 20
+	OldID                 uint64                  `bson:"old_id" json:"old_id"` // 21
 	CustomerID            primitive.ObjectID      `bson:"customer_id" json:"customer_id"`
 	CustomerName          string                  `bson:"customer_name" json:"customer_name,omitempty"`
 	CustomerLexicalName   string                  `bson:"customer_lexical_name" json:"customer_lexical_name,omitempty"`
