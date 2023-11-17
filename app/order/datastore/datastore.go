@@ -31,12 +31,20 @@ type Order struct {
 	CustomerGender                    int8               `bson:"customer_gender" json:"customer_gender"`
 	CustomerGenderOther               string             `bson:"customer_gender_other" json:"customer_gender_other"`
 	CustomerBirthdate                 time.Time          `bson:"customer_birthdate" json:"customer_birthdate"`
+	CustomerEmail                     string             `bson:"customer_email" json:"customer_email"`
+	CustomerPhone                     string             `bson:"customer_phone" json:"customer_phone,omitempty"`
+	CustomerPhoneType                 int8               `bson:"customer_phone_type" json:"customer_phone_type"`
+	CustomerPhoneExtension            string             `bson:"customer_phone_extension" json:"customer_phone_extension"`
 	AssociateID                       primitive.ObjectID `bson:"associate_id" json:"associate_id"`
 	AssociateName                     string             `bson:"associate_name" json:"associate_name,omitempty"`
 	AssociateLexicalName              string             `bson:"associate_lexical_name" json:"associate_lexical_name,omitempty"`
 	AssociateGender                   int8               `bson:"associate_gender" json:"associate_gender"`
 	AssociateGenderOther              string             `bson:"associate_gender_other" json:"associate_gender_other"`
 	AssociateBirthdate                time.Time          `bson:"associate_birthdate" json:"associate_birthdate"`
+	AssociateEmail                    string             `bson:"associate_email" json:"associate_email,omitempty"`
+	AssociatePhone                    string             `bson:"associate_phone" json:"associate_phone,omitempty"`
+	AssociatePhoneType                int8               `bson:"associate_phone_type" json:"associate_phone_type"`
+	AssociatePhoneExtension           string             `bson:"associate_phone_extension" json:"associate_phone_extension"`
 	TenantID                          primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`
 	TenantIDWithWJID                  string             `bson:"tenant_id_with_wjid" json:"-"` // TenantIDWithWJID is a combination of `tenancy_id` and `wjid` values written in the following structure `%v_%v`.
 	Description                       string             `bson:"description" json:"description"`
@@ -79,6 +87,9 @@ type Order struct {
 	InvoiceServiceFeeDescription      string             `bson:"invoice_service_fee_description" json:"invoice_service_fee_description"`
 	InvoiceServiceFeePercentage       float64            `bson:"invoice_service_fee_percentage" json:"invoice_service_fee_percentage"`
 	LatestPendingTaskID               primitive.ObjectID `bson:"latest_pending_task_id" json:"latest_pending_task_id"`
+	LatestPendingTaskTitle            string             `bson:"latest_pending_task_title" json:"latest_pending_task_title"`
+	LatestPendingTaskDescription      string             `bson:"latest_pending_task_description" json:"latest_pending_task_description"`
+	LatestPendingTaskDueDate          time.Time          `bson:"latest_pending_task_due_date" json:"latest_pending_task_due_date"`
 	OngoingOrderID                    primitive.ObjectID `bson:"ongoing_work_order_id" json:"ongoing_work_order_id"`
 	WasSurveyConducted                bool               `bson:"was_survey_conducted" json:"was_survey_conducted"`
 	WasThereFinancialsInputted        bool               `bson:"was_there_financials_inputted" json:"was_there_financials_inputted"`

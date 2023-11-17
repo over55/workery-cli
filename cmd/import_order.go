@@ -240,6 +240,10 @@ func importOrder(
 	var associateGender int8
 	var associateGenderOther string
 	var associateBirthdate time.Time
+	var associateEmail string
+	var associatePhone string
+	var associatePhoneType int8
+	var associatePhoneExtension string
 	a, err := aStorer.GetByOldID(ctx, uint64(wo.AssociateID.ValueOrZero()))
 	if err != nil {
 		log.Fatal(err)
@@ -251,6 +255,10 @@ func importOrder(
 		associateGender = a.Gender
 		associateGenderOther = a.GenderOther
 		associateBirthdate = a.BirthDate
+		associateEmail = a.Email
+		associatePhone = a.Phone
+		associatePhoneType = a.PhoneType
+		associatePhoneExtension = a.PhoneExtension
 	}
 
 	//
@@ -263,6 +271,10 @@ func importOrder(
 	var customerGender int8
 	var customerGenderOther string
 	var customerDOB time.Time
+	var customerEmail string
+	var customerPhone string
+	var customerPhoneType int8
+	var customerPhoneExtension string
 	c, err := cStorer.GetByOldID(ctx, wo.CustomerID)
 	if err != nil {
 		log.Fatal(err)
@@ -274,6 +286,10 @@ func importOrder(
 		customerGender = c.Gender
 		customerGenderOther = c.GenderOther
 		customerDOB = c.BirthDate
+		customerEmail = c.Email
+		customerPhone = c.Phone
+		customerPhoneType = c.PhoneType
+		customerPhoneExtension = c.PhoneExtension
 	}
 
 	//
@@ -395,12 +411,20 @@ func importOrder(
 		CustomerGender:                    customerGender,
 		CustomerGenderOther:               customerGenderOther,
 		CustomerBirthdate:                 customerDOB,
+		CustomerEmail:                     customerEmail,
+		CustomerPhone:                     customerPhone,
+		CustomerPhoneType:                 customerPhoneType,
+		CustomerPhoneExtension:            customerPhoneExtension,
 		AssociateID:                       associateID,
 		AssociateName:                     associateName,
 		AssociateLexicalName:              associateLexicalName,
 		AssociateGender:                   associateGender,
 		AssociateGenderOther:              associateGenderOther,
 		AssociateBirthdate:                associateBirthdate,
+		AssociateEmail:                    associateEmail,
+		AssociatePhone:                    associatePhone,
+		AssociatePhoneType:                associatePhoneType,
+		AssociatePhoneExtension:           associatePhoneExtension,
 		Description:                       wo.Description,
 		AssignmentDate:                    wo.AssignmentDate.ValueOrZero(),
 		IsOngoing:                         wo.IsOngoing,

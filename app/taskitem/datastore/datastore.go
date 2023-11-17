@@ -24,19 +24,20 @@ const (
 )
 
 type TaskItem struct {
-	ID                 primitive.ObjectID `bson:"_id" json:"id"`                                    // 01
-	TenantID           primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`             // 03
-	Type               int8               `bson:"type" json:"type"`                                 // 04
-	Title              string             `bson:"title" json:"title"`                               // 05
-	Description        string             `bson:"description" json:"description"`                   // 06
-	DueDate            time.Time          `bson:"due_date" json:"due_date"`                         // 07
-	IsClosed           bool               `bson:"is_closed" json:"is_closed"`                       // 08
-	WasPostponed       bool               `bson:"was_postponed" json:"was_postponed"`               // 09
-	ClosingReason      int8               `bson:"closing_reason" json:"closing_reason"`             // 10
-	ClosingReasonOther string             `bson:"closing_reason_other" json:"closing_reason_other"` // 11
-	OrderID            primitive.ObjectID `bson:"order_id" json:"order_id"`                         // 12
-	OrderWJID          uint64             `bson:"order_wjid" json:"order_wjid"`
-	OrderType          int8               `bson:"order_type" json:"order_type"` // 28
+	ID                    primitive.ObjectID `bson:"_id" json:"id"`                                    // 01
+	TenantID              primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`             // 03
+	Type                  int8               `bson:"type" json:"type"`                                 // 04
+	Title                 string             `bson:"title" json:"title"`                               // 05
+	Description           string             `bson:"description" json:"description"`                   // 06
+	DueDate               time.Time          `bson:"due_date" json:"due_date"`                         // 07
+	IsClosed              bool               `bson:"is_closed" json:"is_closed"`                       // 08
+	WasPostponed          bool               `bson:"was_postponed" json:"was_postponed"`               // 09
+	ClosingReason         int8               `bson:"closing_reason" json:"closing_reason"`             // 10
+	ClosingReasonOther    string             `bson:"closing_reason_other" json:"closing_reason_other"` // 11
+	OrderID               primitive.ObjectID `bson:"order_id" json:"order_id"`                         // 12
+	OrderWJID             uint64             `bson:"order_wjid" json:"order_wjid"`
+	OrderType             int8               `bson:"order_type" json:"order_type"`                               // 28
+	OrderTenantIDWithWJID string             `bson:"order_tenant_id_with_wjid" json:"order_tenant_id_with_wjid"` // OrderTenantIDWithWJID is a combination of `tenancy_id` and `wjid` values written in the following structure `%v_%v`.
 	//OngoingOrderID       primitive.ObjectID `json:"ongoing_order_id"`                     // 13
 	CreatedAt             time.Time               `bson:"created_at" json:"created_at"`
 	CreatedByUserID       primitive.ObjectID      `bson:"created_by_user_id" json:"created_by_user_id,omitempty"`
@@ -86,13 +87,16 @@ type TaskItemAssociateTag struct {
 }
 
 type TaskItemSkillSet struct {
-	ID          primitive.ObjectID `bson:"_id" json:"id"`
-	TenantID    primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`
-	Category    string             `bson:"category" json:"category"`
-	SubCategory string             `bson:"sub_category" json:"sub_category"`
-	Description string             `bson:"description" json:"description"`
-	Status      int8               `bson:"status" json:"status"`
-	OldID       uint64             `bson:"old_id" json:"old_id"`
+	ID                    primitive.ObjectID `bson:"_id" json:"id"`
+	OrderID               primitive.ObjectID `bson:"order_id" json:"order_id"`
+	OrderWJID             uint64             `bson:"order_wjid" json:"order_wjid"`                               // Workery Job ID
+	OrderTenantIDWithWJID string             `bson:"order_tenant_id_with_wjid" json:"order_tenant_id_with_wjid"` // OrderTenantIDWithWJID is a combination of `tenancy_id` and `wjid` values written in the following structure `%v_%v`.
+	TenantID              primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`
+	Category              string             `bson:"category" json:"category"`
+	SubCategory           string             `bson:"sub_category" json:"sub_category"`
+	Description           string             `bson:"description" json:"description"`
+	Status                int8               `bson:"status" json:"status"`
+	OldID                 uint64             `bson:"old_id" json:"old_id"`
 }
 
 type TaskItemOrderTag struct {

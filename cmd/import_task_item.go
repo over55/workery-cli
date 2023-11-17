@@ -191,12 +191,15 @@ func importTaskItem(
 	var orderSkillSets []*ti_ds.TaskItemSkillSet
 	for _, ss := range order.SkillSets {
 		orderSkillSets = append(orderSkillSets, &ti_ds.TaskItemSkillSet{
-			ID:          ss.ID,
-			TenantID:    ss.TenantID,
-			Category:    ss.Category,
-			SubCategory: ss.SubCategory,
-			Description: ss.Description,
-			OldID:       ss.OldID,
+			ID:                    ss.ID,
+			OrderID:               ss.OrderID,
+			OrderWJID:             ss.OrderWJID,
+			OrderTenantIDWithWJID: ss.OrderTenantIDWithWJID,
+			TenantID:              ss.TenantID,
+			Category:              ss.Category,
+			SubCategory:           ss.SubCategory,
+			Description:           ss.Description,
+			OldID:                 ss.OldID,
 		})
 	}
 
@@ -321,6 +324,7 @@ func importTaskItem(
 		ClosingReasonOther:    ti.ClosingReasonOther,
 		OrderID:               order.ID,
 		OrderWJID:             order.WJID,
+		OrderTenantIDWithWJID: fmt.Sprintf("%v_%v", order.TenantID.Hex(), order.WJID),
 		CreatedAt:             ti.CreatedAt,
 		CreatedByUserID:       createdByUserID,
 		CreatedByUserName:     createdByUserName,
@@ -352,5 +356,15 @@ func importTaskItem(
 	if err := tiStorer.Create(ctx, m); err != nil {
 		log.Panic(err)
 	}
-	fmt.Println("Imported TaskItem ID#", m.ID)
+
+	order.LatestPendingTaskID = m.ID
+	order.LatestPendingTaskTitle = m.Title
+	order.LatestPendingTaskDescription = m.Description
+	order.LatestPendingTaskDueDate = m.DueDate
+
+	if err := oStorer.UpdateByID(ctx, order); err != nil {
+		log.Panic(err)
+	}
+
+	fmt.Println("Imported TaskItem ID#", m.ID.Hex(), " and updated Order ID#", order.ID.Hex())
 }
