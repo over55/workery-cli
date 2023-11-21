@@ -244,6 +244,9 @@ func importOrder(
 	var associatePhone string
 	var associatePhoneType int8
 	var associatePhoneExtension string
+	var associateOtherPhone string
+	var associateOtherPhoneType int8
+	var associateOtherPhoneExtension string
 	a, err := aStorer.GetByOldID(ctx, uint64(wo.AssociateID.ValueOrZero()))
 	if err != nil {
 		log.Fatal(err)
@@ -275,6 +278,9 @@ func importOrder(
 	var customerPhone string
 	var customerPhoneType int8
 	var customerPhoneExtension string
+	var customerOtherPhone string
+	var customerOtherPhoneType int8
+	var customerOtherPhoneExtension string
 	c, err := cStorer.GetByOldID(ctx, wo.CustomerID)
 	if err != nil {
 		log.Fatal(err)
@@ -415,6 +421,9 @@ func importOrder(
 		CustomerPhone:                     customerPhone,
 		CustomerPhoneType:                 customerPhoneType,
 		CustomerPhoneExtension:            customerPhoneExtension,
+		CustomerOtherPhone:                customerOtherPhone,
+		CustomerOtherPhoneType:            customerOtherPhoneType,
+		CustomerOtherPhoneExtension:       customerOtherPhoneExtension,
 		AssociateID:                       associateID,
 		AssociateName:                     associateName,
 		AssociateLexicalName:              associateLexicalName,
@@ -425,6 +434,9 @@ func importOrder(
 		AssociatePhone:                    associatePhone,
 		AssociatePhoneType:                associatePhoneType,
 		AssociatePhoneExtension:           associatePhoneExtension,
+		AssociateOtherPhone:               associateOtherPhone,
+		AssociateOtherPhoneType:           associateOtherPhoneType,
+		AssociateOtherPhoneExtension:      associateOtherPhoneExtension,
 		Description:                       wo.Description,
 		AssignmentDate:                    wo.AssignmentDate.ValueOrZero(),
 		IsOngoing:                         wo.IsOngoing,

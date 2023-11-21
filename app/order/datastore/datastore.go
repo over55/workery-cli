@@ -35,6 +35,9 @@ type Order struct {
 	CustomerPhone                     string             `bson:"customer_phone" json:"customer_phone,omitempty"`
 	CustomerPhoneType                 int8               `bson:"customer_phone_type" json:"customer_phone_type"`
 	CustomerPhoneExtension            string             `bson:"customer_phone_extension" json:"customer_phone_extension"`
+	CustomerOtherPhone                string             `bson:"customer_other_phone" json:"customer_other_phone"`
+	CustomerOtherPhoneExtension       string             `bson:"customer_other_phone_extension" json:"customer_other_phone_extension"`
+	CustomerOtherPhoneType            int8               `bson:"customer_other_phone_type" json:"customer_other_phone_type"`
 	AssociateID                       primitive.ObjectID `bson:"associate_id" json:"associate_id"`
 	AssociateName                     string             `bson:"associate_name" json:"associate_name,omitempty"`
 	AssociateLexicalName              string             `bson:"associate_lexical_name" json:"associate_lexical_name,omitempty"`
@@ -45,6 +48,9 @@ type Order struct {
 	AssociatePhone                    string             `bson:"associate_phone" json:"associate_phone,omitempty"`
 	AssociatePhoneType                int8               `bson:"associate_phone_type" json:"associate_phone_type"`
 	AssociatePhoneExtension           string             `bson:"associate_phone_extension" json:"associate_phone_extension"`
+	AssociateOtherPhone               string             `bson:"associate_other_phone" json:"associate_other_phone"`
+	AssociateOtherPhoneExtension      string             `bson:"associate_other_phone_extension" json:"associate_other_phone_extension"`
+	AssociateOtherPhoneType           int8               `bson:"associate_other_phone_type" json:"associate_other_phone_type"`
 	TenantID                          primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`
 	TenantIDWithWJID                  string             `bson:"tenant_id_with_wjid" json:"-"` // TenantIDWithWJID is a combination of `tenancy_id` and `wjid` values written in the following structure `%v_%v`.
 	Description                       string             `bson:"description" json:"description"`
