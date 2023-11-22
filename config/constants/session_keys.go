@@ -10,6 +10,7 @@ const (
 	SessionUser
 	SessionUserCompanyName
 	SessionUserRole
+	SessionUserHasStaffRole
 	SessionUserID
 	SessionUserUUID
 	SessionUserTimezone

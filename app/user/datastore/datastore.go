@@ -35,6 +35,7 @@ type User struct {
 	PasswordHashAlgorithm       string             `bson:"password_hash_algorithm" json:"password_hash_algorithm,omitempty"`
 	PasswordHash                string             `bson:"password_hash" json:"password_hash,omitempty"`
 	Role                        int8               `bson:"role" json:"role"`
+	HasStaffRole                bool               `bson:"has_staff_role" json:"-"`
 	WasEmailVerified            bool               `bson:"was_email_verified" json:"was_email_verified"`
 	EmailVerificationCode       string             `bson:"email_verification_code,omitempty" json:"email_verification_code,omitempty"`
 	EmailVerificationExpiry     time.Time          `bson:"email_verification_expiry,omitempty" json:"email_verification_expiry,omitempty"`

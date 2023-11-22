@@ -106,8 +106,23 @@ func importUserRole(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.U
 		return
 	}
 	user.Role = int8(ou.GroupId)
+	switch ou.GroupId {
+	case user_ds.UserRoleExecutive, user_ds.UserRoleManagement, user_ds.UserRoleFrontlineStaff:
+		user.HasStaffRole = true
+		break
+	default:
+		user.HasStaffRole = false
+		break
+	}
+
 	if err := us.UpdateByID(ctx, user); err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Imported user role ID#", user.ID, "role", user.Role)
+
+	if user.HasStaffRole {
+		fmt.Println("Imported [staff] user role ID#", user.ID, "role", user.Role)
+	} else {
+		fmt.Println("Imported user role ID#", user.ID, "role", user.Role)
+	}
+
 }
