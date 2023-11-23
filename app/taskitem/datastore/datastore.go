@@ -41,46 +41,50 @@ type TaskItem struct {
 	OrderStartDate        time.Time          `bson:"order_start_date" json:"order_start_date"`
 	OrderDescription      string             `bson:"order_description" json:"order_description"`
 	//OngoingOrderID       primitive.ObjectID `json:"ongoing_order_id"`                     // 13
-	CreatedAt                    time.Time               `bson:"created_at" json:"created_at"`
-	CreatedByUserID              primitive.ObjectID      `bson:"created_by_user_id" json:"created_by_user_id,omitempty"`
-	CreatedByUserName            string                  `bson:"created_by_user_name" json:"created_by_user_name"`
-	CreatedFromIPAddress         string                  `bson:"created_from_ip_address" json:"created_from_ip_address"`
-	ModifiedAt                   time.Time               `bson:"modified_at" json:"modified_at"`
-	ModifiedByUserID             primitive.ObjectID      `bson:"modified_by_user_id" json:"modified_by_user_id,omitempty"`
-	ModifiedByUserName           string                  `bson:"modified_by_user_name" json:"modified_by_user_name"`
-	ModifiedFromIPAddress        string                  `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
-	Status                       int8                    `bson:"status" json:"status"` // 20
-	OldID                        uint64                  `bson:"old_id" json:"old_id"` // 21
-	CustomerID                   primitive.ObjectID      `bson:"customer_id" json:"customer_id"`
-	CustomerName                 string                  `bson:"customer_name" json:"customer_name,omitempty"`
-	CustomerLexicalName          string                  `bson:"customer_lexical_name" json:"customer_lexical_name,omitempty"`
-	CustomerGender               int8                    `bson:"customer_gender" json:"customer_gender"`
-	CustomerGenderOther          string                  `bson:"customer_gender_other" json:"customer_gender_other"`
-	CustomerBirthdate            time.Time               `bson:"customer_birthdate" json:"customer_birthdate"`
-	CustomerEmail                string                  `bson:"customer_email" json:"customer_email,omitempty"`
-	CustomerPhone                string                  `bson:"customer_phone" json:"customer_phone,omitempty"`
-	CustomerPhoneType            int8                    `bson:"customer_phone_type" json:"customer_phone_type"`
-	CustomerPhoneExtension       string                  `bson:"customer_phone_extension" json:"customer_phone_extension"`
-	CustomerOtherPhone           string                  `bson:"customer_other_phone" json:"customer_other_phone"`
-	CustomerOtherPhoneExtension  string                  `bson:"customer_other_phone_extension" json:"customer_other_phone_extension"`
-	CustomerOtherPhoneType       int8                    `bson:"customer_other_phone_type" json:"customer_other_phone_type"`
-	AssociateID                  primitive.ObjectID      `bson:"associate_id" json:"associate_id"`
-	AssociateName                string                  `bson:"associate_name" json:"associate_name,omitempty"`
-	AssociateLexicalName         string                  `bson:"associate_lexical_name" json:"associate_lexical_name,omitempty"`
-	AssociateGender              int8                    `bson:"associate_gender" json:"associate_gender"`
-	AssociateGenderOther         string                  `bson:"associate_gender_other" json:"associate_gender_other"`
-	AssociateBirthdate           time.Time               `bson:"associate_birthdate" json:"associate_birthdate"`
-	AssociateEmail               string                  `bson:"associate_email" json:"associate_email,omitempty"`
-	AssociatePhone               string                  `bson:"associate_phone" json:"associate_phone,omitempty"`
-	AssociatePhoneType           int8                    `bson:"associate_phone_type" json:"associate_phone_type"`
-	AssociatePhoneExtension      string                  `bson:"associate_phone_extension" json:"associate_phone_extension"`
-	AssociateOtherPhone          string                  `bson:"associate_other_phone" json:"associate_other_phone"`
-	AssociateOtherPhoneExtension string                  `bson:"associate_other_phone_extension" json:"associate_other_phone_extension"`
-	AssociateOtherPhoneType      int8                    `bson:"associate_other_phone_type" json:"associate_other_phone_type"`
-	CustomerTags                 []*TaskItemCustomerTag  `bson:"customer_tags" json:"customer_tags,omitempty"`       // Related
-	AssociateTags                []*TaskItemAssociateTag `bson:"associate_tags" json:"associate_tags,omitempty"`     // Related
-	OrderSkillSets               []*TaskItemSkillSet     `bson:"order_skill_sets" json:"order_skill_sets,omitempty"` // Related
-	OrderTags                    []*TaskItemOrderTag     `bson:"order_tags" json:"order_tags,omitempty"`             // Related
+	CreatedAt                             time.Time               `bson:"created_at" json:"created_at"`
+	CreatedByUserID                       primitive.ObjectID      `bson:"created_by_user_id" json:"created_by_user_id,omitempty"`
+	CreatedByUserName                     string                  `bson:"created_by_user_name" json:"created_by_user_name"`
+	CreatedFromIPAddress                  string                  `bson:"created_from_ip_address" json:"created_from_ip_address"`
+	ModifiedAt                            time.Time               `bson:"modified_at" json:"modified_at"`
+	ModifiedByUserID                      primitive.ObjectID      `bson:"modified_by_user_id" json:"modified_by_user_id,omitempty"`
+	ModifiedByUserName                    string                  `bson:"modified_by_user_name" json:"modified_by_user_name"`
+	ModifiedFromIPAddress                 string                  `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
+	Status                                int8                    `bson:"status" json:"status"` // 20
+	OldID                                 uint64                  `bson:"old_id" json:"old_id"` // 21
+	CustomerID                            primitive.ObjectID      `bson:"customer_id" json:"customer_id"`
+	CustomerName                          string                  `bson:"customer_name" json:"customer_name,omitempty"`
+	CustomerLexicalName                   string                  `bson:"customer_lexical_name" json:"customer_lexical_name,omitempty"`
+	CustomerGender                        int8                    `bson:"customer_gender" json:"customer_gender"`
+	CustomerGenderOther                   string                  `bson:"customer_gender_other" json:"customer_gender_other"`
+	CustomerBirthdate                     time.Time               `bson:"customer_birthdate" json:"customer_birthdate"`
+	CustomerEmail                         string                  `bson:"customer_email" json:"customer_email,omitempty"`
+	CustomerPhone                         string                  `bson:"customer_phone" json:"customer_phone,omitempty"`
+	CustomerPhoneType                     int8                    `bson:"customer_phone_type" json:"customer_phone_type"`
+	CustomerPhoneExtension                string                  `bson:"customer_phone_extension" json:"customer_phone_extension"`
+	CustomerOtherPhone                    string                  `bson:"customer_other_phone" json:"customer_other_phone"`
+	CustomerOtherPhoneExtension           string                  `bson:"customer_other_phone_extension" json:"customer_other_phone_extension"`
+	CustomerOtherPhoneType                int8                    `bson:"customer_other_phone_type" json:"customer_other_phone_type"`
+	CustomerFullAddressWithoutPostalCode  string                  `bson:"customer_full_address_without_postal_code" json:"customer_full_address_without_postal_code"`
+	CustomerFullAddressURL                string                  `bson:"customer_full_address_url" json:"customer_full_address_url"`
+	AssociateID                           primitive.ObjectID      `bson:"associate_id" json:"associate_id"`
+	AssociateName                         string                  `bson:"associate_name" json:"associate_name,omitempty"`
+	AssociateLexicalName                  string                  `bson:"associate_lexical_name" json:"associate_lexical_name,omitempty"`
+	AssociateGender                       int8                    `bson:"associate_gender" json:"associate_gender"`
+	AssociateGenderOther                  string                  `bson:"associate_gender_other" json:"associate_gender_other"`
+	AssociateBirthdate                    time.Time               `bson:"associate_birthdate" json:"associate_birthdate"`
+	AssociateEmail                        string                  `bson:"associate_email" json:"associate_email,omitempty"`
+	AssociatePhone                        string                  `bson:"associate_phone" json:"associate_phone,omitempty"`
+	AssociatePhoneType                    int8                    `bson:"associate_phone_type" json:"associate_phone_type"`
+	AssociatePhoneExtension               string                  `bson:"associate_phone_extension" json:"associate_phone_extension"`
+	AssociateOtherPhone                   string                  `bson:"associate_other_phone" json:"associate_other_phone"`
+	AssociateOtherPhoneExtension          string                  `bson:"associate_other_phone_extension" json:"associate_other_phone_extension"`
+	AssociateOtherPhoneType               int8                    `bson:"associate_other_phone_type" json:"associate_other_phone_type"`
+	AssociateFullAddressWithoutPostalCode string                  `bson:"associate_full_address_without_postal_code" json:"associate_full_address_without_postal_code"`
+	AssociateFullAddressURL               string                  `bson:"associate_full_address_url" json:"associate_full_address_url"`
+	CustomerTags                          []*TaskItemCustomerTag  `bson:"customer_tags" json:"customer_tags,omitempty"`       // Related
+	AssociateTags                         []*TaskItemAssociateTag `bson:"associate_tags" json:"associate_tags,omitempty"`     // Related
+	OrderSkillSets                        []*TaskItemSkillSet     `bson:"order_skill_sets" json:"order_skill_sets,omitempty"` // Related
+	OrderTags                             []*TaskItemOrderTag     `bson:"order_tags" json:"order_tags,omitempty"`             // Related
 	// WorkOrder            *WorkOrder           `json:"work_order,omitempty"`                 // Related
 }
 

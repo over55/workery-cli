@@ -256,6 +256,8 @@ func importTaskItem(
 	var associateOtherPhone string
 	var associateOtherPhoneType int8
 	var associateOtherPhoneExtension string
+	var associateFullAddressWithoutPostalCode string
+	var associateFullAddressURL string
 
 	a, err := aStorer.GetByID(ctx, order.AssociateID)
 	if err != nil {
@@ -275,6 +277,8 @@ func importTaskItem(
 		associateOtherPhone = a.OtherPhone
 		associateOtherPhoneType = a.OtherPhoneType
 		associateOtherPhoneExtension = a.OtherPhoneExtension
+		associateFullAddressWithoutPostalCode = a.FullAddressWithoutPostalCode
+		associateFullAddressURL = a.FullAddressURL
 
 		for _, tag := range a.Tags {
 			associateTags = append(associateTags, &ti_ds.TaskItemAssociateTag{
@@ -305,6 +309,8 @@ func importTaskItem(
 	var customerOtherPhone string
 	var customerOtherPhoneType int8
 	var customerOtherPhoneExtension string
+	var customerFullAddressWithoutPostalCode string
+	var customerFullAddressURL string
 
 	c, err := cStorer.GetByID(ctx, order.CustomerID)
 	if err != nil {
@@ -324,6 +330,8 @@ func importTaskItem(
 		customerOtherPhone = c.OtherPhone
 		customerOtherPhoneType = c.OtherPhoneType
 		customerOtherPhoneExtension = c.OtherPhoneExtension
+		customerFullAddressWithoutPostalCode = a.FullAddressWithoutPostalCode
+		customerFullAddressURL = a.FullAddressURL
 
 		for _, tag := range c.Tags {
 			customerTags = append(customerTags, &ti_ds.TaskItemCustomerTag{
@@ -341,60 +349,64 @@ func importTaskItem(
 	//
 
 	m := &ti_ds.TaskItem{
-		ID:                           primitive.NewObjectID(),
-		Type:                         ti.TypeOf,
-		Title:                        ti.Title,
-		Description:                  ti.Description,
-		DueDate:                      ti.DueDate,
-		IsClosed:                     ti.IsClosed,
-		WasPostponed:                 ti.WasPostponed,
-		ClosingReason:                ti.ClosingReason,
-		ClosingReasonOther:           ti.ClosingReasonOther,
-		OrderID:                      order.ID,
-		OrderWJID:                    order.WJID,
-		OrderTenantIDWithWJID:        fmt.Sprintf("%v_%v", order.TenantID.Hex(), order.WJID),
-		OrderStartDate:               order.StartDate,
-		OrderDescription:             order.Description,
-		CreatedAt:                    ti.CreatedAt,
-		CreatedByUserID:              createdByUserID,
-		CreatedByUserName:            createdByUserName,
-		CreatedFromIPAddress:         ti.CreatedFrom.ValueOrZero(),
-		ModifiedByUserID:             modifiedByUserID,
-		ModifiedByUserName:           modifiedByUserName,
-		ModifiedFromIPAddress:        ti.LastModifiedFrom.ValueOrZero(),
-		Status:                       state,
-		TenantID:                     tenant.ID,
-		OldID:                        ti.ID,
-		AssociateID:                  associateID,
-		AssociateName:                associateName,
-		AssociateLexicalName:         associateLexicalName,
-		AssociateGender:              associateGender,
-		AssociateGenderOther:         associateGenderOther,
-		AssociateBirthdate:           associateBirthdate,
-		AssociateEmail:               associateEmail,
-		AssociatePhone:               associatePhone,
-		AssociatePhoneType:           associatePhoneType,
-		AssociatePhoneExtension:      associatePhoneExtension,
-		AssociateOtherPhone:          associateOtherPhone,
-		AssociateOtherPhoneType:      associateOtherPhoneType,
-		AssociateOtherPhoneExtension: associateOtherPhoneExtension,
-		CustomerID:                   customerID,
-		CustomerName:                 customerName,
-		CustomerLexicalName:          customerLexicalName,
-		CustomerGender:               customerGender,
-		CustomerGenderOther:          customerGenderOther,
-		CustomerBirthdate:            customerDOB,
-		CustomerEmail:                customerEmail,
-		CustomerPhone:                customerPhone,
-		CustomerPhoneType:            customerPhoneType,
-		CustomerPhoneExtension:       customerPhoneExtension,
-		CustomerOtherPhone:           customerOtherPhone,
-		CustomerOtherPhoneType:       customerOtherPhoneType,
-		CustomerOtherPhoneExtension:  customerOtherPhoneExtension,
-		CustomerTags:                 customerTags,
-		AssociateTags:                associateTags,
-		OrderSkillSets:               orderSkillSets,
-		OrderTags:                    orderTags,
+		ID:                                    primitive.NewObjectID(),
+		Type:                                  ti.TypeOf,
+		Title:                                 ti.Title,
+		Description:                           ti.Description,
+		DueDate:                               ti.DueDate,
+		IsClosed:                              ti.IsClosed,
+		WasPostponed:                          ti.WasPostponed,
+		ClosingReason:                         ti.ClosingReason,
+		ClosingReasonOther:                    ti.ClosingReasonOther,
+		OrderID:                               order.ID,
+		OrderWJID:                             order.WJID,
+		OrderTenantIDWithWJID:                 fmt.Sprintf("%v_%v", order.TenantID.Hex(), order.WJID),
+		OrderStartDate:                        order.StartDate,
+		OrderDescription:                      order.Description,
+		CreatedAt:                             ti.CreatedAt,
+		CreatedByUserID:                       createdByUserID,
+		CreatedByUserName:                     createdByUserName,
+		CreatedFromIPAddress:                  ti.CreatedFrom.ValueOrZero(),
+		ModifiedByUserID:                      modifiedByUserID,
+		ModifiedByUserName:                    modifiedByUserName,
+		ModifiedFromIPAddress:                 ti.LastModifiedFrom.ValueOrZero(),
+		Status:                                state,
+		TenantID:                              tenant.ID,
+		OldID:                                 ti.ID,
+		AssociateID:                           associateID,
+		AssociateName:                         associateName,
+		AssociateLexicalName:                  associateLexicalName,
+		AssociateGender:                       associateGender,
+		AssociateGenderOther:                  associateGenderOther,
+		AssociateBirthdate:                    associateBirthdate,
+		AssociateEmail:                        associateEmail,
+		AssociatePhone:                        associatePhone,
+		AssociatePhoneType:                    associatePhoneType,
+		AssociatePhoneExtension:               associatePhoneExtension,
+		AssociateOtherPhone:                   associateOtherPhone,
+		AssociateOtherPhoneType:               associateOtherPhoneType,
+		AssociateOtherPhoneExtension:          associateOtherPhoneExtension,
+		AssociateFullAddressWithoutPostalCode: associateFullAddressWithoutPostalCode,
+		AssociateFullAddressURL:               associateFullAddressURL,
+		CustomerID:                            customerID,
+		CustomerName:                          customerName,
+		CustomerLexicalName:                   customerLexicalName,
+		CustomerGender:                        customerGender,
+		CustomerGenderOther:                   customerGenderOther,
+		CustomerBirthdate:                     customerDOB,
+		CustomerEmail:                         customerEmail,
+		CustomerPhone:                         customerPhone,
+		CustomerPhoneType:                     customerPhoneType,
+		CustomerPhoneExtension:                customerPhoneExtension,
+		CustomerOtherPhone:                    customerOtherPhone,
+		CustomerOtherPhoneType:                customerOtherPhoneType,
+		CustomerOtherPhoneExtension:           customerOtherPhoneExtension,
+		CustomerFullAddressWithoutPostalCode:  customerFullAddressWithoutPostalCode,
+		CustomerFullAddressURL:                customerFullAddressURL,
+		CustomerTags:                          customerTags,
+		AssociateTags:                         associateTags,
+		OrderSkillSets:                        orderSkillSets,
+		OrderTags:                             orderTags,
 	}
 
 	if err := tiStorer.Create(ctx, m); err != nil {

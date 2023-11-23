@@ -247,6 +247,8 @@ func importOrder(
 	var associateOtherPhone string
 	var associateOtherPhoneType int8
 	var associateOtherPhoneExtension string
+	var associateFullAddressWithoutPostalCode string
+	var associateFullAddressURL string
 	a, err := aStorer.GetByOldID(ctx, uint64(wo.AssociateID.ValueOrZero()))
 	if err != nil {
 		log.Fatal(err)
@@ -262,6 +264,8 @@ func importOrder(
 		associatePhone = a.Phone
 		associatePhoneType = a.PhoneType
 		associatePhoneExtension = a.PhoneExtension
+		associateFullAddressWithoutPostalCode = a.FullAddressWithoutPostalCode
+		associateFullAddressURL = a.FullAddressURL
 	}
 
 	//
@@ -281,6 +285,8 @@ func importOrder(
 	var customerOtherPhone string
 	var customerOtherPhoneType int8
 	var customerOtherPhoneExtension string
+	var customerFullAddressWithoutPostalCode string
+	var customerFullAddressURL string
 	c, err := cStorer.GetByOldID(ctx, wo.CustomerID)
 	if err != nil {
 		log.Fatal(err)
@@ -296,6 +302,8 @@ func importOrder(
 		customerPhone = c.Phone
 		customerPhoneType = c.PhoneType
 		customerPhoneExtension = c.PhoneExtension
+		customerFullAddressWithoutPostalCode = a.FullAddressWithoutPostalCode
+		customerFullAddressURL = a.FullAddressURL
 	}
 
 	//
@@ -407,75 +415,79 @@ func importOrder(
 	//
 
 	m := &o_ds.Order{
-		WJID:                              wo.ID,
-		TenantID:                          tenant.ID,
-		TenantIDWithWJID:                  fmt.Sprintf("%v_%v", tenant.ID.Hex(), wo.ID),
-		ID:                                primitive.NewObjectID(),
-		CustomerID:                        customerID,
-		CustomerName:                      customerName,
-		CustomerLexicalName:               customerLexicalName,
-		CustomerGender:                    customerGender,
-		CustomerGenderOther:               customerGenderOther,
-		CustomerBirthdate:                 customerDOB,
-		CustomerEmail:                     customerEmail,
-		CustomerPhone:                     customerPhone,
-		CustomerPhoneType:                 customerPhoneType,
-		CustomerPhoneExtension:            customerPhoneExtension,
-		CustomerOtherPhone:                customerOtherPhone,
-		CustomerOtherPhoneType:            customerOtherPhoneType,
-		CustomerOtherPhoneExtension:       customerOtherPhoneExtension,
-		AssociateID:                       associateID,
-		AssociateName:                     associateName,
-		AssociateLexicalName:              associateLexicalName,
-		AssociateGender:                   associateGender,
-		AssociateGenderOther:              associateGenderOther,
-		AssociateBirthdate:                associateBirthdate,
-		AssociateEmail:                    associateEmail,
-		AssociatePhone:                    associatePhone,
-		AssociatePhoneType:                associatePhoneType,
-		AssociatePhoneExtension:           associatePhoneExtension,
-		AssociateOtherPhone:               associateOtherPhone,
-		AssociateOtherPhoneType:           associateOtherPhoneType,
-		AssociateOtherPhoneExtension:      associateOtherPhoneExtension,
-		Description:                       wo.Description,
-		AssignmentDate:                    wo.AssignmentDate.ValueOrZero(),
-		IsOngoing:                         wo.IsOngoing,
-		IsHomeSupportService:              wo.IsHomeSupportService,
-		StartDate:                         wo.StartDate,
-		CompletionDate:                    wo.CompletionDate.ValueOrZero(),
-		Hours:                             wo.Hours,
-		Type:                              wo.TypeOf,
-		IndexedText:                       wo.IndexedText,
-		ClosingReason:                     wo.ClosingReason,
-		ClosingReasonOther:                wo.ClosingReasonOther.ValueOrZero(),
-		Status:                            state,
-		Currency:                          "CAD",
-		WasJobSatisfactory:                wo.WasJobSatisfactory,
-		WasJobFinishedOnTimeAndOnBudget:   wo.WasJobFinishedOnTimeAndOnBudget,
-		WasAssociatePunctual:              wo.WasAssociatePunctual,
-		WasAssociateProfessional:          wo.WasAssociateProfessional,
-		WouldCustomerReferOurOrganization: wo.WouldCustomerReferOurOrganization,
-		Score:                             wo.Score,
-		InvoiceDate:                       wo.InvoiceDate.ValueOrZero(),
-		InvoiceQuoteAmount:                wo.InvoiceQuoteAmount,
-		InvoiceLabourAmount:               wo.InvoiceLabourAmount,
-		InvoiceMaterialAmount:             wo.InvoiceMaterialAmount,
-		InvoiceTaxAmount:                  wo.InvoiceTaxAmount,
-		InvoiceTotalAmount:                wo.InvoiceTotalAmount,
-		InvoiceServiceFeeAmount:           wo.InvoiceServiceFeeAmount,
-		InvoiceServiceFeePaymentDate:      wo.InvoiceServiceFeePaymentDate.ValueOrZero(),
-		CreatedAt:                         wo.Created,
-		CreatedByUserID:                   createdByUserID,
-		CreatedByUserName:                 createdByUserName,
-		CreatedFromIPAddress:              wo.CreatedFrom.ValueOrZero(),
-		ModifiedAt:                        wo.LastModified,
-		ModifiedByUserID:                  modifiedByUserID,
-		ModifiedByUserName:                modifiedByUserName,
-		ModifiedFromIPAddress:             wo.LastModifiedFrom.ValueOrZero(),
-		InvoiceServiceFeeID:               invoiceServiceFeeID,
-		InvoiceServiceFeeName:             invoiceServiceFeeName,
-		InvoiceServiceFeeDescription:      invoiceServiceFeeDescription,
-		InvoiceServiceFeePercentage:       invoiceServiceFeePercentage,
+		WJID:                                  wo.ID,
+		TenantID:                              tenant.ID,
+		TenantIDWithWJID:                      fmt.Sprintf("%v_%v", tenant.ID.Hex(), wo.ID),
+		ID:                                    primitive.NewObjectID(),
+		CustomerID:                            customerID,
+		CustomerName:                          customerName,
+		CustomerLexicalName:                   customerLexicalName,
+		CustomerGender:                        customerGender,
+		CustomerGenderOther:                   customerGenderOther,
+		CustomerBirthdate:                     customerDOB,
+		CustomerEmail:                         customerEmail,
+		CustomerPhone:                         customerPhone,
+		CustomerPhoneType:                     customerPhoneType,
+		CustomerPhoneExtension:                customerPhoneExtension,
+		CustomerOtherPhone:                    customerOtherPhone,
+		CustomerOtherPhoneType:                customerOtherPhoneType,
+		CustomerOtherPhoneExtension:           customerOtherPhoneExtension,
+		CustomerFullAddressWithoutPostalCode:  customerFullAddressWithoutPostalCode,
+		CustomerFullAddressURL:                customerFullAddressURL,
+		AssociateID:                           associateID,
+		AssociateName:                         associateName,
+		AssociateLexicalName:                  associateLexicalName,
+		AssociateGender:                       associateGender,
+		AssociateGenderOther:                  associateGenderOther,
+		AssociateBirthdate:                    associateBirthdate,
+		AssociateEmail:                        associateEmail,
+		AssociatePhone:                        associatePhone,
+		AssociatePhoneType:                    associatePhoneType,
+		AssociatePhoneExtension:               associatePhoneExtension,
+		AssociateOtherPhone:                   associateOtherPhone,
+		AssociateOtherPhoneType:               associateOtherPhoneType,
+		AssociateOtherPhoneExtension:          associateOtherPhoneExtension,
+		AssociateFullAddressWithoutPostalCode: associateFullAddressWithoutPostalCode,
+		AssociateFullAddressURL:               associateFullAddressURL,
+		Description:                           wo.Description,
+		AssignmentDate:                        wo.AssignmentDate.ValueOrZero(),
+		IsOngoing:                             wo.IsOngoing,
+		IsHomeSupportService:                  wo.IsHomeSupportService,
+		StartDate:                             wo.StartDate,
+		CompletionDate:                        wo.CompletionDate.ValueOrZero(),
+		Hours:                                 wo.Hours,
+		Type:                                  wo.TypeOf,
+		IndexedText:                           wo.IndexedText,
+		ClosingReason:                         wo.ClosingReason,
+		ClosingReasonOther:                    wo.ClosingReasonOther.ValueOrZero(),
+		Status:                                state,
+		Currency:                              "CAD",
+		WasJobSatisfactory:                    wo.WasJobSatisfactory,
+		WasJobFinishedOnTimeAndOnBudget:       wo.WasJobFinishedOnTimeAndOnBudget,
+		WasAssociatePunctual:                  wo.WasAssociatePunctual,
+		WasAssociateProfessional:              wo.WasAssociateProfessional,
+		WouldCustomerReferOurOrganization:     wo.WouldCustomerReferOurOrganization,
+		Score:                                 wo.Score,
+		InvoiceDate:                           wo.InvoiceDate.ValueOrZero(),
+		InvoiceQuoteAmount:                    wo.InvoiceQuoteAmount,
+		InvoiceLabourAmount:                   wo.InvoiceLabourAmount,
+		InvoiceMaterialAmount:                 wo.InvoiceMaterialAmount,
+		InvoiceTaxAmount:                      wo.InvoiceTaxAmount,
+		InvoiceTotalAmount:                    wo.InvoiceTotalAmount,
+		InvoiceServiceFeeAmount:               wo.InvoiceServiceFeeAmount,
+		InvoiceServiceFeePaymentDate:          wo.InvoiceServiceFeePaymentDate.ValueOrZero(),
+		CreatedAt:                             wo.Created,
+		CreatedByUserID:                       createdByUserID,
+		CreatedByUserName:                     createdByUserName,
+		CreatedFromIPAddress:                  wo.CreatedFrom.ValueOrZero(),
+		ModifiedAt:                            wo.LastModified,
+		ModifiedByUserID:                      modifiedByUserID,
+		ModifiedByUserName:                    modifiedByUserName,
+		ModifiedFromIPAddress:                 wo.LastModifiedFrom.ValueOrZero(),
+		InvoiceServiceFeeID:                   invoiceServiceFeeID,
+		InvoiceServiceFeeName:                 invoiceServiceFeeName,
+		InvoiceServiceFeeDescription:          invoiceServiceFeeDescription,
+		InvoiceServiceFeePercentage:           invoiceServiceFeePercentage,
 		// OngoingWorkOrderID:                ongoingWorkOrderID,
 		WasSurveyConducted:                wo.WasSurveyConducted,
 		WasThereFinancialsInputted:        wo.WasThereFinancialsInputted,
