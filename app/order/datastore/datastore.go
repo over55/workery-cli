@@ -96,6 +96,7 @@ type Order struct {
 	LatestPendingTaskTitle            string             `bson:"latest_pending_task_title" json:"latest_pending_task_title"`
 	LatestPendingTaskDescription      string             `bson:"latest_pending_task_description" json:"latest_pending_task_description"`
 	LatestPendingTaskDueDate          time.Time          `bson:"latest_pending_task_due_date" json:"latest_pending_task_due_date"`
+	LatestPendingTaskType             int8               `bson:"latest_pending_task_type" json:"latest_pending_task_type"`
 	OngoingOrderID                    primitive.ObjectID `bson:"ongoing_work_order_id" json:"ongoing_work_order_id"`
 	WasSurveyConducted                bool               `bson:"was_survey_conducted" json:"was_survey_conducted"`
 	WasThereFinancialsInputted        bool               `bson:"was_there_financials_inputted" json:"was_there_financials_inputted"`

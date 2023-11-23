@@ -405,6 +405,7 @@ func importTaskItem(
 	order.LatestPendingTaskTitle = m.Title
 	order.LatestPendingTaskDescription = m.Description
 	order.LatestPendingTaskDueDate = m.DueDate
+	order.LatestPendingTaskType = m.Type
 
 	if err := oStorer.UpdateByID(ctx, order); err != nil {
 		log.Panic(err)
