@@ -1,19 +1,23 @@
 package logger
 
 import (
+	"log/slog"
 	"os"
-
-	"golang.org/x/exp/slog"
 )
 
 func NewProvider() *slog.Logger {
-	opts := slog.HandlerOptions{
-		Level:     slog.LevelDebug,
-		AddSource: true, // Add the line this code happened.
-	}
+	// create a logging level variable
+	// the level is Info by default
+	var loggingLevel = new(slog.LevelVar)
 
-	textHandler := opts.NewTextHandler(os.Stdout)
-	logger := slog.New(textHandler)
+	// Pass the loggingLevel to the new logger being created so we can change it later at any time. Also adding source file information.
+	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{AddSource: true, Level: loggingLevel}))
+
+	// set the level to debug
+	loggingLevel.Set(slog.LevelDebug)
+
+	// // Set the logger for the application
+	// slog.SetDefault(logger)
 
 	return logger
 }

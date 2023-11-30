@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"log/slog"
 
 	"github.com/over55/workery-cli/adapter/storage/mongodb"
 	"github.com/over55/workery-cli/adapter/storage/postgres"
@@ -13,7 +14,6 @@ import (
 	"github.com/over55/workery-cli/provider/password"
 	p "github.com/over55/workery-cli/provider/password"
 	"github.com/spf13/cobra"
-	"golang.org/x/exp/slog"
 )
 
 // ex:

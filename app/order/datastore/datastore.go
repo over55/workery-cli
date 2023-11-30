@@ -2,29 +2,18 @@ package datastore
 
 import (
 	"context"
+	"log/slog"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"golang.org/x/exp/slog"
 
 	c "github.com/over55/workery-cli/config"
 )
 
-const (
-	OrderGenderOther          = 1
-	OrderGenderMan            = 2
-	OrderGenderWoman          = 3
-	OrderGenderTransgender    = 4
-	OrderGenderNonBinary      = 5
-	OrderGenderTwoSpirit      = 6
-	OrderGenderPreferNotToSay = 7
-	OrderGenderDoNotKnow      = 8
-)
-
 type Order struct {
 	ID                                    primitive.ObjectID `bson:"_id" json:"id"`
-	WJID                                  uint64             `bson:"wjid" json:"wjid"` // A.K.A. `Workery Job ID`
+	WJID                                  uint64             `bson:"wjid" json:"wjid"` // A.K.A. `Workery Job ID` (Not including tenancy)
 	CustomerID                            primitive.ObjectID `bson:"customer_id" json:"customer_id"`
 	CustomerName                          string             `bson:"customer_name" json:"customer_name,omitempty"`
 	CustomerLexicalName                   string             `bson:"customer_lexical_name" json:"customer_lexical_name,omitempty"`
@@ -40,6 +29,7 @@ type Order struct {
 	CustomerOtherPhoneType                int8               `bson:"customer_other_phone_type" json:"customer_other_phone_type"`
 	CustomerFullAddressWithoutPostalCode  string             `bson:"customer_full_address_without_postal_code" json:"customer_full_address_without_postal_code"`
 	CustomerFullAddressURL                string             `bson:"customer_full_address_url" json:"customer_full_address_url"`
+	CustomerTags                          []*OrderTag        `bson:"customer_tags" json:"customer_tags,omitempty"`
 	AssociateID                           primitive.ObjectID `bson:"associate_id" json:"associate_id"`
 	AssociateName                         string             `bson:"associate_name" json:"associate_name,omitempty"`
 	AssociateLexicalName                  string             `bson:"associate_lexical_name" json:"associate_lexical_name,omitempty"`
@@ -55,8 +45,9 @@ type Order struct {
 	AssociateOtherPhoneType               int8               `bson:"associate_other_phone_type" json:"associate_other_phone_type"`
 	AssociateFullAddressWithoutPostalCode string             `bson:"associate_full_address_without_postal_code" json:"associate_full_address_without_postal_code"`
 	AssociateFullAddressURL               string             `bson:"associate_full_address_url" json:"associate_full_address_url"`
+	AssociateTags                         []*OrderTag        `bson:"associate_tags" json:"associate_tags,omitempty"`
 	TenantID                              primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`
-	TenantIDWithWJID                      string             `bson:"tenant_id_with_wjid" json:"-"` // TenantIDWithWJID is a combination of `tenancy_id` and `wjid` values written in the following structure `%v_%v`.
+	TenantIDWithWJID                      string             `bson:"tenant_id_with_wjid" json:"tenant_id_with_wjid"` // TenantIDWithWJID is a combination of `tenancy_id` and `wjid` values written in the following structure `%v_%v`.
 	Description                           string             `bson:"description" json:"description"`
 	AssignmentDate                        time.Time          `bson:"assignment_date" json:"assignment_date"`
 	IsOngoing                             bool               `bson:"is_ongoing" json:"is_ongoing"`
@@ -128,21 +119,10 @@ type Order struct {
 	Deposits                              []*OrderDeposit    `bson:"deposits" json:"deposits,omitempty"`
 }
 
-type OrderTag struct {
-	ID                    primitive.ObjectID `bson:"id" json:"id"` // A.k.a. "tag_id".
-	OrderID               primitive.ObjectID `bson:"order_id" json:"order_id"`
-	OrderWJID             uint64             `bson:"order_wjid" json:"order_wjid"`                               // Workery Job ID
-	OrderTenantIDWithWJID string             `bson:"order_tenant_id_with_wjid" json:"order_tenant_id_with_wjid"` // OrderTenantIDWithWJID is a combination of `tenancy_id` and `wjid` values written in the following structure `%v_%v`.
-	TenantID              primitive.ObjectID `bson:"tenant_id" json:"tenant_id"`
-	Text                  string             `bson:"text" json:"text,omitempty"`               // Referenced value from 'tags'.
-	Description           string             `bson:"description" json:"description,omitempty"` // Referenced value from 'tags'.
-	OldID                 uint64             `bson:"old_id" json:"old_id"`
-}
-
 type OrderSkillSet struct {
 	ID                    primitive.ObjectID `bson:"id" json:"id"`
-	OrderWJID             uint64             `bson:"order_wjid" json:"order_wjid"` // Workery Job ID
 	OrderID               primitive.ObjectID `bson:"order_id" json:"order_id"`
+	OrderWJID             uint64             `bson:"order_wjid" json:"order_wjid"`                               // Workery Job ID
 	OrderTenantIDWithWJID string             `bson:"order_tenant_id_with_wjid" json:"order_tenant_id_with_wjid"` // OrderTenantIDWithWJID is a combination of `tenancy_id` and `wjid` values written in the following structure `%v_%v`.
 	TenantID              primitive.ObjectID `bson:"tenant_id" json:"tenant_id"`
 	Category              string             `bson:"category" json:"category,omitempty"`         // Referenced value from 'tags'.
@@ -309,6 +289,13 @@ type OrderDeposit struct {
 	OldID                 uint64             `bson:"old_id" json:"old_id"`
 }
 
+type OrderTag struct {
+	ID          primitive.ObjectID `bson:"_id" json:"id"`
+	Text        string             `bson:"text" json:"text"`
+	Description string             `bson:"description" json:"description"`
+	Status      int8               `bson:"status" json:"status"`
+}
+
 type OrderListFilter struct {
 	// Pagination related.
 	Cursor    primitive.ObjectID
@@ -317,11 +304,14 @@ type OrderListFilter struct {
 	SortOrder int8 // 1=ascending | -1=descending
 
 	// Filter related.
-	TenantID        primitive.ObjectID
-	CustomerID      primitive.ObjectID
-	Status          int8
-	ExcludeArchived bool
-	SearchText      string
+	TenantID         primitive.ObjectID
+	CustomerID       primitive.ObjectID
+	AssociateID      primitive.ObjectID
+	Status           int8
+	Type             int8
+	ExcludeArchived  bool
+	SearchText       string
+	ModifiedByUserID primitive.ObjectID
 }
 
 type OrderListResult struct {
@@ -339,15 +329,23 @@ type OrderAsSelectOption struct {
 type OrderStorer interface {
 	Create(ctx context.Context, m *Order) error
 	GetByID(ctx context.Context, id primitive.ObjectID) (*Order, error)
-	GetByWJID(ctx context.Context, wjID uint64) (*Order, error)
-	GetByEmail(ctx context.Context, email string) (*Order, error)
-	GetByVerificationCode(ctx context.Context, verificationCode string) (*Order, error)
-	CheckIfExistsByEmail(ctx context.Context, email string) (bool, error)
+	GetByWJID(ctx context.Context, wjid uint64) (*Order, error)
+	GetLatestOrderByTenantID(ctx context.Context, tenantID primitive.ObjectID) (*Order, error)
+	// GetByOldID(ctx context.Context, oldID uint64) (*Order, error)
+	// GetByEmail(ctx context.Context, email string) (*Order, error)
+	// GetByVerificationCode(ctx context.Context, verificationCode string) (*Order, error)
+	// CheckIfExistsByEmail(ctx context.Context, email string) (bool, error)
 	UpdateByID(ctx context.Context, m *Order) error
-	ListByFilter(ctx context.Context, f *OrderListFilter) (*OrderListResult, error)
-	ListAsSelectOptionByFilter(ctx context.Context, f *OrderListFilter) ([]*OrderAsSelectOption, error)
-	DeleteByID(ctx context.Context, id primitive.ObjectID) error
-	// //TODO: Add more...
+	// ListByFilter(ctx context.Context, f *OrderListFilter) (*OrderListResult, error)
+	LiteListByFilter(ctx context.Context, f *OrderPaginationListFilter) (*OrderPaginationLiteListResult, error)
+	// ListAsSelectOptionByFilter(ctx context.Context, f *OrderListFilter) ([]*OrderAsSelectOption, error)
+	// DeleteByID(ctx context.Context, id primitive.ObjectID) error
+	CountByFilter(ctx context.Context, f *OrderListFilter) (int64, error)
+	CountByAssociateID(ctx context.Context, associateID primitive.ObjectID) (int64, error)
+	CountByTenantID(ctx context.Context, tenantID primitive.ObjectID) (int64, error)
+	PermanentlyDeleteAllByCustomerID(ctx context.Context, customerID primitive.ObjectID) error
+	PermanentlyDeleteAllByAssociateID(ctx context.Context, associateID primitive.ObjectID) error
+	// // //TODO: Add more...
 }
 
 type OrderStorerImpl struct {

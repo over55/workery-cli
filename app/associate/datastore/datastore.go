@@ -3,12 +3,12 @@ package datastore
 import (
 	"context"
 	"log"
+	"log/slog"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"golang.org/x/exp/slog"
 
 	c "github.com/over55/workery-cli/config"
 )
@@ -40,6 +40,18 @@ const (
 	AssociateGenderTwoSpirit      = 6
 	AssociateGenderPreferNotToSay = 7
 	AssociateGenderDoNotKnow      = 8
+
+	AssociateIdentifyAsOther                = 1
+	AssociateIdentifyAsPreferNotToSay       = 2
+	AssociateIdentifyAsWomen                = 3
+	AssociateIdentifyAsNewcomer             = 4
+	AssociateIdentifyAsRacializedPerson     = 5
+	AssociateIdentifyAsVeteran              = 6
+	AssociateIdentifyAsFrancophone          = 7
+	AssociateIdentifyAsPersonWithDisability = 8
+	AssociateIdentifyAsInuit                = 9
+	AssociateIdentifyAsFirstNations         = 10
+	AssociateIdentifyAsMetis                = 11
 )
 
 type Associate struct {
@@ -154,8 +166,19 @@ type Associate struct {
 	VehicleTypes                         []*AssociateVehicleType          `bson:"vehicle_types" json:"vehicle_types,omitempty"`
 	AwayLogs                             []*AssociateAwayLog              `bson:"away_logs" json:"away_logs,omitempty"`
 	Tags                                 []*AssociateTag                  `bson:"tags" json:"tags,omitempty"`
+	IdentifyAs                           []int8                           `bson:"identify_as" json:"identify_as,omitempty"`
 	// ServiceFee            *WorkOrderServiceFee             `json:"invoice_service_fee,omitempty"` // Referenced value from 'work_order_service_fee'.
 	// Tags                  []*AssociateTag                  `json:"tags,omitempty"`
+}
+
+// SkillSetIDs is a convinience function which will return an array of skill
+// set ID values from the associate.
+func (a *Associate) SkillSetIDs() []primitive.ObjectID {
+	skillSetIDs := make([]primitive.ObjectID, 0)
+	for _, ss := range a.SkillSets {
+		skillSetIDs = append(skillSetIDs, ss.ID)
+	}
+	return skillSetIDs
 }
 
 type AssociateComment struct {
@@ -176,30 +199,24 @@ type AssociateComment struct {
 
 type AssociateVehicleType struct {
 	ID          primitive.ObjectID `bson:"_id" json:"id"`
-	TenantID    primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`
 	Name        string             `bson:"name" json:"name"`
 	Description string             `bson:"description" json:"description"`
 	Status      int8               `bson:"status" json:"status"`
-	OldID       uint64             `bson:"old_id" json:"old_id"`
 }
 
 type AssociateSkillSet struct {
 	ID          primitive.ObjectID `bson:"_id" json:"id"`
-	TenantID    primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`
 	Category    string             `bson:"category" json:"category"`
 	SubCategory string             `bson:"sub_category" json:"sub_category"`
 	Description string             `bson:"description" json:"description"`
 	Status      int8               `bson:"status" json:"status"`
-	OldID       uint64             `bson:"old_id" json:"old_id"`
 }
 
 type AssociateInsuranceRequirement struct {
 	ID          primitive.ObjectID `bson:"_id" json:"id"`
-	TenantID    primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`
 	Name        string             `bson:"name" json:"name"`
 	Description string             `bson:"description" json:"description"`
 	Status      int8               `bson:"status" json:"status"`
-	OldID       uint64             `bson:"old_id" json:"old_id"`
 }
 
 type AssociateAwayLog struct {
@@ -227,11 +244,9 @@ type AssociateAwayLog struct {
 
 type AssociateTag struct {
 	ID          primitive.ObjectID `bson:"_id" json:"id"`
-	TenantID    primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`
 	Text        string             `bson:"text" json:"text"`
 	Description string             `bson:"description" json:"description"`
 	Status      int8               `bson:"status" json:"status"`
-	OldID       uint64             `bson:"old_id" json:"old_id"`
 }
 
 type AssociateListFilter struct {
@@ -246,6 +261,7 @@ type AssociateListFilter struct {
 	Role            int8
 	Status          int8
 	UUIDs           []string
+	Type            int8
 	ExcludeArchived bool
 	SearchText      string
 	FirstName       string
@@ -253,6 +269,7 @@ type AssociateListFilter struct {
 	Email           string
 	Phone           string
 	CreatedAtGTE    time.Time
+	SkillSetIDs     []primitive.ObjectID
 }
 
 type AssociateListResult struct {
@@ -276,9 +293,11 @@ type AssociateStorer interface {
 	CheckIfExistsByEmail(ctx context.Context, email string) (bool, error)
 	UpdateByID(ctx context.Context, m *Associate) error
 	UpsertByID(ctx context.Context, user *Associate) error
-	ListByFilter(ctx context.Context, f *AssociateListFilter) (*AssociateListResult, error)
+	ListByFilter(ctx context.Context, f *AssociatePaginationListFilter) (*AssociatePaginationListResult, error)
 	ListAsSelectOptionByFilter(ctx context.Context, f *AssociateListFilter) ([]*AssociateAsSelectOption, error)
+	LiteListByFilter(ctx context.Context, f *AssociatePaginationListFilter) (*AssociatePaginationLiteListResult, error)
 	DeleteByID(ctx context.Context, id primitive.ObjectID) error
+	CountByFilter(ctx context.Context, f *AssociateListFilter) (int64, error)
 	// //TODO: Add more...
 }
 
@@ -348,10 +367,9 @@ var AssociateTelephoneTypeLabels = map[int8]string{
 	3: "Work",
 }
 
-//---------------------
-// organization_type
-//---------------------
-// 1 = Unknown Organization Type | UNKNOWN_ORGANIZATION_TYPE_OF_ID
-// 2 = Private Organization Type | PRIVATE_ORGANIZATION_TYPE_OF_ID
-// 3 = Non-Profit Organization Type | NON_PROFIT_ORGANIZATION_TYPE_OF_ID
-// 4 = Government Organization | GOVERNMENT_ORGANIZATION_TYPE_OF_ID
+var AssociateOrganizationTypeLabels = map[int8]string{
+	1: "Unknown",
+	2: "Private",
+	3: "Non-Profit",
+	4: "Government",
+}

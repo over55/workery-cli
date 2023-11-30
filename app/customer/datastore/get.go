@@ -2,11 +2,11 @@ package datastore
 
 import (
 	"context"
+	"log/slog"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"golang.org/x/exp/slog"
 )
 
 func (impl CustomerStorerImpl) GetByID(ctx context.Context, id primitive.ObjectID) (*Customer, error) {

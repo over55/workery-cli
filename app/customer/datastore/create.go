@@ -2,9 +2,9 @@ package datastore
 
 import (
 	"context"
+	"log/slog"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"golang.org/x/exp/slog"
 )
 
 func (impl CustomerStorerImpl) Create(ctx context.Context, u *Customer) error {

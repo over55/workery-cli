@@ -2,13 +2,13 @@ package datastore
 
 import (
 	"context"
-	"log"
 	"time"
+
+	"log/slog"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"golang.org/x/exp/slog"
 )
 
 func (impl OrderStorerImpl) ListByFilter(ctx context.Context, f *OrderListFilter) (*OrderListResult, error) {
@@ -25,12 +25,23 @@ func (impl OrderStorerImpl) ListByFilter(ctx context.Context, f *OrderListFilter
 	if !f.TenantID.IsZero() {
 		filter["tenant_id"] = f.TenantID
 	}
-
+	if !f.CustomerID.IsZero() {
+		filter["customer_id"] = f.CustomerID
+	}
+	if !f.AssociateID.IsZero() {
+		filter["associate_id"] = f.AssociateID
+	}
 	if f.ExcludeArchived {
 		filter["status"] = bson.M{"$ne": OrderStatusArchived} // Do not list archived items! This code
 	}
 	if f.Status != 0 {
 		filter["status"] = f.Status
+	}
+	if f.Type != 0 {
+		filter["type"] = f.Type
+	}
+	if !f.ModifiedByUserID.IsZero() {
+		filter["modified_by_user_id"] = f.ModifiedByUserID
 	}
 
 	impl.Logger.Debug("listing filter:",
@@ -91,68 +102,4 @@ func (impl OrderStorerImpl) ListByFilter(ctx context.Context, f *OrderListFilter
 		NextCursor:  nextCursor,
 		HasNextPage: hasNextPage,
 	}, nil
-}
-
-func (impl OrderStorerImpl) ListAsSelectOptionByFilter(ctx context.Context, f *OrderListFilter) ([]*OrderAsSelectOption, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
-	defer cancel()
-
-	// Get a reference to the collection
-	collection := impl.Collection
-
-	// Pagination parameters
-	pageSize := 10
-	startAfter := "" // The ID to start after, initially empty for the first page
-
-	// Sorting parameters
-	sortField := "_id"
-	sortOrder := 1 // 1=ascending | -1=descending
-
-	// Pagination query
-	query := bson.M{}
-	options := options.Find().
-		SetLimit(int64(pageSize)).
-		SetSort(bson.D{{sortField, sortOrder}})
-
-	// Add filter conditions to the query
-	if !f.TenantID.IsZero() {
-		query["tenant_id"] = f.TenantID
-	}
-
-	if startAfter != "" {
-		// Find the document with the given startAfter ID
-		cursor, err := collection.FindOne(ctx, bson.M{"_id": startAfter}).DecodeBytes()
-		if err != nil {
-			log.Fatal(err)
-		}
-		options.SetSkip(1)
-		query["_id"] = bson.M{"$gt": cursor.Lookup("_id").ObjectID()}
-	}
-
-	if f.ExcludeArchived {
-		query["status"] = bson.M{"$ne": OrderStatusArchived} // Do not list archived items! This code
-	}
-
-	// Full-text search
-	if f.SearchText != "" {
-		query["$text"] = bson.M{"$search": f.SearchText}
-		options.SetProjection(bson.M{"score": bson.M{"$meta": "textScore"}})
-		options.SetSort(bson.D{{"score", bson.M{"$meta": "textScore"}}})
-	}
-
-	options.SetSort(bson.D{{sortField, 1}}) // Sort in ascending order based on the specified field
-
-	// Retrieve the list of items from the collection
-	cursor, err := collection.Find(ctx, query, options)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer cursor.Close(ctx)
-
-	var results = []*OrderAsSelectOption{}
-	if err = cursor.All(ctx, &results); err != nil {
-		panic(err)
-	}
-
-	return results, nil
 }

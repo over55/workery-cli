@@ -7,8 +7,9 @@ import (
 	"log"
 	"time"
 
+	"log/slog"
+
 	"github.com/spf13/cobra"
-	"golang.org/x/exp/slog"
 
 	"github.com/over55/workery-cli/adapter/storage/mongodb"
 	"github.com/over55/workery-cli/adapter/storage/postgres"
@@ -134,11 +135,9 @@ func importAssociateTag(ctx context.Context, ts tenant_ds.TenantStorer, us user_
 
 	cc := &cust_ds.AssociateTag{
 		ID:          tag.ID,
-		TenantID:    tag.TenantID,
 		Text:        tag.Text,
 		Description: tag.Description,
 		Status:      tag.Status,
-		OldID:       tag.OldID,
 	}
 
 	// Append tags to associate details.

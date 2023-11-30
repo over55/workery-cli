@@ -8,7 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"golang.org/x/exp/slog"
+	"log/slog"
 )
 
 func (impl InsuranceRequirementStorerImpl) ListByFilter(ctx context.Context, f *InsuranceRequirementListFilter) (*InsuranceRequirementListResult, error) {

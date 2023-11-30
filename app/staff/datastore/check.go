@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"golang.org/x/exp/slog"
+	"log/slog"
 )
 
 func (impl StaffStorerImpl) CheckIfExistsByEmail(ctx context.Context, email string) (bool, error) {

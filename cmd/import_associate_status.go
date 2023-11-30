@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"log"
 
+	"log/slog"
+
 	"github.com/spf13/cobra"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"golang.org/x/exp/slog"
 
 	"github.com/over55/workery-cli/adapter/storage/mongodb"
 	"github.com/over55/workery-cli/adapter/storage/postgres"
@@ -87,8 +87,8 @@ func RunImportAssociateStatus(cfg *config.Conf, public *sql.DB, london *sql.DB, 
 		5988,
 		6097,
 	}
-	f := &a_ds.AssociateListFilter{
-		Cursor:    primitive.NilObjectID,
+	f := &a_ds.AssociatePaginationListFilter{
+		Cursor:    "",
 		PageSize:  1_000_000,
 		SortField: "_id",
 		SortOrder: 1,

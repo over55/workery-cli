@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"golang.org/x/exp/slog"
+	"log/slog"
 )
 
 func (impl ServiceFeeStorerImpl) UpdateByID(ctx context.Context, m *ServiceFee) error {

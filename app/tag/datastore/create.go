@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"golang.org/x/exp/slog"
+	"log/slog"
 )
 
 func (impl TagStorerImpl) Create(ctx context.Context, u *Tag) error {

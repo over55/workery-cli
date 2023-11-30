@@ -2,13 +2,12 @@ package datastore
 
 import (
 	"context"
-	"log"
+	"log/slog"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"golang.org/x/exp/slog"
 )
 
 func (impl CustomerStorerImpl) ListByFilter(ctx context.Context, f *CustomerListFilter) (*CustomerListResult, error) {
@@ -25,23 +24,20 @@ func (impl CustomerStorerImpl) ListByFilter(ctx context.Context, f *CustomerList
 	if !f.TenantID.IsZero() {
 		filter["tenant_id"] = f.TenantID
 	}
-	if f.Role > 0 {
-		filter["role"] = f.Role
+	if f.Type > 0 {
+		filter["type"] = f.Type
 	}
 	if f.FirstName != "" {
-		filter["first_name"] = f.FirstName
+		filter["first_name"] = bson.M{"$regex": primitive.Regex{Pattern: f.FirstName, Options: "i"}}
 	}
 	if f.LastName != "" {
-		filter["last_name"] = f.LastName
+		filter["last_name"] = bson.M{"$regex": primitive.Regex{Pattern: f.LastName, Options: "i"}}
 	}
 	if f.Email != "" {
-		filter["email"] = f.Email
+		filter["email"] = bson.M{"$regex": primitive.Regex{Pattern: f.Email, Options: "i"}}
 	}
 	if f.Phone != "" {
 		filter["phone"] = f.Phone
-	}
-	if f.ExcludeArchived {
-		filter["status"] = bson.M{"$ne": CustomerStatusArchived} // Do not list archived items! This code
 	}
 	if f.Status != 0 {
 		filter["status"] = f.Status
@@ -108,83 +104,4 @@ func (impl CustomerStorerImpl) ListByFilter(ctx context.Context, f *CustomerList
 		NextCursor:  nextCursor,
 		HasNextPage: hasNextPage,
 	}, nil
-}
-
-func (impl CustomerStorerImpl) ListAsSelectOptionByFilter(ctx context.Context, f *CustomerListFilter) ([]*CustomerAsSelectOption, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
-	defer cancel()
-
-	// Get a reference to the collection
-	collection := impl.Collection
-
-	// Pagination parameters
-	pageSize := 10
-	startAfter := "" // The ID to start after, initially empty for the first page
-
-	// Sorting parameters
-	sortField := "_id"
-	sortOrder := 1 // 1=ascending | -1=descending
-
-	// Pagination query
-	query := bson.M{}
-	options := options.Find().
-		SetLimit(int64(pageSize)).
-		SetSort(bson.D{{sortField, sortOrder}})
-
-	// Add filter conditions to the query
-	if !f.TenantID.IsZero() {
-		query["tenant_id"] = f.TenantID
-	}
-	if f.Role > 0 {
-		query["role"] = f.Role
-	}
-	if f.FirstName != "" {
-		query["first_name"] = f.FirstName
-	}
-	if f.LastName != "" {
-		query["last_name"] = f.LastName
-	}
-	if f.Email != "" {
-		query["email"] = f.Email
-	}
-	if f.Phone != "" {
-		query["phone"] = f.Phone
-	}
-
-	if startAfter != "" {
-		// Find the document with the given startAfter ID
-		cursor, err := collection.FindOne(ctx, bson.M{"_id": startAfter}).DecodeBytes()
-		if err != nil {
-			log.Fatal(err)
-		}
-		options.SetSkip(1)
-		query["_id"] = bson.M{"$gt": cursor.Lookup("_id").ObjectID()}
-	}
-
-	if f.ExcludeArchived {
-		query["status"] = bson.M{"$ne": CustomerStatusArchived} // Do not list archived items! This code
-	}
-
-	// Full-text search
-	if f.SearchText != "" {
-		query["$text"] = bson.M{"$search": f.SearchText}
-		options.SetProjection(bson.M{"score": bson.M{"$meta": "textScore"}})
-		options.SetSort(bson.D{{"score", bson.M{"$meta": "textScore"}}})
-	}
-
-	options.SetSort(bson.D{{sortField, 1}}) // Sort in ascending order based on the specified field
-
-	// Retrieve the list of items from the collection
-	cursor, err := collection.Find(ctx, query, options)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer cursor.Close(ctx)
-
-	var results = []*CustomerAsSelectOption{}
-	if err = cursor.All(ctx, &results); err != nil {
-		panic(err)
-	}
-
-	return results, nil
 }

@@ -8,7 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"golang.org/x/exp/slog"
+	"log/slog"
 
 	c "github.com/over55/workery-cli/config"
 )
@@ -163,30 +163,24 @@ type StaffComment struct {
 
 type StaffVehicleType struct {
 	ID          primitive.ObjectID `bson:"_id" json:"id"`
-	TenantID    primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`
 	Text        string             `bson:"text" json:"text"`
 	Description string             `bson:"description" json:"description"`
 	Status      int8               `bson:"status" json:"status"`
-	OldID       uint64             `bson:"old_id" json:"old_id"`
 }
 
 type StaffSkillSet struct {
 	ID          primitive.ObjectID `bson:"_id" json:"id"`
-	TenantID    primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`
 	Category    string             `bson:"category" json:"category"`
 	SubCategory string             `bson:"sub_category" json:"sub_category"`
 	Description string             `bson:"description" json:"description"`
 	Status      int8               `bson:"status" json:"status"`
-	OldID       uint64             `bson:"old_id" json:"old_id"`
 }
 
 type StaffInsuranceRequirement struct {
 	ID          primitive.ObjectID `bson:"_id" json:"id"`
-	TenantID    primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`
 	Text        string             `bson:"text" json:"text"`
 	Description string             `bson:"description" json:"description"`
 	Status      int8               `bson:"status" json:"status"`
-	OldID       uint64             `bson:"old_id" json:"old_id"`
 }
 
 type StaffAwayLog struct {
@@ -214,11 +208,9 @@ type StaffAwayLog struct {
 
 type StaffTag struct {
 	ID          primitive.ObjectID `bson:"_id" json:"id"`
-	TenantID    primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`
 	Text        string             `bson:"text" json:"text"`
 	Description string             `bson:"description" json:"description"`
 	Status      int8               `bson:"status" json:"status"`
-	OldID       uint64             `bson:"old_id" json:"old_id"`
 }
 
 type StaffListFilter struct {

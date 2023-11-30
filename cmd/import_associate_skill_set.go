@@ -7,8 +7,9 @@ import (
 	"log"
 	"time"
 
+	"log/slog"
+
 	"github.com/spf13/cobra"
-	"golang.org/x/exp/slog"
 
 	"github.com/over55/workery-cli/adapter/storage/mongodb"
 	"github.com/over55/workery-cli/adapter/storage/postgres"
@@ -132,12 +133,10 @@ func importAssociateSkillSet(ctx context.Context, ssStorer ss_ds.SkillSetStorer,
 
 	avt := &a_ds.AssociateSkillSet{
 		ID:          ss.ID,
-		TenantID:    ss.TenantID,
 		Category:    ss.Category,
 		SubCategory: ss.SubCategory,
 		Description: ss.Description,
 		Status:      ss.Status,
-		OldID:       ss.OldID,
 	}
 
 	a.SkillSets = append(a.SkillSets, avt)

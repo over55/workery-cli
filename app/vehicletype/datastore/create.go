@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"golang.org/x/exp/slog"
+	"log/slog"
 )
 
 func (impl VehicleTypeStorerImpl) Create(ctx context.Context, u *VehicleType) error {

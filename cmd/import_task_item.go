@@ -7,9 +7,10 @@ import (
 	"log"
 	"time"
 
+	"log/slog"
+
 	"github.com/spf13/cobra"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"golang.org/x/exp/slog"
 	"gopkg.in/guregu/null.v4"
 
 	"github.com/over55/workery-cli/adapter/storage/mongodb"
@@ -203,14 +204,13 @@ func importTaskItem(
 		})
 	}
 
-	var orderTags []*ti_ds.TaskItemOrderTag
+	var orderTags []*ti_ds.TaskItemTag
 	for _, t := range order.Tags {
-		orderTags = append(orderTags, &ti_ds.TaskItemOrderTag{
+		orderTags = append(orderTags, &ti_ds.TaskItemTag{
 			ID:          t.ID,
-			TenantID:    t.TenantID,
 			Text:        t.Text,
 			Description: t.Description,
-			OldID:       t.OldID,
+			Status:      t.Status,
 		})
 	}
 
@@ -248,7 +248,7 @@ func importTaskItem(
 	var associateGender int8
 	var associateGenderOther string
 	var associateBirthdate time.Time
-	var associateTags = make([]*ti_ds.TaskItemAssociateTag, 0)
+	var associateTags = make([]*ti_ds.TaskItemTag, 0)
 	var associateEmail string
 	var associatePhone string
 	var associatePhoneType int8
@@ -281,12 +281,11 @@ func importTaskItem(
 		associateFullAddressURL = a.FullAddressURL
 
 		for _, tag := range a.Tags {
-			associateTags = append(associateTags, &ti_ds.TaskItemAssociateTag{
+			associateTags = append(associateTags, &ti_ds.TaskItemTag{
 				ID:          tag.ID,
-				TenantID:    tag.TenantID,
 				Text:        tag.Text,
 				Description: tag.Description,
-				OldID:       tag.OldID,
+				Status:      tag.Status,
 			})
 		}
 	}
@@ -301,7 +300,7 @@ func importTaskItem(
 	var customerGender int8
 	var customerGenderOther string
 	var customerDOB time.Time
-	var customerTags []*ti_ds.TaskItemCustomerTag
+	var customerTags []*ti_ds.TaskItemTag
 	var customerEmail string
 	var customerPhone string
 	var customerPhoneType int8
@@ -334,12 +333,11 @@ func importTaskItem(
 		customerFullAddressURL = c.FullAddressURL
 
 		for _, tag := range c.Tags {
-			customerTags = append(customerTags, &ti_ds.TaskItemCustomerTag{
+			customerTags = append(customerTags, &ti_ds.TaskItemTag{
 				ID:          tag.ID,
-				TenantID:    tag.TenantID,
 				Text:        tag.Text,
 				Description: tag.Description,
-				OldID:       tag.OldID,
+				Status:      tag.Status,
 			})
 		}
 	}

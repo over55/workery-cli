@@ -3,8 +3,9 @@ package datastore
 import (
 	"context"
 
+	"log/slog"
+
 	"go.mongodb.org/mongo-driver/bson"
-	"golang.org/x/exp/slog"
 )
 
 func (impl TaskItemStorerImpl) UpdateByID(ctx context.Context, m *TaskItem) error {
@@ -15,13 +16,10 @@ func (impl TaskItemStorerImpl) UpdateByID(ctx context.Context, m *TaskItem) erro
 	}
 
 	// execute the UpdateOne() function to update the first matching document
-	result, err := impl.Collection.UpdateOne(ctx, filter, update)
+	_, err := impl.Collection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		impl.Logger.Error("database update by user id error", slog.Any("error", err))
 	}
-
-	// display the number of documents updated
-	impl.Logger.Debug("number of documents updated", slog.Int64("modified_count", result.ModifiedCount))
 
 	return nil
 }

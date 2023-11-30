@@ -3,43 +3,43 @@ package datastore
 import (
 	"context"
 	"log"
+	"log/slog"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"golang.org/x/exp/slog"
 
 	c "github.com/over55/workery-cli/config"
 )
 
 const (
-	CustomerStatusActive   = 1
-	CustomerStatusArchived = 2
-
+	CustomerStatusActive                    = 1
+	CustomerStatusArchived                  = 2
 	CustomerDeactivationReasonNotSpecified  = 0
 	CustomerDeactivationReasonOther         = 1
 	CustomerDeactivationReasonBlacklisted   = 2
 	CustomerDeactivationReasonMoved         = 3
 	CustomerDeactivationReasonDeceased      = 4
 	CustomerDeactivationReasonDoNotConstact = 5
-
-	CustomerTypeUnassigned  = 1
-	CustomerTypeResidential = 2
-	CustomerTypeCommercial  = 3
-
-	CustomerPhoneTypeLandline = 1
-	CustomerPhoneTypeMobile   = 2
-	CustomerPhoneTypeWork     = 3
-
-	CustomerGenderOther          = 1
-	CustomerGenderMan            = 2
-	CustomerGenderWoman          = 3
-	CustomerGenderTransgender    = 4
-	CustomerGenderNonBinary      = 5
-	CustomerGenderTwoSpirit      = 6
-	CustomerGenderPreferNotToSay = 7
-	CustomerGenderDoNotKnow      = 8
+	CustomerTypeUnassigned                  = 1
+	CustomerTypeResidential                 = 2
+	CustomerTypeCommercial                  = 3
+	CustomerPhoneTypeLandline               = 1
+	CustomerPhoneTypeMobile                 = 2
+	CustomerPhoneTypeWork                   = 3
+	CustomerOrganizationTypeUnknown         = 1
+	CustomerOrganizationTypePrivate         = 2
+	CustomerOrganizationTypeNonProfit       = 3
+	CustomerOrganizationTypeGovernment      = 4
+	CustomerGenderOther                     = 1
+	CustomerGenderMan                       = 2
+	CustomerGenderWoman                     = 3
+	CustomerGenderTransgender               = 4
+	CustomerGenderNonBinary                 = 5
+	CustomerGenderTwoSpirit                 = 6
+	CustomerGenderPreferNotToSay            = 7
+	CustomerGenderDoNotKnow                 = 8
 )
 
 type Customer struct {
@@ -50,9 +50,11 @@ type Customer struct {
 	Name                                 string             `bson:"name" json:"name"`
 	LexicalName                          string             `bson:"lexical_name" json:"lexical_name"`
 	Email                                string             `bson:"email" json:"email"`
+	IsOkToEmail                          bool               `bson:"is_ok_to_email" json:"is_ok_to_email"`
 	Phone                                string             `bson:"phone" json:"phone,omitempty"`
 	PhoneType                            int8               `bson:"phone_type" json:"phone_type"`
 	PhoneExtension                       string             `bson:"phone_extension" json:"phone_extension"`
+	IsOkToText                           bool               `bson:"is_ok_to_text" json:"is_ok_to_text"`
 	FaxNumber                            string             `bson:"fax_number" json:"fax_number"`
 	OtherPhone                           string             `bson:"other_phone" json:"other_phone"`
 	OtherPhoneExtension                  string             `bson:"other_phone_extension" json:"other_phone_extension"`
@@ -101,8 +103,6 @@ type Customer struct {
 	HasUserAccount                       bool               `bson:"has_user_account" json:"has_user_account,omitempty"`
 	UserID                               primitive.ObjectID `bson:"user_id" json:"user_id,omitempty"`
 	Type                                 int8               `bson:"type" json:"type"`
-	IsOkToEmail                          bool               `bson:"is_ok_to_email" json:"is_ok_to_email"`
-	IsOkToText                           bool               `bson:"is_ok_to_text" json:"is_ok_to_text"`
 	IsBusiness                           bool               `bson:"is_business" json:"is_business"`
 	IsSenior                             bool               `bson:"is_senior" json:"is_senior"`
 	IsSupport                            bool               `bson:"is_support" json:"is_support"`
@@ -110,6 +110,8 @@ type Customer struct {
 	DeactivationReason                   int8               `bson:"deactivation_reason" json:"deactivation_reason"`
 	DeactivationReasonOther              string             `bson:"deactivation_reason_other" json:"deactivation_reason_other"`
 	Description                          string             `bson:"description" json:"description"`
+	AvatarObjectExpiry                   time.Time          `bson:"avatar_object_expiry" json:"avatar_object_expiry"`
+	AvatarObjectURL                      string             `bson:"avatar_object_url" json:"avatar_object_url"`
 	AvatarObjectKey                      string             `bson:"avatar_object_key" json:"avatar_object_key"`
 	AvatarFileType                       string             `bson:"avatar_file_type" json:"avatar_file_type"`
 	AvatarFileName                       string             `bson:"avatar_file_name" json:"avatar_file_name"`
@@ -151,11 +153,9 @@ type CustomerComment struct {
 
 type CustomerTag struct {
 	ID          primitive.ObjectID `bson:"_id" json:"id"`
-	TenantID    primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`
 	Text        string             `bson:"text" json:"text"`
 	Description string             `bson:"description" json:"description"`
 	Status      int8               `bson:"status" json:"status"`
-	OldID       uint64             `bson:"old_id" json:"old_id"`
 }
 
 type CustomerListFilter struct {
@@ -166,17 +166,17 @@ type CustomerListFilter struct {
 	SortOrder int8 // 1=ascending | -1=descending
 
 	// Filter related.
-	TenantID        primitive.ObjectID
-	Role            int8
-	Status          int8
-	UUIDs           []string
-	ExcludeArchived bool
-	SearchText      string
-	FirstName       string
-	LastName        string
-	Email           string
-	Phone           string
-	CreatedAtGTE    time.Time
+	TenantID     primitive.ObjectID
+	Type         int8
+	Role         int8
+	Status       int8
+	UUIDs        []string
+	SearchText   string
+	FirstName    string
+	LastName     string
+	Email        string
+	Phone        string
+	CreatedAtGTE time.Time
 }
 
 type CustomerListResult struct {
@@ -202,7 +202,9 @@ type CustomerStorer interface {
 	UpsertByID(ctx context.Context, user *Customer) error
 	ListByFilter(ctx context.Context, f *CustomerListFilter) (*CustomerListResult, error)
 	ListAsSelectOptionByFilter(ctx context.Context, f *CustomerListFilter) ([]*CustomerAsSelectOption, error)
+	LiteListByFilter(ctx context.Context, f *CustomerPaginationListFilter) (*CustomerPaginationLiteListResult, error)
 	DeleteByID(ctx context.Context, id primitive.ObjectID) error
+	CountByFilter(ctx context.Context, f *CustomerListFilter) (int64, error)
 	// //TODO: Add more...
 }
 
@@ -272,10 +274,9 @@ var CustomerTelephoneTypeLabels = map[int8]string{
 	3: "Work",
 }
 
-//---------------------
-// organization_type
-//---------------------
-// 1 = Unknown Organization Type | UNKNOWN_ORGANIZATION_TYPE_OF_ID
-// 2 = Private Organization Type | PRIVATE_ORGANIZATION_TYPE_OF_ID
-// 3 = Non-Profit Organization Type | NON_PROFIT_ORGANIZATION_TYPE_OF_ID
-// 4 = Government Organization | GOVERNMENT_ORGANIZATION_TYPE_OF_ID
+var CustomerOrganizationTypeLabels = map[int8]string{
+	1: "Unknown",
+	2: "Private",
+	3: "Non-Profit",
+	4: "Government",
+}

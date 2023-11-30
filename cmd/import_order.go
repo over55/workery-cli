@@ -5,11 +5,11 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"log/slog"
 	"time"
 
 	"github.com/spf13/cobra"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"golang.org/x/exp/slog"
 	"gopkg.in/guregu/null.v4"
 
 	"github.com/over55/workery-cli/adapter/storage/mongodb"
@@ -313,27 +313,27 @@ func importOrder(
 	var state int8
 	switch s := wo.State; s {
 	case "new":
-		state = o_ds.OrderNewState
+		state = o_ds.OrderStatusNew
 	case "declined":
-		state = o_ds.OrderDeclinedState
+		state = o_ds.OrderStatusDeclined
 	case "pending":
-		state = o_ds.OrderPendingState
+		state = o_ds.OrderStatusPending
 	case "cancelled":
-		state = o_ds.OrderCancelledState
+		state = o_ds.OrderStatusCancelled
 	case "ongoing":
-		state = o_ds.OrderOngoingState
+		state = o_ds.OrderStatusOngoing
 	case "in_progress":
-		state = o_ds.OrderInProgressState
+		state = o_ds.OrderStatusInProgress
 	case "completed_and_unpaid":
-		state = o_ds.OrderCompletedButUnpaidState
+		state = o_ds.OrderStatusCompletedButUnpaid
 	case "completed_but_unpaid":
-		state = o_ds.OrderCompletedButUnpaidState
+		state = o_ds.OrderStatusCompletedButUnpaid
 	case "completed_and_paid":
-		state = o_ds.OrderCompletedAndPaidState
+		state = o_ds.OrderStatusCompletedAndPaid
 	case "archived":
-		state = o_ds.OrderArchivedState
+		state = o_ds.OrderStatusArchived
 	default:
-		state = o_ds.OrderArchivedState
+		state = o_ds.OrderStatusArchived
 	}
 
 	//

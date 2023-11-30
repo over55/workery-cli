@@ -7,8 +7,9 @@ import (
 	"log"
 	"time"
 
+	"log/slog"
+
 	"github.com/spf13/cobra"
-	"golang.org/x/exp/slog"
 
 	"github.com/over55/workery-cli/adapter/storage/mongodb"
 	"github.com/over55/workery-cli/adapter/storage/postgres"
@@ -135,12 +136,9 @@ func importOrderTag(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.U
 
 	oc := &o_ds.OrderTag{
 		ID:          tag.ID,
-		OrderID:     order.ID,
-		OrderWJID:   order.WJID,
-		TenantID:    tag.TenantID,
 		Text:        tag.Text,
 		Description: tag.Description,
-		OldID:       tag.OldID,
+		Status:      tag.Status,
 	}
 
 	// Append tags to order details.

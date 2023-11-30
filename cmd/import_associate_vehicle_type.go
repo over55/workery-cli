@@ -7,8 +7,9 @@ import (
 	"log"
 	"time"
 
+	"log/slog"
+
 	"github.com/spf13/cobra"
-	"golang.org/x/exp/slog"
 
 	"github.com/over55/workery-cli/adapter/storage/mongodb"
 	"github.com/over55/workery-cli/adapter/storage/postgres"
@@ -132,11 +133,9 @@ func importAssociateVehicleType(ctx context.Context, vtStorer vt_ds.VehicleTypeS
 
 	avt := &a_ds.AssociateVehicleType{
 		ID:          vt.ID,
-		TenantID:    vt.TenantID,
 		Name:        vt.Name,
 		Description: vt.Description,
 		Status:      vt.Status,
-		OldID:       vt.OldID,
 	}
 
 	a.VehicleTypes = append(a.VehicleTypes, avt)
