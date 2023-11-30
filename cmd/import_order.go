@@ -302,8 +302,8 @@ func importOrder(
 		customerPhone = c.Phone
 		customerPhoneType = c.PhoneType
 		customerPhoneExtension = c.PhoneExtension
-		customerFullAddressWithoutPostalCode = a.FullAddressWithoutPostalCode
-		customerFullAddressURL = a.FullAddressURL
+		customerFullAddressWithoutPostalCode = c.FullAddressWithoutPostalCode
+		customerFullAddressURL = c.FullAddressURL
 	}
 
 	//

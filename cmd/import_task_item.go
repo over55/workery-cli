@@ -330,8 +330,8 @@ func importTaskItem(
 		customerOtherPhone = c.OtherPhone
 		customerOtherPhoneType = c.OtherPhoneType
 		customerOtherPhoneExtension = c.OtherPhoneExtension
-		customerFullAddressWithoutPostalCode = a.FullAddressWithoutPostalCode
-		customerFullAddressURL = a.FullAddressURL
+		customerFullAddressWithoutPostalCode = c.FullAddressWithoutPostalCode
+		customerFullAddressURL = c.FullAddressURL
 
 		for _, tag := range c.Tags {
 			customerTags = append(customerTags, &ti_ds.TaskItemCustomerTag{
