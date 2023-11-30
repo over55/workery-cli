@@ -510,6 +510,8 @@ func importOrder(
 		ClosingReasonComment:              wo.ClosingReasonComment,
 		Tags:                              orderTags,
 		SkillSets:                         orderSkillSets,
+		InsuranceRequirements:             make([]*o_s.OrderInsuranceRequirement, 0),
+		VehicleTypes:                      make([]*o_s.OrderVehicleType, 0),
 		// LatestPendingTaskID:               wo.LatestPendingTaskID, //TODO: LATER
 	}
 

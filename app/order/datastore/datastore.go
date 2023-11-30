@@ -8,127 +8,118 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	c "github.com/over55/workery-cli/config"
+	c "github.com/over55/workery-backend/config"
 )
 
 type Order struct {
-	ID                                    primitive.ObjectID `bson:"_id" json:"id"`
-	WJID                                  uint64             `bson:"wjid" json:"wjid"` // A.K.A. `Workery Job ID` (Not including tenancy)
-	CustomerID                            primitive.ObjectID `bson:"customer_id" json:"customer_id"`
-	CustomerName                          string             `bson:"customer_name" json:"customer_name,omitempty"`
-	CustomerLexicalName                   string             `bson:"customer_lexical_name" json:"customer_lexical_name,omitempty"`
-	CustomerGender                        int8               `bson:"customer_gender" json:"customer_gender"`
-	CustomerGenderOther                   string             `bson:"customer_gender_other" json:"customer_gender_other"`
-	CustomerBirthdate                     time.Time          `bson:"customer_birthdate" json:"customer_birthdate"`
-	CustomerEmail                         string             `bson:"customer_email" json:"customer_email"`
-	CustomerPhone                         string             `bson:"customer_phone" json:"customer_phone,omitempty"`
-	CustomerPhoneType                     int8               `bson:"customer_phone_type" json:"customer_phone_type"`
-	CustomerPhoneExtension                string             `bson:"customer_phone_extension" json:"customer_phone_extension"`
-	CustomerOtherPhone                    string             `bson:"customer_other_phone" json:"customer_other_phone"`
-	CustomerOtherPhoneExtension           string             `bson:"customer_other_phone_extension" json:"customer_other_phone_extension"`
-	CustomerOtherPhoneType                int8               `bson:"customer_other_phone_type" json:"customer_other_phone_type"`
-	CustomerFullAddressWithoutPostalCode  string             `bson:"customer_full_address_without_postal_code" json:"customer_full_address_without_postal_code"`
-	CustomerFullAddressURL                string             `bson:"customer_full_address_url" json:"customer_full_address_url"`
-	CustomerTags                          []*OrderTag        `bson:"customer_tags" json:"customer_tags,omitempty"`
-	AssociateID                           primitive.ObjectID `bson:"associate_id" json:"associate_id"`
-	AssociateName                         string             `bson:"associate_name" json:"associate_name,omitempty"`
-	AssociateLexicalName                  string             `bson:"associate_lexical_name" json:"associate_lexical_name,omitempty"`
-	AssociateGender                       int8               `bson:"associate_gender" json:"associate_gender"`
-	AssociateGenderOther                  string             `bson:"associate_gender_other" json:"associate_gender_other"`
-	AssociateBirthdate                    time.Time          `bson:"associate_birthdate" json:"associate_birthdate"`
-	AssociateEmail                        string             `bson:"associate_email" json:"associate_email,omitempty"`
-	AssociatePhone                        string             `bson:"associate_phone" json:"associate_phone,omitempty"`
-	AssociatePhoneType                    int8               `bson:"associate_phone_type" json:"associate_phone_type"`
-	AssociatePhoneExtension               string             `bson:"associate_phone_extension" json:"associate_phone_extension"`
-	AssociateOtherPhone                   string             `bson:"associate_other_phone" json:"associate_other_phone"`
-	AssociateOtherPhoneExtension          string             `bson:"associate_other_phone_extension" json:"associate_other_phone_extension"`
-	AssociateOtherPhoneType               int8               `bson:"associate_other_phone_type" json:"associate_other_phone_type"`
-	AssociateFullAddressWithoutPostalCode string             `bson:"associate_full_address_without_postal_code" json:"associate_full_address_without_postal_code"`
-	AssociateFullAddressURL               string             `bson:"associate_full_address_url" json:"associate_full_address_url"`
-	AssociateTags                         []*OrderTag        `bson:"associate_tags" json:"associate_tags,omitempty"`
-	TenantID                              primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`
-	TenantIDWithWJID                      string             `bson:"tenant_id_with_wjid" json:"tenant_id_with_wjid"` // TenantIDWithWJID is a combination of `tenancy_id` and `wjid` values written in the following structure `%v_%v`.
-	Description                           string             `bson:"description" json:"description"`
-	AssignmentDate                        time.Time          `bson:"assignment_date" json:"assignment_date"`
-	IsOngoing                             bool               `bson:"is_ongoing" json:"is_ongoing"`
-	IsHomeSupportService                  bool               `bson:"is_home_support_service" json:"is_home_support_service"`
-	StartDate                             time.Time          `bson:"start_date" json:"start_date"`
-	CompletionDate                        time.Time          `bson:"completion_date" json:"completion_date"`
-	Hours                                 float64            `bson:"hours" json:"hours"`
-	Type                                  int8               `bson:"type" json:"type"`
-	IndexedText                           string             `bson:"indexed_text" json:"indexed_text"`
-	ClosingReason                         int8               `bson:"closing_reason" json:"closing_reason"`
-	ClosingReasonOther                    string             `bson:"closing_reason_other" json:"closing_reason_other"`
-	Status                                int8               `bson:"status" json:"status"`
-	Currency                              string             `bson:"currency" json:"currency"`
-	WasJobSatisfactory                    bool               `bson:"was_job_satisfactory" json:"was_job_satisfactory"`
-	WasJobFinishedOnTimeAndOnBudget       bool               `bson:"was_job_finished_on_time_and_on_budget" json:"was_job_finished_on_time_and_on_budget"`
-	WasAssociatePunctual                  bool               `bson:"was_associate_punctual" json:"was_associate_punctual"`
-	WasAssociateProfessional              bool               `bson:"was_associate_professional" json:"was_associate_professional"`
-	WouldCustomerReferOurOrganization     bool               `bson:"would_customer_refer_our_organization" json:"would_customer_refer_our_organization"`
-	Score                                 float64            `bson:"score" json:"score"`
-	InvoiceDate                           time.Time          `bson:"invoice_date" json:"invoice_date"`
-	InvoiceQuoteAmount                    float64            `bson:"invoice_quote_amount" json:"invoice_quote_amount"`
-	InvoiceLabourAmount                   float64            `bson:"invoice_labour_amount" json:"invoice_labour_amount"`
-	InvoiceMaterialAmount                 float64            `bson:"invoice_material_amount" json:"invoice_material_amount"`
-	InvoiceTaxAmount                      float64            `bson:"invoice_tax_amount" json:"invoice_tax_amount"`
-	InvoiceTotalAmount                    float64            `bson:"invoice_total_amount" json:"invoice_total_amount"`
-	InvoiceServiceFeeAmount               float64            `bson:"invoice_service_fee_amount" json:"invoice_service_fee_amount"`
-	InvoiceServiceFeePaymentDate          time.Time          `bson:"invoice_service_fee_payment_date" json:"invoice_service_fee_payment_date"`
-	CreatedAt                             time.Time          `bson:"created_at" json:"created_at"`
-	CreatedByUserID                       primitive.ObjectID `bson:"created_by_user_id" json:"created_by_user_id,omitempty"`
-	CreatedByUserName                     string             `bson:"created_by_user_name" json:"created_by_user_name"`
-	CreatedFromIPAddress                  string             `bson:"created_from_ip_address" json:"created_from_ip_address"`
-	ModifiedAt                            time.Time          `bson:"modified_at" json:"modified_at"`
-	ModifiedByUserID                      primitive.ObjectID `bson:"modified_by_user_id" json:"modified_by_user_id,omitempty"`
-	ModifiedByUserName                    string             `bson:"modified_by_user_name" json:"modified_by_user_name"`
-	ModifiedFromIPAddress                 string             `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
-	InvoiceServiceFeeID                   primitive.ObjectID `bson:"invoice_service_fee_id" json:"invoice_service_fee_id"`
-	InvoiceServiceFeeName                 string             `bson:"invoice_service_fee_name" json:"invoice_service_fee_name"`
-	InvoiceServiceFeeDescription          string             `bson:"invoice_service_fee_description" json:"invoice_service_fee_description"`
-	InvoiceServiceFeePercentage           float64            `bson:"invoice_service_fee_percentage" json:"invoice_service_fee_percentage"`
-	LatestPendingTaskID                   primitive.ObjectID `bson:"latest_pending_task_id" json:"latest_pending_task_id"`
-	LatestPendingTaskTitle                string             `bson:"latest_pending_task_title" json:"latest_pending_task_title"`
-	LatestPendingTaskDescription          string             `bson:"latest_pending_task_description" json:"latest_pending_task_description"`
-	LatestPendingTaskDueDate              time.Time          `bson:"latest_pending_task_due_date" json:"latest_pending_task_due_date"`
-	LatestPendingTaskType                 int8               `bson:"latest_pending_task_type" json:"latest_pending_task_type"`
-	OngoingOrderID                        primitive.ObjectID `bson:"ongoing_work_order_id" json:"ongoing_work_order_id"`
-	WasSurveyConducted                    bool               `bson:"was_survey_conducted" json:"was_survey_conducted"`
-	WasThereFinancialsInputted            bool               `bson:"was_there_financials_inputted" json:"was_there_financials_inputted"`
-	InvoiceActualServiceFeeAmountPaid     float64            `bson:"invoice_actual_service_fee_amount_paid" json:"invoice_actual_service_fee_amount_paid"`
-	InvoiceBalanceOwingAmount             float64            `bson:"invoice_balance_owing_amount" json:"invoice_balance_owing_amount"`
-	InvoiceQuotedLabourAmount             float64            `bson:"invoice_quoted_labour_amount" json:"invoice_quoted_labour_amount"`
-	InvoiceQuotedMaterialAmount           float64            `bson:"invoice_quoted_material_amount" json:"invoice_quoted_material_amount"`
-	InvoiceTotalQuoteAmount               float64            `bson:"invoice_total_quote_amount" json:"invoice_total_quote_amount"`
-	Visits                                int8               `bson:"visits" json:"visits"`
-	InvoiceIDs                            string             `bson:"invoice_ids" json:"invoice_ids"`
-	NoSurveyConductedReason               int8               `bson:"no_survey_conducted_reason" json:"no_survey_conducted_reason"`
-	NoSurveyConductedReasonOther          string             `bson:"no_survey_conducted_reason_other" json:"no_survey_conducted_reason_other"`
-	ClonedFromOrderID                     primitive.ObjectID `bson:"cloned_from_order_id" json:"cloned_from_order_id"`
-	InvoiceDepositAmount                  float64            `bson:"invoice_deposit_amount_id" json:"invoice_deposit_amount"`
-	InvoiceOtherCostsAmount               float64            `bson:"invoice_other_costs_amount" json:"invoice_other_costs_amount"`
-	InvoiceQuotedOtherCostsAmount         float64            `bson:"invoice_quoted_other_costs_amount" json:"invoice_quoted_other_costs_amount"`
-	InvoicePaidTo                         int8               `bson:"invoice_paid_to" json:"invoice_paid_to"`
-	InvoiceAmountDue                      float64            `bson:"invoice_amount_due" json:"invoice_amount_due"`
-	InvoiceSubTotalAmount                 float64            `bson:"invoice_sub_total_amount" json:"invoice_sub_total_amount"`
-	ClosingReasonComment                  string             `bson:"closing_reason_comment" json:"closing_reason_comment"`
-	Tags                                  []*OrderTag        `bson:"tags" json:"tags,omitempty"`
-	SkillSets                             []*OrderSkillSet   `bson:"skill_sets" json:"skill_sets,omitempty"`
-	Comments                              []*OrderComment    `bson:"comments" json:"comments,omitempty"`
-	Invoices                              []*OrderInvoice    `bson:"invoices" json:"invoices,omitempty"`
-	Deposits                              []*OrderDeposit    `bson:"deposits" json:"deposits,omitempty"`
-}
-
-type OrderSkillSet struct {
-	ID                    primitive.ObjectID `bson:"id" json:"id"`
-	OrderID               primitive.ObjectID `bson:"order_id" json:"order_id"`
-	OrderWJID             uint64             `bson:"order_wjid" json:"order_wjid"`                               // Workery Job ID
-	OrderTenantIDWithWJID string             `bson:"order_tenant_id_with_wjid" json:"order_tenant_id_with_wjid"` // OrderTenantIDWithWJID is a combination of `tenancy_id` and `wjid` values written in the following structure `%v_%v`.
-	TenantID              primitive.ObjectID `bson:"tenant_id" json:"tenant_id"`
-	Category              string             `bson:"category" json:"category,omitempty"`         // Referenced value from 'tags'.
-	SubCategory           string             `bson:"sub_category" json:"sub_category,omitempty"` // Referenced value from 'tags'.
-	Description           string             `bson:"description" json:"description,omitempty"`   // Referenced value from 'tags'.
-	OldID                 uint64             `bson:"old_id" json:"old_id"`
+	ID                                    primitive.ObjectID           `bson:"_id" json:"id"`
+	WJID                                  uint64                       `bson:"wjid" json:"wjid"` // A.K.A. `Workery Job ID` (Not including tenancy)
+	CustomerID                            primitive.ObjectID           `bson:"customer_id" json:"customer_id"`
+	CustomerName                          string                       `bson:"customer_name" json:"customer_name,omitempty"`
+	CustomerLexicalName                   string                       `bson:"customer_lexical_name" json:"customer_lexical_name,omitempty"`
+	CustomerGender                        int8                         `bson:"customer_gender" json:"customer_gender"`
+	CustomerGenderOther                   string                       `bson:"customer_gender_other" json:"customer_gender_other"`
+	CustomerBirthdate                     time.Time                    `bson:"customer_birthdate" json:"customer_birthdate"`
+	CustomerEmail                         string                       `bson:"customer_email" json:"customer_email"`
+	CustomerPhone                         string                       `bson:"customer_phone" json:"customer_phone,omitempty"`
+	CustomerPhoneType                     int8                         `bson:"customer_phone_type" json:"customer_phone_type"`
+	CustomerPhoneExtension                string                       `bson:"customer_phone_extension" json:"customer_phone_extension"`
+	CustomerOtherPhone                    string                       `bson:"customer_other_phone" json:"customer_other_phone"`
+	CustomerOtherPhoneExtension           string                       `bson:"customer_other_phone_extension" json:"customer_other_phone_extension"`
+	CustomerOtherPhoneType                int8                         `bson:"customer_other_phone_type" json:"customer_other_phone_type"`
+	CustomerFullAddressWithoutPostalCode  string                       `bson:"customer_full_address_without_postal_code" json:"customer_full_address_without_postal_code"`
+	CustomerFullAddressURL                string                       `bson:"customer_full_address_url" json:"customer_full_address_url"`
+	CustomerTags                          []*OrderTag                  `bson:"customer_tags" json:"customer_tags,omitempty"`
+	AssociateID                           primitive.ObjectID           `bson:"associate_id" json:"associate_id"`
+	AssociateName                         string                       `bson:"associate_name" json:"associate_name,omitempty"`
+	AssociateLexicalName                  string                       `bson:"associate_lexical_name" json:"associate_lexical_name,omitempty"`
+	AssociateGender                       int8                         `bson:"associate_gender" json:"associate_gender"`
+	AssociateGenderOther                  string                       `bson:"associate_gender_other" json:"associate_gender_other"`
+	AssociateBirthdate                    time.Time                    `bson:"associate_birthdate" json:"associate_birthdate"`
+	AssociateEmail                        string                       `bson:"associate_email" json:"associate_email,omitempty"`
+	AssociatePhone                        string                       `bson:"associate_phone" json:"associate_phone,omitempty"`
+	AssociatePhoneType                    int8                         `bson:"associate_phone_type" json:"associate_phone_type"`
+	AssociatePhoneExtension               string                       `bson:"associate_phone_extension" json:"associate_phone_extension"`
+	AssociateOtherPhone                   string                       `bson:"associate_other_phone" json:"associate_other_phone"`
+	AssociateOtherPhoneExtension          string                       `bson:"associate_other_phone_extension" json:"associate_other_phone_extension"`
+	AssociateOtherPhoneType               int8                         `bson:"associate_other_phone_type" json:"associate_other_phone_type"`
+	AssociateFullAddressWithoutPostalCode string                       `bson:"associate_full_address_without_postal_code" json:"associate_full_address_without_postal_code"`
+	AssociateFullAddressURL               string                       `bson:"associate_full_address_url" json:"associate_full_address_url"`
+	AssociateTags                         []*OrderTag                  `bson:"associate_tags" json:"associate_tags,omitempty"`
+	AssociateSkillSets                    []*OrderSkillSet             `bson:"associate_skill_sets" json:"associate_skill_sets,omitempty"`
+	AssociateInsuranceRequirements        []*OrderInsuranceRequirement `bson:"associate_insurance_requirements" json:"associate_insurance_requirements,omitempty"`
+	AssociateVehicleTypes                 []*OrderVehicleType          `bson:"associate_vehicle_types" json:"associate_vehicle_types,omitempty"`
+	TenantID                              primitive.ObjectID           `bson:"tenant_id" json:"tenant_id,omitempty"`
+	TenantIDWithWJID                      string                       `bson:"tenant_id_with_wjid" json:"tenant_id_with_wjid"` // TenantIDWithWJID is a combination of `tenancy_id` and `wjid` values written in the following structure `%v_%v`.
+	Description                           string                       `bson:"description" json:"description"`
+	AssignmentDate                        time.Time                    `bson:"assignment_date" json:"assignment_date"`
+	IsOngoing                             bool                         `bson:"is_ongoing" json:"is_ongoing"`
+	IsHomeSupportService                  bool                         `bson:"is_home_support_service" json:"is_home_support_service"`
+	StartDate                             time.Time                    `bson:"start_date" json:"start_date"`
+	CompletionDate                        time.Time                    `bson:"completion_date" json:"completion_date"`
+	Hours                                 float64                      `bson:"hours" json:"hours"`
+	Type                                  int8                         `bson:"type" json:"type"`
+	IndexedText                           string                       `bson:"indexed_text" json:"indexed_text"`
+	ClosingReason                         int8                         `bson:"closing_reason" json:"closing_reason"`
+	ClosingReasonOther                    string                       `bson:"closing_reason_other" json:"closing_reason_other"`
+	Status                                int8                         `bson:"status" json:"status"`
+	Currency                              string                       `bson:"currency" json:"currency"`
+	WasJobSatisfactory                    bool                         `bson:"was_job_satisfactory" json:"was_job_satisfactory"`
+	WasJobFinishedOnTimeAndOnBudget       bool                         `bson:"was_job_finished_on_time_and_on_budget" json:"was_job_finished_on_time_and_on_budget"`
+	WasAssociatePunctual                  bool                         `bson:"was_associate_punctual" json:"was_associate_punctual"`
+	WasAssociateProfessional              bool                         `bson:"was_associate_professional" json:"was_associate_professional"`
+	WouldCustomerReferOurOrganization     bool                         `bson:"would_customer_refer_our_organization" json:"would_customer_refer_our_organization"`
+	Score                                 float64                      `bson:"score" json:"score"`
+	InvoiceDate                           time.Time                    `bson:"invoice_date" json:"invoice_date"`
+	InvoiceQuoteAmount                    float64                      `bson:"invoice_quote_amount" json:"invoice_quote_amount"`
+	InvoiceLabourAmount                   float64                      `bson:"invoice_labour_amount" json:"invoice_labour_amount"`
+	InvoiceMaterialAmount                 float64                      `bson:"invoice_material_amount" json:"invoice_material_amount"`
+	InvoiceTaxAmount                      float64                      `bson:"invoice_tax_amount" json:"invoice_tax_amount"`
+	InvoiceTotalAmount                    float64                      `bson:"invoice_total_amount" json:"invoice_total_amount"`
+	InvoiceServiceFeeAmount               float64                      `bson:"invoice_service_fee_amount" json:"invoice_service_fee_amount"`
+	InvoiceServiceFeePaymentDate          time.Time                    `bson:"invoice_service_fee_payment_date" json:"invoice_service_fee_payment_date"`
+	CreatedAt                             time.Time                    `bson:"created_at" json:"created_at"`
+	CreatedByUserID                       primitive.ObjectID           `bson:"created_by_user_id" json:"created_by_user_id,omitempty"`
+	CreatedByUserName                     string                       `bson:"created_by_user_name" json:"created_by_user_name"`
+	CreatedFromIPAddress                  string                       `bson:"created_from_ip_address" json:"created_from_ip_address"`
+	ModifiedAt                            time.Time                    `bson:"modified_at" json:"modified_at"`
+	ModifiedByUserID                      primitive.ObjectID           `bson:"modified_by_user_id" json:"modified_by_user_id,omitempty"`
+	ModifiedByUserName                    string                       `bson:"modified_by_user_name" json:"modified_by_user_name"`
+	ModifiedFromIPAddress                 string                       `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
+	InvoiceServiceFeeID                   primitive.ObjectID           `bson:"invoice_service_fee_id" json:"invoice_service_fee_id"`
+	InvoiceServiceFeeName                 string                       `bson:"invoice_service_fee_name" json:"invoice_service_fee_name"`
+	InvoiceServiceFeeDescription          string                       `bson:"invoice_service_fee_description" json:"invoice_service_fee_description"`
+	InvoiceServiceFeePercentage           float64                      `bson:"invoice_service_fee_percentage" json:"invoice_service_fee_percentage"`
+	LatestPendingTaskID                   primitive.ObjectID           `bson:"latest_pending_task_id" json:"latest_pending_task_id"`
+	LatestPendingTaskTitle                string                       `bson:"latest_pending_task_title" json:"latest_pending_task_title"`
+	LatestPendingTaskDescription          string                       `bson:"latest_pending_task_description" json:"latest_pending_task_description"`
+	LatestPendingTaskDueDate              time.Time                    `bson:"latest_pending_task_due_date" json:"latest_pending_task_due_date"`
+	LatestPendingTaskType                 int8                         `bson:"latest_pending_task_type" json:"latest_pending_task_type"`
+	OngoingOrderID                        primitive.ObjectID           `bson:"ongoing_work_order_id" json:"ongoing_work_order_id"`
+	WasSurveyConducted                    bool                         `bson:"was_survey_conducted" json:"was_survey_conducted"`
+	WasThereFinancialsInputted            bool                         `bson:"was_there_financials_inputted" json:"was_there_financials_inputted"`
+	InvoiceActualServiceFeeAmountPaid     float64                      `bson:"invoice_actual_service_fee_amount_paid" json:"invoice_actual_service_fee_amount_paid"`
+	InvoiceBalanceOwingAmount             float64                      `bson:"invoice_balance_owing_amount" json:"invoice_balance_owing_amount"`
+	InvoiceQuotedLabourAmount             float64                      `bson:"invoice_quoted_labour_amount" json:"invoice_quoted_labour_amount"`
+	InvoiceQuotedMaterialAmount           float64                      `bson:"invoice_quoted_material_amount" json:"invoice_quoted_material_amount"`
+	InvoiceTotalQuoteAmount               float64                      `bson:"invoice_total_quote_amount" json:"invoice_total_quote_amount"`
+	Visits                                int8                         `bson:"visits" json:"visits"`
+	InvoiceIDs                            string                       `bson:"invoice_ids" json:"invoice_ids"`
+	NoSurveyConductedReason               int8                         `bson:"no_survey_conducted_reason" json:"no_survey_conducted_reason"`
+	NoSurveyConductedReasonOther          string                       `bson:"no_survey_conducted_reason_other" json:"no_survey_conducted_reason_other"`
+	ClonedFromOrderID                     primitive.ObjectID           `bson:"cloned_from_order_id" json:"cloned_from_order_id"`
+	InvoiceDepositAmount                  float64                      `bson:"invoice_deposit_amount_id" json:"invoice_deposit_amount"`
+	InvoiceOtherCostsAmount               float64                      `bson:"invoice_other_costs_amount" json:"invoice_other_costs_amount"`
+	InvoiceQuotedOtherCostsAmount         float64                      `bson:"invoice_quoted_other_costs_amount" json:"invoice_quoted_other_costs_amount"`
+	InvoicePaidTo                         int8                         `bson:"invoice_paid_to" json:"invoice_paid_to"`
+	InvoiceAmountDue                      float64                      `bson:"invoice_amount_due" json:"invoice_amount_due"`
+	InvoiceSubTotalAmount                 float64                      `bson:"invoice_sub_total_amount" json:"invoice_sub_total_amount"`
+	ClosingReasonComment                  string                       `bson:"closing_reason_comment" json:"closing_reason_comment"`
+	Tags                                  []*OrderTag                  `bson:"tags" json:"tags,omitempty"`
+	SkillSets                             []*OrderSkillSet             `bson:"skill_sets" json:"skill_sets,omitempty"`
+	Comments                              []*OrderComment              `bson:"comments" json:"comments,omitempty"`
+	Invoices                              []*OrderInvoice              `bson:"invoices" json:"invoices,omitempty"`
+	Deposits                              []*OrderDeposit              `bson:"deposits" json:"deposits,omitempty"`
 }
 
 type OrderComment struct {
@@ -292,6 +283,28 @@ type OrderDeposit struct {
 type OrderTag struct {
 	ID          primitive.ObjectID `bson:"_id" json:"id"`
 	Text        string             `bson:"text" json:"text"`
+	Description string             `bson:"description" json:"description"`
+	Status      int8               `bson:"status" json:"status"`
+}
+
+type OrderSkillSet struct {
+	ID          primitive.ObjectID `bson:"id" json:"id"`
+	Category    string             `bson:"category" json:"category,omitempty"`         // Referenced value from 'tags'.
+	SubCategory string             `bson:"sub_category" json:"sub_category,omitempty"` // Referenced value from 'tags'.
+	Description string             `bson:"description" json:"description,omitempty"`   // Referenced value from 'tags'.
+	Status      int8               `bson:"status" json:"status"`
+}
+
+type OrderInsuranceRequirement struct {
+	ID          primitive.ObjectID `bson:"_id" json:"id"`
+	Name        string             `bson:"name" json:"name"`
+	Description string             `bson:"description" json:"description"`
+	Status      int8               `bson:"status" json:"status"`
+}
+
+type OrderVehicleType struct {
+	ID          primitive.ObjectID `bson:"_id" json:"id"`
+	Name        string             `bson:"name" json:"name"`
 	Description string             `bson:"description" json:"description"`
 	Status      int8               `bson:"status" json:"status"`
 }
