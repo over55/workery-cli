@@ -5,10 +5,10 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"log/slog"
 	"time"
 
 	"github.com/spf13/cobra"
-	"log/slog"
 
 	"github.com/over55/workery-cli/adapter/storage/mongodb"
 	"github.com/over55/workery-cli/adapter/storage/postgres"
@@ -132,13 +132,10 @@ func importOrderSkillSet(ctx context.Context, ssStorer ss_ds.SkillSetStorer, oSt
 
 	avt := &a_ds.OrderSkillSet{
 		ID:          ss.ID,
-		OrderID:     o.ID,
-		OrderWJID:   o.WJID,
-		TenantID:    ss.TenantID,
 		Category:    ss.Category,
 		SubCategory: ss.SubCategory,
 		Description: ss.Description,
-		OldID:       oa.ID,
+		Status:      ss.Status,
 	}
 
 	o.SkillSets = append(o.SkillSets, avt)

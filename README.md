@@ -20,6 +20,7 @@ clear; go run main.go import_customer;
 clear; go run main.go import_customer_comment;
 clear; go run main.go import_customer_tag;
 clear; go run main.go import_associate;
+clear; go run main.go import_associate_status;
 clear; go run main.go import_associate_vehicle_type;
 clear; go run main.go import_associate_skill_set;
 clear; go run main.go import_associate_comment;

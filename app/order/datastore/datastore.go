@@ -8,13 +8,15 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	c "github.com/over55/workery-backend/config"
+	c "github.com/over55/workery-cli/config"
 )
 
 type Order struct {
 	ID                                    primitive.ObjectID           `bson:"_id" json:"id"`
 	WJID                                  uint64                       `bson:"wjid" json:"wjid"` // A.K.A. `Workery Job ID` (Not including tenancy)
 	CustomerID                            primitive.ObjectID           `bson:"customer_id" json:"customer_id"`
+	CustomerFirstName                     string                       `bson:"customer_first_name" json:"customer_first_name,omitempty"`
+	CustomerLastName                      string                       `bson:"customer_last_name" json:"customer_last_name,omitempty"`
 	CustomerName                          string                       `bson:"customer_name" json:"customer_name,omitempty"`
 	CustomerLexicalName                   string                       `bson:"customer_lexical_name" json:"customer_lexical_name,omitempty"`
 	CustomerGender                        int8                         `bson:"customer_gender" json:"customer_gender"`
@@ -31,6 +33,8 @@ type Order struct {
 	CustomerFullAddressURL                string                       `bson:"customer_full_address_url" json:"customer_full_address_url"`
 	CustomerTags                          []*OrderTag                  `bson:"customer_tags" json:"customer_tags,omitempty"`
 	AssociateID                           primitive.ObjectID           `bson:"associate_id" json:"associate_id"`
+	AssociateFirstName                    string                       `bson:"associate_first_name" json:"associate_first_name,omitempty"`
+	AssociateLastName                     string                       `bson:"associate_last_name" json:"associate_last_name,omitempty"`
 	AssociateName                         string                       `bson:"associate_name" json:"associate_name,omitempty"`
 	AssociateLexicalName                  string                       `bson:"associate_lexical_name" json:"associate_lexical_name,omitempty"`
 	AssociateGender                       int8                         `bson:"associate_gender" json:"associate_gender"`
@@ -370,22 +374,6 @@ type OrderStorerImpl struct {
 func NewDatastore(appCfg *c.Conf, loggerp *slog.Logger, client *mongo.Client) OrderStorer {
 	// ctx := context.Background()
 	uc := client.Database(appCfg.DB.Name).Collection("orders")
-
-	// // The following few lines of code will create the index for our app for this
-	// // colleciton.
-	// indexModel := mongo.IndexModel{
-	// 	Keys: bson.D{
-	// 		{"text", "text"},
-	// 		{"description", "text"},
-	// 	},
-	// }
-	// _, err := uc.Indexes().CreateOne(context.TODO(), indexModel)
-	// if err != nil {
-	// 	// It is important that we crash the app on startup to meet the
-	// 	// requirements of `google/wire` framework.
-	// 	log.Fatal(err)
-	// }
-
 	s := &OrderStorerImpl{
 		Logger:     loggerp,
 		DbClient:   client,

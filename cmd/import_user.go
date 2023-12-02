@@ -8,9 +8,10 @@ import (
 	"strings"
 	"time"
 
+	"log/slog"
+
 	"github.com/spf13/cobra"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"log/slog"
 
 	"github.com/over55/workery-cli/adapter/storage/mongodb"
 	"github.com/over55/workery-cli/adapter/storage/postgres"
@@ -180,17 +181,20 @@ func importUser(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.UserS
 		log.Fatal("missing tenant", tenantID)
 	}
 
+	name := strings.Replace(ou.FirstName+" "+ou.LastName, "   ", "", 0)
+	name = strings.Replace(name, "  ", "", 0)
 	lexicalName := ou.LastName + ", " + ou.FirstName
 	lexicalName = strings.Replace(lexicalName, ", ,", ",", 0)
 	lexicalName = strings.Replace(lexicalName, "  ", " ", 0)
 	lexicalName = strings.Replace(lexicalName, ", , ", ", ", 0)
+	lexicalName = strings.Replace(lexicalName, "   ", "", 0)
 
 	m := &user_ds.User{
 		OldID:            ou.ID,
 		ID:               primitive.NewObjectID(),
 		FirstName:        ou.FirstName,
 		LastName:         ou.LastName,
-		Name:             ou.FirstName + " " + ou.LastName,
+		Name:             name,
 		LexicalName:      lexicalName,
 		Email:            ou.Email,
 		JoinedTime:       ou.DateJoined,

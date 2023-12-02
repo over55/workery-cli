@@ -5,12 +5,12 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"log/slog"
 	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"log/slog"
 	"gopkg.in/guregu/null.v4"
 
 	"github.com/over55/workery-cli/adapter/storage/mongodb"
@@ -215,10 +215,13 @@ func importCustomer(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.U
 	// 	log.Fatal("missing tenant", tenantID)
 	// }
 
+	name := strings.Replace(ou.GivenName.ValueOrZero()+" "+ou.LastName.ValueOrZero(), "   ", "", 0)
+	name = strings.Replace(name, "  ", "", 0)
 	lexicalName := ou.LastName.ValueOrZero() + ", " + ou.GivenName.ValueOrZero()
 	lexicalName = strings.Replace(lexicalName, ", ,", ",", 0)
 	lexicalName = strings.Replace(lexicalName, "  ", " ", 0)
 	lexicalName = strings.Replace(lexicalName, ", , ", ", ", 0)
+	lexicalName = strings.Replace(lexicalName, "   ", "", 0)
 
 	//
 	// Compile the `full address` and `address url`.
@@ -324,7 +327,7 @@ func importCustomer(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.U
 		TenantID:                     tenant.ID,
 		FirstName:                    ou.GivenName.ValueOrZero(),
 		LastName:                     ou.LastName.ValueOrZero(),
-		Name:                         ou.GivenName.ValueOrZero() + " " + ou.LastName.ValueOrZero(),
+		Name:                         name,
 		LexicalName:                  lexicalName,
 		Email:                        ou.Email.ValueOrZero(),
 		Phone:                        ou.Telephone.ValueOrZero(),

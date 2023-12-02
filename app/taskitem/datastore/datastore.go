@@ -9,7 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	c "github.com/over55/workery-backend/config"
+	c "github.com/over55/workery-cli/config"
 )
 
 const (
@@ -55,6 +55,8 @@ type TaskItem struct {
 	Status                                int8                            `bson:"status" json:"status"` // 20
 	OldID                                 uint64                          `bson:"old_id" json:"old_id"` // 21
 	CustomerID                            primitive.ObjectID              `bson:"customer_id" json:"customer_id"`
+	CustomerFirstName                     string                          `bson:"customer_first_name" json:"customer_first_name,omitempty"`
+	CustomerLastName                      string                          `bson:"customer_last_name" json:"customer_last_name,omitempty"`
 	CustomerName                          string                          `bson:"customer_name" json:"customer_name,omitempty"`
 	CustomerLexicalName                   string                          `bson:"customer_lexical_name" json:"customer_lexical_name,omitempty"`
 	CustomerGender                        int8                            `bson:"customer_gender" json:"customer_gender"`
@@ -71,6 +73,8 @@ type TaskItem struct {
 	CustomerFullAddressURL                string                          `bson:"customer_full_address_url" json:"customer_full_address_url"`
 	CustomerTags                          []*TaskItemTag                  `bson:"customer_tags" json:"customer_tags,omitempty"` // Related
 	AssociateID                           primitive.ObjectID              `bson:"associate_id" json:"associate_id"`
+	AssociateFirstName                    string                          `bson:"associate_first_name" json:"associate_first_name,omitempty"`
+	AssociateLastName                     string                          `bson:"associate_last_name" json:"associate_last_name,omitempty"`
 	AssociateName                         string                          `bson:"associate_name" json:"associate_name,omitempty"`
 	AssociateLexicalName                  string                          `bson:"associate_lexical_name" json:"associate_lexical_name,omitempty"`
 	AssociateGender                       int8                            `bson:"associate_gender" json:"associate_gender"`

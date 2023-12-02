@@ -2,11 +2,9 @@ package datastore
 
 import (
 	"context"
-	"log"
 	"log/slog"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
@@ -217,28 +215,6 @@ type CustomerStorerImpl struct {
 func NewDatastore(appCfg *c.Conf, loggerp *slog.Logger, client *mongo.Client) CustomerStorer {
 	// ctx := context.Background()
 	uc := client.Database(appCfg.DB.Name).Collection("customers")
-
-	// The following few lines of code will create the index for our app for this
-	// colleciton.
-	indexModel := mongo.IndexModel{
-		Keys: bson.D{
-			{"name", "text"},
-			{"lexical_name", "text"},
-			{"email", "text"},
-			{"phone", "text"},
-			{"country", "text"},
-			{"region", "text"},
-			{"city", "text"},
-			{"postal_code", "text"},
-			{"address_line1", "text"},
-		},
-	}
-	_, err := uc.Indexes().CreateOne(context.TODO(), indexModel)
-	if err != nil {
-		// It is important that we crash the app on startup to meet the
-		// requirements of `google/wire` framework.
-		log.Fatal(err)
-	}
 
 	s := &CustomerStorerImpl{
 		Logger:     loggerp,

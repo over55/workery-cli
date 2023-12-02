@@ -5,9 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"time"
-
 	"log/slog"
+	"time"
 
 	"github.com/spf13/cobra"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -192,15 +191,11 @@ func importTaskItem(
 	var orderSkillSets []*ti_ds.TaskItemSkillSet
 	for _, ss := range order.SkillSets {
 		orderSkillSets = append(orderSkillSets, &ti_ds.TaskItemSkillSet{
-			ID:                    ss.ID,
-			OrderID:               ss.OrderID,
-			OrderWJID:             ss.OrderWJID,
-			OrderTenantIDWithWJID: ss.OrderTenantIDWithWJID,
-			TenantID:              ss.TenantID,
-			Category:              ss.Category,
-			SubCategory:           ss.SubCategory,
-			Description:           ss.Description,
-			OldID:                 ss.OldID,
+			ID:          ss.ID,
+			Category:    ss.Category,
+			SubCategory: ss.SubCategory,
+			Description: ss.Description,
+			Status:      ss.Status,
 		})
 	}
 
@@ -243,12 +238,13 @@ func importTaskItem(
 	//
 
 	var associateID primitive.ObjectID = primitive.NilObjectID
+	var associateFirstName string
+	var associateLastName string
 	var associateName string
 	var associateLexicalName string
 	var associateGender int8
 	var associateGenderOther string
 	var associateBirthdate time.Time
-	var associateTags = make([]*ti_ds.TaskItemTag, 0)
 	var associateEmail string
 	var associatePhone string
 	var associatePhoneType int8
@@ -258,13 +254,18 @@ func importTaskItem(
 	var associateOtherPhoneExtension string
 	var associateFullAddressWithoutPostalCode string
 	var associateFullAddressURL string
-
+	var associateTags = make([]*a_ds.AssociateTag, 0)
+	var associateSkillSets []*a_ds.AssociateSkillSet
+	var associateInsuranceRequirements []*a_ds.AssociateInsuranceRequirement
+	var associateVehicleTypes []*a_ds.AssociateVehicleType
 	a, err := aStorer.GetByID(ctx, order.AssociateID)
 	if err != nil {
 		log.Fatal(err)
 	}
 	if a != nil {
 		associateID = a.ID
+		associateFirstName = a.FirstName
+		associateLastName = a.LastName
 		associateName = a.Name
 		associateLexicalName = a.LexicalName
 		associateGender = a.Gender
@@ -279,15 +280,10 @@ func importTaskItem(
 		associateOtherPhoneExtension = a.OtherPhoneExtension
 		associateFullAddressWithoutPostalCode = a.FullAddressWithoutPostalCode
 		associateFullAddressURL = a.FullAddressURL
-
-		for _, tag := range a.Tags {
-			associateTags = append(associateTags, &ti_ds.TaskItemTag{
-				ID:          tag.ID,
-				Text:        tag.Text,
-				Description: tag.Description,
-				Status:      tag.Status,
-			})
-		}
+		associateTags = a.Tags
+		associateSkillSets = a.SkillSets
+		associateInsuranceRequirements = a.InsuranceRequirements
+		associateVehicleTypes = a.VehicleTypes
 	}
 
 	//
@@ -295,12 +291,13 @@ func importTaskItem(
 	//
 
 	var customerID primitive.ObjectID = primitive.NilObjectID
+	var customerFirstName string
+	var customerLastName string
 	var customerName string
 	var customerLexicalName string
 	var customerGender int8
 	var customerGenderOther string
 	var customerDOB time.Time
-	var customerTags []*ti_ds.TaskItemTag
 	var customerEmail string
 	var customerPhone string
 	var customerPhoneType int8
@@ -310,6 +307,7 @@ func importTaskItem(
 	var customerOtherPhoneExtension string
 	var customerFullAddressWithoutPostalCode string
 	var customerFullAddressURL string
+	var customerTags []*c_ds.CustomerTag
 
 	c, err := cStorer.GetByID(ctx, order.CustomerID)
 	if err != nil {
@@ -317,6 +315,8 @@ func importTaskItem(
 	}
 	if c != nil {
 		customerID = c.ID
+		customerFirstName = c.FirstName
+		customerLastName = c.LastName
 		customerName = c.Name
 		customerLexicalName = c.LexicalName
 		customerGender = c.Gender
@@ -331,15 +331,7 @@ func importTaskItem(
 		customerOtherPhoneExtension = c.OtherPhoneExtension
 		customerFullAddressWithoutPostalCode = c.FullAddressWithoutPostalCode
 		customerFullAddressURL = c.FullAddressURL
-
-		for _, tag := range c.Tags {
-			customerTags = append(customerTags, &ti_ds.TaskItemTag{
-				ID:          tag.ID,
-				Text:        tag.Text,
-				Description: tag.Description,
-				Status:      tag.Status,
-			})
-		}
+		customerTags = c.Tags
 	}
 
 	//
@@ -361,6 +353,8 @@ func importTaskItem(
 		OrderTenantIDWithWJID:                 fmt.Sprintf("%v_%v", order.TenantID.Hex(), order.WJID),
 		OrderStartDate:                        order.StartDate,
 		OrderDescription:                      order.Description,
+		OrderSkillSets:                        toTaskItemSkillSetsFromOrderSkillSets(order.SkillSets),
+		OrderTags:                             toTaskItemTagsFromOrderTags(order.Tags),
 		CreatedAt:                             ti.CreatedAt,
 		CreatedByUserID:                       createdByUserID,
 		CreatedByUserName:                     createdByUserName,
@@ -372,6 +366,8 @@ func importTaskItem(
 		TenantID:                              tenant.ID,
 		OldID:                                 ti.ID,
 		AssociateID:                           associateID,
+		AssociateFirstName:                    associateFirstName,
+		AssociateLastName:                     associateLastName,
 		AssociateName:                         associateName,
 		AssociateLexicalName:                  associateLexicalName,
 		AssociateGender:                       associateGender,
@@ -386,7 +382,13 @@ func importTaskItem(
 		AssociateOtherPhoneExtension:          associateOtherPhoneExtension,
 		AssociateFullAddressWithoutPostalCode: associateFullAddressWithoutPostalCode,
 		AssociateFullAddressURL:               associateFullAddressURL,
+		AssociateTags:                         toTaskItemTagsFromAssociateTags(associateTags),
+		AssociateSkillSets:                    toTaskItemSkillSetsFromAssociateSkillSets(associateSkillSets),
+		AssociateInsuranceRequirements:        toTaskItemInsuranceRequirementsFromAssociateInsuranceRequirements(associateInsuranceRequirements),
+		AssociateVehicleTypes:                 toTaskItemVehicleTypesFromAssociateVehicleTypes(associateVehicleTypes),
 		CustomerID:                            customerID,
+		CustomerFirstName:                     customerFirstName,
+		CustomerLastName:                      customerLastName,
 		CustomerName:                          customerName,
 		CustomerLexicalName:                   customerLexicalName,
 		CustomerGender:                        customerGender,
@@ -401,10 +403,7 @@ func importTaskItem(
 		CustomerOtherPhoneExtension:           customerOtherPhoneExtension,
 		CustomerFullAddressWithoutPostalCode:  customerFullAddressWithoutPostalCode,
 		CustomerFullAddressURL:                customerFullAddressURL,
-		CustomerTags:                          customerTags,
-		AssociateTags:                         associateTags,
-		OrderSkillSets:                        orderSkillSets,
-		OrderTags:                             orderTags,
+		CustomerTags:                          toTaskItemTagsFromCustomerTags(customerTags),
 	}
 
 	if err := tiStorer.Create(ctx, m); err != nil {

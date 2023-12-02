@@ -235,6 +235,8 @@ func importOrder(
 	//
 
 	var associateID primitive.ObjectID = primitive.NilObjectID
+	var associateFirstName string
+	var associateLastName string
 	var associateName string
 	var associateLexicalName string
 	var associateGender int8
@@ -249,12 +251,18 @@ func importOrder(
 	var associateOtherPhoneExtension string
 	var associateFullAddressWithoutPostalCode string
 	var associateFullAddressURL string
+	var associateTags []*a_ds.AssociateTag
+	var associateSkillSets []*a_ds.AssociateSkillSet
+	var associateInsuranceRequirements []*a_ds.AssociateInsuranceRequirement
+	var associateVehicleTypes []*a_ds.AssociateVehicleType
 	a, err := aStorer.GetByOldID(ctx, uint64(wo.AssociateID.ValueOrZero()))
 	if err != nil {
 		log.Fatal(err)
 	}
 	if a != nil {
 		associateID = a.ID
+		associateFirstName = a.FirstName
+		associateLastName = a.LastName
 		associateName = a.Name
 		associateLexicalName = a.LexicalName
 		associateGender = a.Gender
@@ -266,6 +274,10 @@ func importOrder(
 		associatePhoneExtension = a.PhoneExtension
 		associateFullAddressWithoutPostalCode = a.FullAddressWithoutPostalCode
 		associateFullAddressURL = a.FullAddressURL
+		associateTags = a.Tags
+		associateSkillSets = a.SkillSets
+		associateInsuranceRequirements = a.InsuranceRequirements
+		associateVehicleTypes = a.VehicleTypes
 	}
 
 	//
@@ -273,6 +285,8 @@ func importOrder(
 	//
 
 	var customerID primitive.ObjectID = primitive.NilObjectID
+	var customerFirstName string
+	var customerLastName string
 	var customerName string
 	var customerLexicalName string
 	var customerGender int8
@@ -287,12 +301,15 @@ func importOrder(
 	var customerOtherPhoneExtension string
 	var customerFullAddressWithoutPostalCode string
 	var customerFullAddressURL string
+	var customerTags []*c_ds.CustomerTag
 	c, err := cStorer.GetByOldID(ctx, wo.CustomerID)
 	if err != nil {
 		log.Fatal(err)
 	}
 	if c != nil {
 		customerID = c.ID
+		customerFirstName = c.FirstName
+		customerLastName = c.LastName
 		customerName = c.Name
 		customerLexicalName = c.LexicalName
 		customerGender = c.Gender
@@ -304,6 +321,7 @@ func importOrder(
 		customerPhoneExtension = c.PhoneExtension
 		customerFullAddressWithoutPostalCode = c.FullAddressWithoutPostalCode
 		customerFullAddressURL = c.FullAddressURL
+		customerTags = c.Tags
 	}
 
 	//
@@ -420,6 +438,8 @@ func importOrder(
 		TenantIDWithWJID:                      fmt.Sprintf("%v_%v", tenant.ID.Hex(), wo.ID),
 		ID:                                    primitive.NewObjectID(),
 		CustomerID:                            customerID,
+		CustomerFirstName:                     customerFirstName,
+		CustomerLastName:                      customerLastName,
 		CustomerName:                          customerName,
 		CustomerLexicalName:                   customerLexicalName,
 		CustomerGender:                        customerGender,
@@ -434,7 +454,10 @@ func importOrder(
 		CustomerOtherPhoneExtension:           customerOtherPhoneExtension,
 		CustomerFullAddressWithoutPostalCode:  customerFullAddressWithoutPostalCode,
 		CustomerFullAddressURL:                customerFullAddressURL,
+		CustomerTags:                          toOrderTagsFromCustomerTags(customerTags),
 		AssociateID:                           associateID,
+		AssociateFirstName:                    associateFirstName,
+		AssociateLastName:                     associateLastName,
 		AssociateName:                         associateName,
 		AssociateLexicalName:                  associateLexicalName,
 		AssociateGender:                       associateGender,
@@ -449,6 +472,10 @@ func importOrder(
 		AssociateOtherPhoneExtension:          associateOtherPhoneExtension,
 		AssociateFullAddressWithoutPostalCode: associateFullAddressWithoutPostalCode,
 		AssociateFullAddressURL:               associateFullAddressURL,
+		AssociateTags:                         toOrderTagsFromAssociateTags(associateTags),
+		AssociateSkillSets:                    toOrderSkillSetsFromAssociateSkillSets(associateSkillSets),
+		AssociateInsuranceRequirements:        toOrderInsuranceRequirementsFromAssociateInsuranceRequirements(associateInsuranceRequirements),
+		AssociateVehicleTypes:                 toOrderVehicleTypesFromAssociateVehicleTypes(associateVehicleTypes),
 		Description:                           wo.Description,
 		AssignmentDate:                        wo.AssignmentDate.ValueOrZero(),
 		IsOngoing:                             wo.IsOngoing,
@@ -510,8 +537,9 @@ func importOrder(
 		ClosingReasonComment:              wo.ClosingReasonComment,
 		Tags:                              orderTags,
 		SkillSets:                         orderSkillSets,
-		InsuranceRequirements:             make([]*o_s.OrderInsuranceRequirement, 0),
-		VehicleTypes:                      make([]*o_s.OrderVehicleType, 0),
+		Comments:                          make([]*o_ds.OrderComment, 0),
+		Invoices:                          make([]*o_ds.OrderInvoice, 0),
+		Deposits:                          make([]*o_ds.OrderDeposit, 0),
 		// LatestPendingTaskID:               wo.LatestPendingTaskID, //TODO: LATER
 	}
 
