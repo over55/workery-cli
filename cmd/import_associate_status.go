@@ -90,7 +90,7 @@ func RunImportAssociateStatus(cfg *config.Conf, public *sql.DB, london *sql.DB, 
 	f := &a_ds.AssociatePaginationListFilter{
 		Cursor:    "",
 		PageSize:  1_000_000,
-		SortField: "_id",
+		SortField: "", // Forget sorting, we don't need it here.
 		SortOrder: 1,
 	}
 	res, err := aStorer.ListByFilter(context.Background(), f)

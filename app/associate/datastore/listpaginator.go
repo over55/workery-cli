@@ -165,12 +165,19 @@ func (impl AssociateStorerImpl) newPaginationFilterBasedOnTimestamp(f *Associate
 // newPaginatorOptions will generate the mongodb options which will support the
 // paginator in ordering the data to work.
 func (impl AssociateStorerImpl) newPaginationOptions(f *AssociatePaginationListFilter) (*options.FindOptions, error) {
-	options := options.Find().
-		SetSort(bson.D{
-			{f.SortField, f.SortOrder},
-			{"_id", f.SortOrder}, // Include _id in sorting for consistency
-		}).
-		SetLimit(f.PageSize)
+	options := options.Find().SetLimit(f.PageSize)
+
+	// DEVELOPERS NOTE:
+	// We want to be able to return a list without sorting so we will need to
+	// run the following code.
+	if f.SortField != "" {
+		options = options.
+			SetSort(bson.D{
+				{f.SortField, f.SortOrder},
+				{"_id", f.SortOrder}, // Include _id in sorting for consistency
+			})
+	}
+
 	return options, nil
 }
 
