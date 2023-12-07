@@ -93,6 +93,7 @@ type TaskItem struct {
 	AssociateSkillSets                    []*TaskItemSkillSet             `bson:"associate_skill_sets" json:"associate_skill_sets,omitempty"`
 	AssociateInsuranceRequirements        []*TaskItemInsuranceRequirement `bson:"associate_insurance_requirements" json:"associate_insurance_requirements,omitempty"`
 	AssociateVehicleTypes                 []*TaskItemVehicleType          `bson:"associate_vehicle_types" json:"associate_vehicle_types,omitempty"`
+	AssociateTaxID                        string                          `bson:"associate_tax_id" json:"associate_tax_id"`
 }
 
 type TaskItemTag struct {

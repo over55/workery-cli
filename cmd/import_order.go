@@ -255,6 +255,7 @@ func importOrder(
 	var associateSkillSets []*a_ds.AssociateSkillSet
 	var associateInsuranceRequirements []*a_ds.AssociateInsuranceRequirement
 	var associateVehicleTypes []*a_ds.AssociateVehicleType
+	var associateTaxID string
 	a, err := aStorer.GetByOldID(ctx, uint64(wo.AssociateID.ValueOrZero()))
 	if err != nil {
 		log.Fatal(err)
@@ -278,6 +279,7 @@ func importOrder(
 		associateSkillSets = a.SkillSets
 		associateInsuranceRequirements = a.InsuranceRequirements
 		associateVehicleTypes = a.VehicleTypes
+		associateTaxID = a.TaxID
 	}
 
 	//
@@ -476,6 +478,7 @@ func importOrder(
 		AssociateSkillSets:                    toOrderSkillSetsFromAssociateSkillSets(associateSkillSets),
 		AssociateInsuranceRequirements:        toOrderInsuranceRequirementsFromAssociateInsuranceRequirements(associateInsuranceRequirements),
 		AssociateVehicleTypes:                 toOrderVehicleTypesFromAssociateVehicleTypes(associateVehicleTypes),
+		AssociateTaxID:                        associateTaxID,
 		Description:                           wo.Description,
 		AssignmentDate:                        wo.AssignmentDate.ValueOrZero(),
 		IsOngoing:                             wo.IsOngoing,

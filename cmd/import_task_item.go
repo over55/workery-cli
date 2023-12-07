@@ -258,6 +258,7 @@ func importTaskItem(
 	var associateSkillSets []*a_ds.AssociateSkillSet
 	var associateInsuranceRequirements []*a_ds.AssociateInsuranceRequirement
 	var associateVehicleTypes []*a_ds.AssociateVehicleType
+	var associateTaxID string
 	a, err := aStorer.GetByID(ctx, order.AssociateID)
 	if err != nil {
 		log.Fatal(err)
@@ -284,6 +285,7 @@ func importTaskItem(
 		associateSkillSets = a.SkillSets
 		associateInsuranceRequirements = a.InsuranceRequirements
 		associateVehicleTypes = a.VehicleTypes
+		associateTaxID = a.TaxID
 	}
 
 	//
@@ -386,6 +388,7 @@ func importTaskItem(
 		AssociateSkillSets:                    toTaskItemSkillSetsFromAssociateSkillSets(associateSkillSets),
 		AssociateInsuranceRequirements:        toTaskItemInsuranceRequirementsFromAssociateInsuranceRequirements(associateInsuranceRequirements),
 		AssociateVehicleTypes:                 toTaskItemVehicleTypesFromAssociateVehicleTypes(associateVehicleTypes),
+		AssociateTaxID:                        associateTaxID,
 		CustomerID:                            customerID,
 		CustomerFirstName:                     customerFirstName,
 		CustomerLastName:                      customerLastName,
