@@ -7,9 +7,10 @@ import (
 	"log"
 	"time"
 
+	"log/slog"
+
 	"github.com/spf13/cobra"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"log/slog"
 	"gopkg.in/guregu/null.v4"
 
 	"github.com/over55/workery-cli/adapter/storage/mongodb"
@@ -459,7 +460,7 @@ func importOrderInvoice(
 	}
 
 	// Append invoices to order details.
-	order.Invoices = append(order.Invoices, oc)
+	order.PastInvoices = append(order.PastInvoices, oc)
 
 	if err := oStorer.UpdateByID(ctx, order); err != nil {
 		log.Fatal(err)

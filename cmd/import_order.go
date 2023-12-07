@@ -541,7 +541,7 @@ func importOrder(
 		Tags:                              orderTags,
 		SkillSets:                         orderSkillSets,
 		Comments:                          make([]*o_ds.OrderComment, 0),
-		Invoices:                          make([]*o_ds.OrderInvoice, 0),
+		PastInvoices:                      make([]*o_ds.OrderInvoice, 0),
 		Deposits:                          make([]*o_ds.OrderDeposit, 0),
 		// LatestPendingTaskID:               wo.LatestPendingTaskID, //TODO: LATER
 	}
