@@ -123,8 +123,9 @@ type Order struct {
 	Tags                                  []*OrderTag                  `bson:"tags" json:"tags,omitempty"`
 	SkillSets                             []*OrderSkillSet             `bson:"skill_sets" json:"skill_sets,omitempty"`
 	Comments                              []*OrderComment              `bson:"comments" json:"comments,omitempty"`
-	Invoices                              []*OrderInvoice              `bson:"invoices" json:"invoices,omitempty"`
 	Deposits                              []*OrderDeposit              `bson:"deposits" json:"deposits,omitempty"`
+	Invoice                               *OrderInvoice                `bson:"invoice" json:"invoice,omitempty"`
+	PastInvoices                          []*OrderInvoice              `bson:"past_invoices" json:"past_invoices,omitempty"`
 }
 
 type OrderComment struct {
