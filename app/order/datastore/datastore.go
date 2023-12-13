@@ -164,9 +164,9 @@ type OrderInvoice struct {
 	InvoiceID                string             `bson:"invoice_id" json:"invoice_id"`
 	InvoiceDate              time.Time          `bson:"invoice_date" json:"invoice_date"`
 	AssociateName            string             `bson:"associate_name" json:"associate_name"`
-	AssociateTelephone       string             `bson:"associate_telephone" json:"associate_telephone"`
+	AssociatePhone           string             `bson:"associate_phone" json:"associate_phone"`
 	ClientName               string             `bson:"client_name" json:"client_name"`
-	ClientTelephone          string             `bson:"client_telephone" json:"client_telephone"`
+	ClientPhone              string             `bson:"client_phone" json:"client_phone"`
 	ClientEmail              string             `bson:"client_email" json:"client_email"`
 	Line01Qty                int8               `bson:"line_01_qty" json:"line_01_qty"`
 	Line01Desc               string             `bson:"line_01_desc" json:"line_01_desc"`

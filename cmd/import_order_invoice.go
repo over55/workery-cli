@@ -355,9 +355,9 @@ func importOrderInvoice(
 		OrderID:                  order.ID,                             // 5
 		InvoiceDate:              oi.InvoiceDate,                       // 6
 		AssociateName:            oi.AssociateName,                     // 7
-		AssociateTelephone:       oi.AssociateTelephone,                // 8
+		AssociatePhone:           oi.AssociateTelephone,                // 8
 		ClientName:               oi.ClientName,                        // 9
-		ClientTelephone:          oi.ClientTelephone,                   // 10
+		ClientPhone:              oi.ClientTelephone,                   // 10
 		ClientEmail:              oi.ClientEmail.ValueOrZero(),         // 11
 		Line01Qty:                oi.Line01Qty,                         // 12
 		Line01Desc:               oi.Line01Desc,                        // 13
