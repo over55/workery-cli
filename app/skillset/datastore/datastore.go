@@ -3,19 +3,19 @@ package datastore
 import (
 	"context"
 	"log"
+	"log/slog"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"log/slog"
 
 	c "github.com/over55/workery-cli/config"
 )
 
 const (
 	SkillSetStatusActive   = 1
-	SkillSetStatusArchived = 100
+	SkillSetStatusArchived = 2
 	SkillSetRoleRoot       = 1
 	SkillSetRoleRetailer   = 2
 	SkillSetRoleCustomer   = 3

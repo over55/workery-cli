@@ -3,18 +3,18 @@ package datastore
 import (
 	"context"
 	"log"
+	"log/slog"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"log/slog"
 
 	c "github.com/over55/workery-cli/config"
 )
 
 const (
 	HowHearAboutUsItemStatusActive   = 1
-	HowHearAboutUsItemStatusArchived = 100
+	HowHearAboutUsItemStatusArchived = 2
 )
 
 type HowHearAboutUsItem struct {
