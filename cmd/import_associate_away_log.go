@@ -7,9 +7,10 @@ import (
 	"log"
 	"time"
 
+	"log/slog"
+
 	"github.com/spf13/cobra"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"log/slog"
 	"gopkg.in/guregu/null.v4"
 
 	"github.com/over55/workery-cli/adapter/storage/mongodb"
@@ -195,6 +196,15 @@ func importAssociateAwayLog(ctx context.Context, uStorer u_ds.UserStorer, aStore
 		// log.Println("modifiedByName:", modifiedByName)
 	}
 
+	// Convert
+
+	var ufn int8 = int8(aal_ds.UntilFurtherNoticeUnspecified)
+	if aal.UntilFurtherNotice {
+		ufn = int8(aal_ds.UntilFurtherNoticeYes)
+	} else {
+		ufn = int8(aal_ds.UntilFurtherNoticeNo)
+	}
+
 	//
 	// Insert `AssociateAwayLog` record.
 	//
@@ -209,7 +219,7 @@ func importAssociateAwayLog(ctx context.Context, uStorer u_ds.UserStorer, aStore
 		Reason:                aal.Reason,
 		Status:                state,
 		ReasonOther:           aal.ReasonOther.ValueOrZero(),
-		UntilFurtherNotice:    aal.UntilFurtherNotice,
+		UntilFurtherNotice:    ufn,
 		UntilDate:             aal.UntilDate.ValueOrZero(),
 		StartDate:             aal.StartDate.ValueOrZero(),
 		CreatedAt:             aal.CreatedTime,
@@ -240,7 +250,7 @@ func importAssociateAwayLog(ctx context.Context, uStorer u_ds.UserStorer, aStore
 		Reason:                aal.Reason,
 		Status:                state,
 		ReasonOther:           aal.ReasonOther.ValueOrZero(),
-		UntilFurtherNotice:    aal.UntilFurtherNotice,
+		UntilFurtherNotice:    ufn,
 		UntilDate:             aal.UntilDate.ValueOrZero(),
 		StartDate:             aal.StartDate.ValueOrZero(),
 		CreatedAt:             aal.CreatedTime,

@@ -5,10 +5,11 @@ import (
 	"log"
 	"time"
 
+	"log/slog"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"log/slog"
 
 	c "github.com/over55/workery-cli/config"
 )
@@ -16,6 +17,11 @@ import (
 const (
 	AssociateAwayLogStatusActive   = 1
 	AssociateAwayLogStatusArchived = 2
+	UntilFurtherNoticeUnspecified  = 0
+	UntilFurtherNoticeYes          = 1
+	UntilFurtherNoticeNo           = 2
+	ReasonUnspecified              = 0
+	ReasonOther                    = 1
 )
 
 type AssociateAwayLog struct {
@@ -26,7 +32,7 @@ type AssociateAwayLog struct {
 	AssociateLexicalName  string             `bson:"associate_lexical_name" json:"associate_lexical_name,omitempty"`
 	Reason                int8               `bson:"reason" json:"reason"`
 	ReasonOther           string             `bson:"reason_other" json:"reason_other"`
-	UntilFurtherNotice    bool               `bson:"until_further_notice" json:"until_further_notice"`
+	UntilFurtherNotice    int8               `bson:"until_further_notice" json:"until_further_notice"`
 	UntilDate             time.Time          `bson:"until_date" json:"until_date"`
 	StartDate             time.Time          `bson:"start_date" json:"start_date"`
 	Status                int8               `bson:"status" json:"status"`
