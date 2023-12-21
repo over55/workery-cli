@@ -5,13 +5,13 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"log/slog"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"log/slog"
 	"gopkg.in/guregu/null.v4"
 
 	"github.com/over55/workery-cli/adapter/storage/mongodb"
@@ -443,6 +443,19 @@ func importStaff(
 	at := make([]*s_ds.StaffTag, 0)
 
 	//
+	// Gender
+	//
+
+	var gender int8
+	if ou.Gender.ValueOrZero() == "male" {
+		gender = s_ds.StaffGenderMan
+	} else if ou.Gender.ValueOrZero() == "female" {
+		gender = s_ds.StaffGenderWoman
+	} else if ou.Gender.ValueOrZero() == "prefer not to say" {
+		gender = s_ds.StaffGenderPreferNotToSay
+	}
+
+	//
 	// Insert our `Staff` data.
 	//
 
@@ -487,7 +500,6 @@ func importStaff(
 		ModifiedFromIPAddress:        ou.LastModifiedFrom.String,
 		Status:                       status,
 		// Comments:              Comments // SKIP
-		JoinedTime:     ou.JoinDate.ValueOrZero(),
 		Timezone:       "American/Toronto",
 		HasUserAccount: false,
 		UserID:         ownerUser.ID,
@@ -503,16 +515,16 @@ func importStaff(
 		// AvatarObjectKey                      string             `bson:"avatar_object_key" json:"avatar_object_key"`
 		// AvatarFileType                       string             `bson:"avatar_file_type" json:"avatar_file_type"`
 		// AvatarFileName                       string             `bson:"avatar_file_name" json:"avatar_file_name"`
-		Birthdate:   ou.Birthdate.ValueOrZero(),
+		BirthDate:   ou.Birthdate.ValueOrZero(),
 		JoinDate:    ou.JoinDate.ValueOrZero(),
 		Nationality: ou.Nationality.ValueOrZero(),
-		Gender:      ou.Gender.ValueOrZero(),
+		Gender:      gender,
 		TaxID:       ou.TaxID.ValueOrZero(),
 		Elevation:   ou.Elevation.ValueOrZero(),
 		Latitude:    ou.Elevation.ValueOrZero(),
 		Longitude:   ou.Longitude.ValueOrZero(),
 		// AreaServed:            ou.AreaServed.ValueOrZero(),
-		AvailableLanguage:                    ou.AvailableLanguage.ValueOrZero(),
+		PreferredLanguage:                    ou.AvailableLanguage.ValueOrZero(),
 		ContactType:                          ou.ContactType.ValueOrZero(),
 		Tags:                                 at,
 		Comments:                             cc,

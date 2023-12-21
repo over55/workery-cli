@@ -3,12 +3,12 @@ package datastore
 import (
 	"context"
 	"log"
+	"log/slog"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"log/slog"
 
 	c "github.com/over55/workery-cli/config"
 )
@@ -31,6 +31,27 @@ const (
 	StaffPhoneTypeLandline = 1
 	StaffPhoneTypeMobile   = 2
 	StaffPhoneTypeWork     = 3
+
+	StaffGenderOther          = 1
+	StaffGenderMan            = 2
+	StaffGenderWoman          = 3
+	StaffGenderTransgender    = 4
+	StaffGenderNonBinary      = 5
+	StaffGenderTwoSpirit      = 6
+	StaffGenderPreferNotToSay = 7
+	StaffGenderDoNotKnow      = 8
+
+	StaffIdentifyAsOther                = 1
+	StaffIdentifyAsPreferNotToSay       = 2
+	StaffIdentifyAsWomen                = 3
+	StaffIdentifyAsNewcomer             = 4
+	StaffIdentifyAsRacializedPerson     = 5
+	StaffIdentifyAsVeteran              = 6
+	StaffIdentifyAsFrancophone          = 7
+	StaffIdentifyAsPersonWithDisability = 8
+	StaffIdentifyAsInuit                = 9
+	StaffIdentifyAsFirstNations         = 10
+	StaffIdentifyAsMetis                = 11
 )
 
 type Staff struct {
@@ -42,9 +63,11 @@ type Staff struct {
 	LexicalName                          string                       `bson:"lexical_name" json:"lexical_name"`
 	Email                                string                       `bson:"email" json:"email"`
 	PersonalEmail                        string                       `bson:"personal_email" json:"personal_email"`
+	IsOkToEmail                          bool                         `bson:"is_ok_to_email" json:"is_ok_to_email"`
 	Phone                                string                       `bson:"phone" json:"phone,omitempty"`
 	PhoneType                            int8                         `bson:"phone_type" json:"phone_type"`
 	PhoneExtension                       string                       `bson:"phone_extension" json:"phone_extension"`
+	IsOkToText                           bool                         `bson:"is_ok_to_text" json:"is_ok_to_text"`
 	FaxNumber                            string                       `bson:"fax_number" json:"fax_number"`
 	OtherPhone                           string                       `bson:"other_phone" json:"other_phone"`
 	OtherPhoneExtension                  string                       `bson:"other_phone_extension" json:"other_phone_extension"`
@@ -87,16 +110,12 @@ type Staff struct {
 	ModifiedFromIPAddress                string                       `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
 	Status                               int8                         `bson:"status" json:"status"`
 	Salt                                 string                       `bson:"salt" json:"salt,omitempty"`
-	JoinedTime                           time.Time                    `bson:"joined_time" json:"joined_time,omitempty"`
 	PrAccessCode                         string                       `bson:"pr_access_code" json:"pr_access_code,omitempty"`
 	PrExpiryTime                         time.Time                    `bson:"pr_expiry_time" json:"pr_expiry_time,omitempty"`
-	RoleID                               int8                         `bson:"role_id" json:"role_id,omitempty"`
 	Timezone                             string                       `bson:"timezone" json:"timezone,omitempty"`
 	HasUserAccount                       bool                         `bson:"has_user_account" json:"has_user_account,omitempty"`
 	UserID                               primitive.ObjectID           `bson:"user_id" json:"user_id,omitempty"`
 	Type                                 int8                         `bson:"type" json:"type"`
-	IsOkToEmail                          bool                         `bson:"is_ok_to_email" json:"is_ok_to_email"`
-	IsOkToText                           bool                         `bson:"is_ok_to_text" json:"is_ok_to_text"`
 	IsBusiness                           bool                         `bson:"is_business" json:"is_business"`
 	IsSenior                             bool                         `bson:"is_senior" json:"is_senior"`
 	IsSupport                            bool                         `bson:"is_support" json:"is_support"`
@@ -104,22 +123,25 @@ type Staff struct {
 	DeactivationReason                   int8                         `bson:"deactivation_reason" json:"deactivation_reason"`
 	DeactivationReasonOther              string                       `bson:"deactivation_reason_other" json:"deactivation_reason_other"`
 	Description                          string                       `bson:"description" json:"description"`
+	AvatarObjectExpiry                   time.Time                    `bson:"avatar_object_expiry" json:"avatar_object_expiry"`
+	AvatarObjectURL                      string                       `bson:"avatar_object_url" json:"avatar_object_url"`
 	AvatarObjectKey                      string                       `bson:"avatar_object_key" json:"avatar_object_key"`
 	AvatarFileType                       string                       `bson:"avatar_file_type" json:"avatar_file_type"`
 	AvatarFileName                       string                       `bson:"avatar_file_name" json:"avatar_file_name"`
-	Birthdate                            time.Time                    `bson:"birthdate" json:"birthdate"`
+	BirthDate                            time.Time                    `bson:"birth_date" json:"birth_date"`
 	JoinDate                             time.Time                    `bson:"join_date" json:"join_date"`
 	Nationality                          string                       `bson:"nationality" json:"nationality"`
-	Gender                               string                       `bson:"gender" json:"gender"`
+	Gender                               int8                         `bson:"gender" json:"gender"`
+	GenderOther                          string                       `bson:"gender_other" json:"gender_other"`
 	TaxID                                string                       `bson:"tax_id" json:"tax_id"`
 	Elevation                            float64                      `bson:"elevation" json:"elevation"`
 	Latitude                             float64                      `bson:"latitude" json:"latitude"`
 	Longitude                            float64                      `bson:"longitude" json:"longitude"`
 	AreaServed                           string                       `bson:"area_served" json:"area_served"`
-	AvailableLanguage                    string                       `bson:"available_language" json:"available_language"`
+	PreferredLanguage                    string                       `bson:"preferred_language" json:"preferred_language"`
 	ContactType                          string                       `bson:"contact_type" json:"contact_type"`
 	OldID                                uint64                       `bson:"old_id" json:"old_id,omitempty"`
-	HourlySalaryDesired                  int                          `bson:"hourly_salary_desired" json:"hourly_salary_desired"`
+	HourlySalaryDesired                  int64                        `bson:"hourly_salary_desired" json:"hourly_salary_desired"`
 	LimitSpecial                         string                       `bson:"limit_special" json:"limit_special"`
 	DuesDate                             time.Time                    `bson:"dues_date" json:"dues_date"`
 	CommercialInsuranceExpiryDate        time.Time                    `bson:"commercial_insurance_expiry_date" json:"commercial_insurance_expiry_date"`
@@ -129,7 +151,6 @@ type Staff struct {
 	PoliceCheck                          time.Time                    `bson:"police_check" json:"police_check"`
 	DriversLicenseClass                  string                       `bson:"drivers_license_class" json:"drivers_license_class"`
 	Score                                float64                      `bson:"score" json:"score"`
-	ServiceFeeID                         uint64                       `bson:"service_fee_id" json:"service_fee_id"`
 	BalanceOwingAmount                   float64                      `bson:"balance_owing_amount" json:"balance_owing_amount"`
 	EmergencyContactName                 string                       `bson:"emergency_contact_name" json:"emergency_contact_name"`
 	EmergencyContactRelationship         string                       `bson:"emergency_contact_relationship" json:"emergency_contact_relationship"`
@@ -163,7 +184,7 @@ type StaffComment struct {
 
 type StaffVehicleType struct {
 	ID          primitive.ObjectID `bson:"_id" json:"id"`
-	Text        string             `bson:"text" json:"text"`
+	Name        string             `bson:"name" json:"name"`
 	Description string             `bson:"description" json:"description"`
 	Status      int8               `bson:"status" json:"status"`
 }
