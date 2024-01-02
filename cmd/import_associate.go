@@ -345,8 +345,8 @@ func importAssociate(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.
 	//
 
 	m := &a_ds.Associate{
-		OldID:                        ou.ID,
 		ID:                           primitive.NewObjectID(),
+		PublicID:                     ou.ID,
 		TenantID:                     tenant.ID,
 		FirstName:                    ou.GivenName.ValueOrZero(),
 		LastName:                     ou.LastName.ValueOrZero(),

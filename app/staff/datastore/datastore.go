@@ -52,6 +52,13 @@ const (
 	StaffIdentifyAsInuit                = 9
 	StaffIdentifyAsFirstNations         = 10
 	StaffIdentifyAsMetis                = 11
+
+	StaffTypeExecutive      = 1
+	StaffTypeManagement     = 2
+	StaffTypeFrontlineStaff = 3
+	StaffTypeStaff          = 3
+	StaffTypeAssociate      = 4
+	StaffTypeCustomer       = 5
 )
 
 type Staff struct {
@@ -140,7 +147,6 @@ type Staff struct {
 	AreaServed                           string                       `bson:"area_served" json:"area_served"`
 	PreferredLanguage                    string                       `bson:"preferred_language" json:"preferred_language"`
 	ContactType                          string                       `bson:"contact_type" json:"contact_type"`
-	OldID                                uint64                       `bson:"old_id" json:"old_id,omitempty"`
 	HourlySalaryDesired                  int64                        `bson:"hourly_salary_desired" json:"hourly_salary_desired"`
 	LimitSpecial                         string                       `bson:"limit_special" json:"limit_special"`
 	DuesDate                             time.Time                    `bson:"dues_date" json:"dues_date"`

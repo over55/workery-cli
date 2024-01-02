@@ -460,7 +460,6 @@ func importStaff(
 	//
 
 	m := &s_ds.Staff{
-		OldID:                        ou.ID,
 		ID:                           primitive.NewObjectID(),
 		TenantID:                     tenant.ID,
 		FirstName:                    ou.GivenName.ValueOrZero(),

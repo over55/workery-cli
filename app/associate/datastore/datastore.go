@@ -53,13 +53,13 @@ const (
 )
 
 type Associate struct {
-	ID                                   primitive.ObjectID               `bson:"_id" json:"id"`
-	TenantID                             primitive.ObjectID               `bson:"tenant_id" json:"tenant_id,omitempty"`
-	FirstName                            string                           `bson:"first_name" json:"first_name"`
-	LastName                             string                           `bson:"last_name" json:"last_name"`
+	PublicID                             uint64                           `bson:"public_id" json:"public_id"`
+	Email                                string                           `bson:"email" json:"email"`
 	Name                                 string                           `bson:"name" json:"name"`
 	LexicalName                          string                           `bson:"lexical_name" json:"lexical_name"`
-	Email                                string                           `bson:"email" json:"email"`
+	ID                                   primitive.ObjectID               `bson:"_id" json:"id"`
+	FirstName                            string                           `bson:"first_name" json:"first_name"`
+	LastName                             string                           `bson:"last_name" json:"last_name"`
 	IsOkToEmail                          bool                             `bson:"is_ok_to_email" json:"is_ok_to_email"`
 	Phone                                string                           `bson:"phone" json:"phone,omitempty"`
 	PhoneType                            int8                             `bson:"phone_type" json:"phone_type"`
@@ -139,7 +139,6 @@ type Associate struct {
 	ContactType                          string                           `bson:"contact_type" json:"contact_type"`
 	OrganizationName                     string                           `bson:"organization_name" json:"organization_name"`
 	OrganizationType                     int8                             `bson:"organization_type" json:"organization_type"`
-	OldID                                uint64                           `bson:"old_id" json:"old_id,omitempty"`
 	HourlySalaryDesired                  int64                            `bson:"hourly_salary_desired" json:"hourly_salary_desired"`
 	LimitSpecial                         string                           `bson:"limit_special" json:"limit_special"`
 	DuesDate                             time.Time                        `bson:"dues_date" json:"dues_date"`
@@ -158,6 +157,7 @@ type Associate struct {
 	EmergencyContactRelationship         string                           `bson:"emergency_contact_relationship" json:"emergency_contact_relationship"`
 	EmergencyContactTelephone            string                           `bson:"emergency_contact_telephone" json:"emergency_contact_telephone"`
 	EmergencyContactAlternativeTelephone string                           `bson:"emergency_contact_alternative_telephone" json:"emergency_contact_alternative_telephone"`
+	TenantID                             primitive.ObjectID               `bson:"tenant_id" json:"tenant_id,omitempty"`
 	Comments                             []*AssociateComment              `bson:"comments" json:"comments"`
 	SkillSets                            []*AssociateSkillSet             `bson:"skill_sets" json:"skill_sets,omitempty"`
 	InsuranceRequirements                []*AssociateInsuranceRequirement `bson:"insurance_requirements" json:"insurance_requirements,omitempty"`
