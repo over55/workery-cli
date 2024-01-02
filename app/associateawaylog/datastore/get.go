@@ -25,8 +25,8 @@ func (impl AssociateAwayLogStorerImpl) GetByID(ctx context.Context, id primitive
 	return &result, nil
 }
 
-func (impl AssociateAwayLogStorerImpl) GetByOldID(ctx context.Context, oldID uint64) (*AssociateAwayLog, error) {
-	filter := bson.D{{"old_id", oldID}}
+func (impl AssociateAwayLogStorerImpl) GetByPublicID(ctx context.Context, oldID uint64) (*AssociateAwayLog, error) {
+	filter := bson.D{{"public_id", oldID}}
 
 	var result AssociateAwayLog
 	err := impl.Collection.FindOne(ctx, filter).Decode(&result)

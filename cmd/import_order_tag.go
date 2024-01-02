@@ -122,7 +122,7 @@ func importOrderTag(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.U
 	if order == nil {
 		log.Fatal("order does not exist")
 	}
-	tag, err := comStorer.GetByOldID(ctx, ou.TagId)
+	tag, err := comStorer.GetByPublicID(ctx, ou.TagId)
 	if err != nil {
 		log.Fatal(err)
 	}

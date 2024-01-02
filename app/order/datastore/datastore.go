@@ -144,7 +144,7 @@ type OrderComment struct {
 	ModifiedFromIPAddress string             `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
 	Content               string             `bson:"content" json:"content"`
 	Status                int8               `bson:"status" json:"status"`
-	OldID                 uint64             `bson:"old_id" json:"old_id"` // Workery Job ID
+	PublicID                 uint64             `bson:"public_id" json:"public_id"` // Workery Job ID
 }
 
 type OrderInvoice struct {
@@ -259,7 +259,7 @@ type OrderInvoice struct {
 	FileTitle                string             `bson:"file_title" json:"file_title"`
 	FileObjectURL            string             `bson:"file_object_url" json:"file_object_url,omitempty"` // (Optional, added by endpoint)
 	Status                   int8               `bson:"status" json:"status"`
-	OldID                    uint64             `bson:"old_id" json:"old_id"`
+	PublicID                    uint64             `bson:"public_id" json:"public_id"`
 }
 
 type OrderDeposit struct {
@@ -283,7 +283,7 @@ type OrderDeposit struct {
 	ModifiedByUserName    string             `bson:"modified_by_user_name" json:"modified_by_user_name"`
 	ModifiedFromIPAddress string             `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
 	Status                int8               `bson:"status" json:"status"`
-	OldID                 uint64             `bson:"old_id" json:"old_id"`
+	PublicID                 uint64             `bson:"public_id" json:"public_id"`
 }
 
 type OrderTag struct {
@@ -350,7 +350,7 @@ type OrderStorer interface {
 	GetByID(ctx context.Context, id primitive.ObjectID) (*Order, error)
 	GetByWJID(ctx context.Context, wjid uint64) (*Order, error)
 	GetLatestOrderByTenantID(ctx context.Context, tenantID primitive.ObjectID) (*Order, error)
-	// GetByOldID(ctx context.Context, oldID uint64) (*Order, error)
+	// GetByPublicID(ctx context.Context, oldID uint64) (*Order, error)
 	// GetByEmail(ctx context.Context, email string) (*Order, error)
 	// GetByVerificationCode(ctx context.Context, verificationCode string) (*Order, error)
 	// CheckIfExistsByEmail(ctx context.Context, email string) (bool, error)

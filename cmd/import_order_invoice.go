@@ -318,9 +318,9 @@ func importOrderInvoice(
 
 	var createdByID primitive.ObjectID = primitive.NilObjectID
 	var createdByName string
-	createdByUser, err := uStorer.GetByOldID(ctx, oi.CreatedByID)
+	createdByUser, err := uStorer.GetByPublicID(ctx, oi.CreatedByID)
 	if err != nil {
-		log.Fatal("ur.GetByOldID", err)
+		log.Fatal("ur.GetByPublicID", err)
 	}
 	if createdByUser != nil {
 		createdByID = createdByUser.ID
@@ -333,9 +333,9 @@ func importOrderInvoice(
 
 	var modifiedByID primitive.ObjectID = primitive.NilObjectID
 	var modifiedByName string
-	modifiedByUser, err := uStorer.GetByOldID(ctx, oi.CreatedByID)
+	modifiedByUser, err := uStorer.GetByPublicID(ctx, oi.CreatedByID)
 	if err != nil {
-		log.Fatal("ur.GetByOldID", err)
+		log.Fatal("ur.GetByPublicID", err)
 	}
 	if modifiedByUser != nil {
 		modifiedByID = modifiedByUser.ID
@@ -350,7 +350,7 @@ func importOrderInvoice(
 		OrderWJID: order.WJID,
 		ID:        primitive.NewObjectID(), // 1
 		TenantID:  tenant.ID,               // 2
-		OldID:     oi.OrderID,              // 3
+		PublicID:     oi.OrderID,              // 3
 		// InvoiceID: order.InvoiceID,         // 4
 		OrderID:                  order.ID,                             // 5
 		InvoiceDate:              oi.InvoiceDate,                       // 6

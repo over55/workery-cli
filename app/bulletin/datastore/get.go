@@ -25,8 +25,8 @@ func (impl BulletinStorerImpl) GetByID(ctx context.Context, id primitive.ObjectI
 	return &result, nil
 }
 
-func (impl BulletinStorerImpl) GetByOldID(ctx context.Context, oldID uint64) (*Bulletin, error) {
-	filter := bson.D{{"old_id", oldID}}
+func (impl BulletinStorerImpl) GetByPublicID(ctx context.Context, oldID uint64) (*Bulletin, error) {
+	filter := bson.D{{"public_id", oldID}}
 
 	var result Bulletin
 	err := impl.Collection.FindOne(ctx, filter).Decode(&result)

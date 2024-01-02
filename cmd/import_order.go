@@ -256,7 +256,7 @@ func importOrder(
 	var associateInsuranceRequirements []*a_ds.AssociateInsuranceRequirement
 	var associateVehicleTypes []*a_ds.AssociateVehicleType
 	var associateTaxID string
-	a, err := aStorer.GetByOldID(ctx, uint64(wo.AssociateID.ValueOrZero()))
+	a, err := aStorer.GetByPublicID(ctx, uint64(wo.AssociateID.ValueOrZero()))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -304,7 +304,7 @@ func importOrder(
 	var customerFullAddressWithoutPostalCode string
 	var customerFullAddressURL string
 	var customerTags []*c_ds.CustomerTag
-	c, err := cStorer.GetByOldID(ctx, wo.CustomerID)
+	c, err := cStorer.GetByPublicID(ctx, wo.CustomerID)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -362,7 +362,7 @@ func importOrder(
 
 	var createdByUserID primitive.ObjectID = primitive.NilObjectID
 	var createdByUserName string
-	createdByUser, err := uStorer.GetByOldID(ctx, uint64(wo.CreatedByID.ValueOrZero()))
+	createdByUser, err := uStorer.GetByPublicID(ctx, uint64(wo.CreatedByID.ValueOrZero()))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -377,7 +377,7 @@ func importOrder(
 
 	var modifiedByUserID primitive.ObjectID = primitive.NilObjectID
 	var modifiedByUserName string
-	modifiedByUser, err := uStorer.GetByOldID(ctx, uint64(wo.LastModifiedByID.ValueOrZero()))
+	modifiedByUser, err := uStorer.GetByPublicID(ctx, uint64(wo.LastModifiedByID.ValueOrZero()))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -394,7 +394,7 @@ func importOrder(
 	var invoiceServiceFeeName string
 	var invoiceServiceFeeDescription string
 	var invoiceServiceFeePercentage float64
-	sf, err := sfStorer.GetByOldID(ctx, uint64(wo.InvoiceServiceFeeID.ValueOrZero()))
+	sf, err := sfStorer.GetByPublicID(ctx, uint64(wo.InvoiceServiceFeeID.ValueOrZero()))
 	if err != nil {
 		log.Fatal(err)
 	}

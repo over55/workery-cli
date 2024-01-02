@@ -106,14 +106,14 @@ func RunImportSkillSetInsuranceRequirement(cfg *config.Conf, public *sql.DB, lon
 }
 
 func importSkillSetInsuranceRequirement(ctx context.Context, ssStorer ss_ds.SkillSetStorer, irStorer ir_ds.InsuranceRequirementStorer, tenant *tenant_ds.Tenant, t *OldSkillSetInsuranceRequirement) {
-	ss, err := ssStorer.GetByOldID(ctx, t.SkillSetId)
+	ss, err := ssStorer.GetByPublicID(ctx, t.SkillSetId)
 	if err != nil {
 		log.Fatal(err)
 	}
 	if ss == nil {
 		log.Fatal("ss does not exist")
 	}
-	ir, err := irStorer.GetByOldID(ctx, t.InsuranceRequirementId)
+	ir, err := irStorer.GetByPublicID(ctx, t.InsuranceRequirementId)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -128,7 +128,7 @@ func importSkillSetInsuranceRequirement(ctx context.Context, ssStorer ss_ds.Skil
 		Name:        ir.Name,
 		Description: ir.Description,
 		Status:      1, // 1=Active
-		OldID:       ir.OldID,
+		PublicID:       ir.PublicID,
 	}
 	ss.InsuranceRequirements = append(ss.InsuranceRequirements, m)
 

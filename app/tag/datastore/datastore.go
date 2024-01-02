@@ -23,7 +23,7 @@ type Tag struct {
 	Text        string             `bson:"text" json:"text"`
 	Description string             `bson:"description" json:"description"`
 	Status      int8               `bson:"status" json:"status"`
-	OldID       uint64             `bson:"old_id" json:"old_id"`
+	PublicID       uint64             `bson:"public_id" json:"public_id"`
 }
 
 type TagListFilter struct {
@@ -55,7 +55,7 @@ type TagAsSelectOption struct {
 type TagStorer interface {
 	Create(ctx context.Context, m *Tag) error
 	GetByID(ctx context.Context, id primitive.ObjectID) (*Tag, error)
-	GetByOldID(ctx context.Context, oldID uint64) (*Tag, error)
+	GetByPublicID(ctx context.Context, oldID uint64) (*Tag, error)
 	GetByEmail(ctx context.Context, email string) (*Tag, error)
 	GetByVerificationCode(ctx context.Context, verificationCode string) (*Tag, error)
 	CheckIfExistsByEmail(ctx context.Context, email string) (bool, error)

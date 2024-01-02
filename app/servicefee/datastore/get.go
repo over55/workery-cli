@@ -25,8 +25,8 @@ func (impl ServiceFeeStorerImpl) GetByID(ctx context.Context, id primitive.Objec
 	return &result, nil
 }
 
-func (impl ServiceFeeStorerImpl) GetByOldID(ctx context.Context, oldID uint64) (*ServiceFee, error) {
-	filter := bson.D{{"old_id", oldID}}
+func (impl ServiceFeeStorerImpl) GetByPublicID(ctx context.Context, oldID uint64) (*ServiceFee, error) {
+	filter := bson.D{{"public_id", oldID}}
 
 	var result ServiceFee
 	err := impl.Collection.FindOne(ctx, filter).Decode(&result)

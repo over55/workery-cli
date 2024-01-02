@@ -137,7 +137,7 @@ func importAssociateAwayLog(ctx context.Context, uStorer u_ds.UserStorer, aStore
 	// Lookup related.
 	//
 
-	a, err := aStorer.GetByOldID(ctx, aal.AssociateID)
+	a, err := aStorer.GetByPublicID(ctx, aal.AssociateID)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -161,9 +161,9 @@ func importAssociateAwayLog(ctx context.Context, uStorer u_ds.UserStorer, aStore
 	var createdByID primitive.ObjectID = primitive.NilObjectID
 	var createdByName string
 	if aal.CreatedByID.ValueOrZero() > 0 {
-		user, err := uStorer.GetByOldID(ctx, uint64(aal.CreatedByID.ValueOrZero()))
+		user, err := uStorer.GetByPublicID(ctx, uint64(aal.CreatedByID.ValueOrZero()))
 		if err != nil {
-			log.Fatal("ur.GetByOldID", err)
+			log.Fatal("ur.GetByPublicID", err)
 		}
 		if user != nil {
 			createdByID = user.ID
@@ -182,9 +182,9 @@ func importAssociateAwayLog(ctx context.Context, uStorer u_ds.UserStorer, aStore
 	var modifiedByID primitive.ObjectID = primitive.NilObjectID
 	var modifiedByName string
 	if aal.CreatedByID.ValueOrZero() > 0 {
-		user, err := uStorer.GetByOldID(ctx, uint64(aal.CreatedByID.ValueOrZero()))
+		user, err := uStorer.GetByPublicID(ctx, uint64(aal.CreatedByID.ValueOrZero()))
 		if err != nil {
-			log.Fatal("ur.GetByOldID", err)
+			log.Fatal("ur.GetByPublicID", err)
 		}
 		if user != nil {
 			modifiedByID = user.ID
@@ -210,7 +210,7 @@ func importAssociateAwayLog(ctx context.Context, uStorer u_ds.UserStorer, aStore
 	//
 
 	m := &aal_ds.AssociateAwayLog{
-		OldID:                 aal.ID,
+		PublicID:              aal.ID,
 		ID:                    primitive.NewObjectID(),
 		TenantID:              tenant.ID,
 		AssociateID:           a.ID,
@@ -241,7 +241,7 @@ func importAssociateAwayLog(ctx context.Context, uStorer u_ds.UserStorer, aStore
 	//
 
 	m2 := &a_ds.AssociateAwayLog{
-		OldID:                 aal.ID,
+		PublicID:              aal.ID,
 		ID:                    primitive.NewObjectID(),
 		TenantID:              tenant.ID,
 		AssociateID:           a.ID,

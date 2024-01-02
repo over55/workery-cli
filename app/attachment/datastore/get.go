@@ -25,8 +25,8 @@ func (impl AttachmentStorerImpl) GetByID(ctx context.Context, id primitive.Objec
 	return &result, nil
 }
 
-func (impl AttachmentStorerImpl) GetByOldID(ctx context.Context, oldID uint64) (*Attachment, error) {
-	filter := bson.D{{"old_id", oldID}}
+func (impl AttachmentStorerImpl) GetByPublicID(ctx context.Context, oldID uint64) (*Attachment, error) {
+	filter := bson.D{{"public_id", oldID}}
 
 	var result Attachment
 	err := impl.Collection.FindOne(ctx, filter).Decode(&result)

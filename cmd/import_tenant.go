@@ -206,7 +206,7 @@ func ListAllTenants(db *sql.DB) ([]*OldTenant, error) {
 
 func importTenant(ctx context.Context, tenantStorer datastore.TenantStorer, t *OldTenant) {
 	m := &datastore.Tenant{
-		OldID:              t.Id,
+		PublicID:              t.Id,
 		ID:                 primitive.NewObjectID(),
 		AlternateName:      t.AlternateName,
 		Description:        t.Description,

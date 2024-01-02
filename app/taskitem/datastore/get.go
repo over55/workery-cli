@@ -25,8 +25,8 @@ func (impl TaskItemStorerImpl) GetByID(ctx context.Context, id primitive.ObjectI
 	return &result, nil
 }
 
-func (impl TaskItemStorerImpl) GetByOldID(ctx context.Context, oldID uint64) (*TaskItem, error) {
-	filter := bson.D{{"old_id", oldID}}
+func (impl TaskItemStorerImpl) GetByPublicID(ctx context.Context, oldID uint64) (*TaskItem, error) {
+	filter := bson.D{{"public_id", oldID}}
 
 	var result TaskItem
 	err := impl.Collection.FindOne(ctx, filter).Decode(&result)

@@ -25,8 +25,8 @@ func (impl HowHearAboutUsItemStorerImpl) GetByID(ctx context.Context, id primiti
 	return &result, nil
 }
 
-func (impl HowHearAboutUsItemStorerImpl) GetByOldID(ctx context.Context, oldID uint64) (*HowHearAboutUsItem, error) {
-	filter := bson.D{{"old_id", oldID}}
+func (impl HowHearAboutUsItemStorerImpl) GetByPublicID(ctx context.Context, oldID uint64) (*HowHearAboutUsItem, error) {
+	filter := bson.D{{"public_id", oldID}}
 
 	var result HowHearAboutUsItem
 	err := impl.Collection.FindOne(ctx, filter).Decode(&result)

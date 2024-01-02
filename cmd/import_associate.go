@@ -226,7 +226,7 @@ func importAssociate(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.
 	// 	tenantID = sql.NullInt64{Int64: ou.TenantID.Int64, Valid: true}
 	// }
 	//
-	// tenant, err := ts.GetByOldID(ctx, uint64(tenantID.Int64))
+	// tenant, err := ts.GetByPublicID(ctx, uint64(tenantID.Int64))
 	// if err != nil {
 	// 	log.Fatal(err)
 	// }
@@ -276,7 +276,7 @@ func importAssociate(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.
 	howHearID := uint64(ou.HowHearID.Int64)
 	howHearText := ""
 	isHowHearOther := false
-	howHear, err := hhStorer.GetByOldID(ctx, uint64(howHearID))
+	howHear, err := hhStorer.GetByPublicID(ctx, uint64(howHearID))
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -298,7 +298,7 @@ func importAssociate(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.
 
 	var createdByUserID primitive.ObjectID = primitive.NilObjectID
 	var createdByUserName string
-	createdByUser, _ := us.GetByOldID(ctx, uint64(ou.CreatedByID.ValueOrZero()))
+	createdByUser, _ := us.GetByPublicID(ctx, uint64(ou.CreatedByID.ValueOrZero()))
 	if createdByUser != nil {
 		createdByUserID = createdByUser.ID
 		createdByUserName = createdByUser.Name
@@ -310,7 +310,7 @@ func importAssociate(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.
 
 	var modifiedByUserID primitive.ObjectID = primitive.NilObjectID
 	var modifiedByUserName string
-	modifiedByUser, _ := us.GetByOldID(ctx, uint64(ou.LastModifiedByID.ValueOrZero()))
+	modifiedByUser, _ := us.GetByPublicID(ctx, uint64(ou.LastModifiedByID.ValueOrZero()))
 	if modifiedByUser != nil {
 		modifiedByUserID = modifiedByUser.ID
 		modifiedByUserName = modifiedByUser.Name
@@ -440,7 +440,7 @@ func importAssociate(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.
 	//
 
 	if !ou.ServiceFeeID.IsZero() {
-		sf, err := sfStorer.GetByOldID(ctx, uint64(ou.ServiceFeeID.ValueOrZero()))
+		sf, err := sfStorer.GetByPublicID(ctx, uint64(ou.ServiceFeeID.ValueOrZero()))
 		if err != nil {
 			log.Panic(err)
 		}

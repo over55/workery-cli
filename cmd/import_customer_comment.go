@@ -7,8 +7,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/spf13/cobra"
 	"log/slog"
+
+	"github.com/spf13/cobra"
 
 	"github.com/over55/workery-cli/adapter/storage/mongodb"
 	"github.com/over55/workery-cli/adapter/storage/postgres"
@@ -115,14 +116,14 @@ func importCustomerComment(ctx context.Context, ts tenant_ds.TenantStorer, us us
 	// Lookup related.
 	//
 
-	customer, err := custStorer.GetByOldID(ctx, ou.CustomerId)
+	customer, err := custStorer.GetByPublicID(ctx, ou.CustomerId)
 	if err != nil {
 		log.Fatal(err)
 	}
 	if customer == nil {
 		log.Fatal("customer does not exist")
 	}
-	comment, err := comStorer.GetByOldID(ctx, ou.CommentId)
+	comment, err := comStorer.GetByPublicID(ctx, ou.CommentId)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -147,7 +148,7 @@ func importCustomerComment(ctx context.Context, ts tenant_ds.TenantStorer, us us
 		ModifiedFromIPAddress: comment.ModifiedFromIPAddress,
 		Content:               comment.Content,
 		Status:                comment.Status,
-		OldID:                 comment.OldID,
+		PublicID:              comment.PublicID,
 	}
 
 	// Append comments to customer details.

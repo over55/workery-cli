@@ -173,7 +173,7 @@ func importUser(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.UserS
 		tenantID = sql.NullInt64{Int64: ou.TenantID.Int64, Valid: true}
 	}
 
-	tenant, err := ts.GetByOldID(ctx, uint64(tenantID.Int64))
+	tenant, err := ts.GetByPublicID(ctx, uint64(tenantID.Int64))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -190,7 +190,7 @@ func importUser(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.UserS
 	lexicalName = strings.Replace(lexicalName, "   ", "", 0)
 
 	m := &user_ds.User{
-		OldID:            ou.ID,
+		PublicID:         ou.ID,
 		ID:               primitive.NewObjectID(),
 		FirstName:        ou.FirstName,
 		LastName:         ou.LastName,

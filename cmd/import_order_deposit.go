@@ -193,7 +193,7 @@ func importOrderDeposit(
 
 	var createdByUserID primitive.ObjectID = primitive.NilObjectID
 	var createdByUserName string
-	createdByUser, _ := uStorer.GetByOldID(ctx, uint64(od.CreatedByID.ValueOrZero()))
+	createdByUser, _ := uStorer.GetByPublicID(ctx, uint64(od.CreatedByID.ValueOrZero()))
 	if createdByUser != nil {
 		createdByUserID = createdByUser.ID
 		createdByUserName = createdByUser.Name
@@ -205,7 +205,7 @@ func importOrderDeposit(
 
 	var modifiedByUserID primitive.ObjectID = primitive.NilObjectID
 	var modifiedByUserName string
-	modifiedByUser, _ := uStorer.GetByOldID(ctx, uint64(od.CreatedByID.ValueOrZero()))
+	modifiedByUser, _ := uStorer.GetByPublicID(ctx, uint64(od.CreatedByID.ValueOrZero()))
 	if modifiedByUser != nil {
 		modifiedByUserID = modifiedByUser.ID
 		modifiedByUserName = modifiedByUser.Name
@@ -216,7 +216,7 @@ func importOrderDeposit(
 	//
 
 	deposit := &order_ds.OrderDeposit{
-		OldID:                 od.ID,
+		PublicID:                 od.ID,
 		OrderWJID:             order.WJID,
 		OrderID:               order.ID,
 		ID:                    primitive.NewObjectID(),

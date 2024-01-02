@@ -112,14 +112,14 @@ func importAssociateVehicleType(ctx context.Context, vtStorer vt_ds.VehicleTypeS
 	// Lookup related.
 	//
 
-	a, err := aStorer.GetByOldID(ctx, oa.AssociateID)
+	a, err := aStorer.GetByPublicID(ctx, oa.AssociateID)
 	if err != nil {
 		log.Fatal(err)
 	}
 	if a == nil {
 		log.Fatal("associate does not exist")
 	}
-	vt, err := vtStorer.GetByOldID(ctx, oa.VehicleTypeID)
+	vt, err := vtStorer.GetByPublicID(ctx, oa.VehicleTypeID)
 	if err != nil {
 		log.Fatal(err)
 	}

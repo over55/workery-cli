@@ -7,9 +7,10 @@ import (
 	"log"
 	"time"
 
+	"log/slog"
+
 	"github.com/spf13/cobra"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"log/slog"
 
 	"github.com/over55/workery-cli/adapter/storage/mongodb"
 	"github.com/over55/workery-cli/adapter/storage/postgres"
@@ -132,7 +133,7 @@ func importSkillSet(ctx context.Context, ssStorer ss_ds.SkillSetStorer, tenant *
 	}
 
 	m := &ss_ds.SkillSet{
-		OldID:                 t.ID,
+		PublicID:              t.ID,
 		TenantID:              tenant.ID,
 		ID:                    primitive.NewObjectID(),
 		Category:              t.Category,

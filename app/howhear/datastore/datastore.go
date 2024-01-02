@@ -26,7 +26,7 @@ type HowHearAboutUsItem struct {
 	IsForCustomer  bool               `bson:"is_for_customer" json:"is_for_customer"`
 	IsForStaff     bool               `bson:"is_for_staff" json:"is_for_staff"`
 	Status         int8               `bson:"status" json:"status"`
-	OldID          uint64             `bson:"old_id" json:"old_id"`
+	PublicID          uint64             `bson:"public_id" json:"public_id"`
 }
 
 type HowHearAboutUsItemListFilter struct {
@@ -58,7 +58,7 @@ type HowHearAboutUsItemAsSelectOption struct {
 type HowHearAboutUsItemStorer interface {
 	Create(ctx context.Context, m *HowHearAboutUsItem) error
 	GetByID(ctx context.Context, id primitive.ObjectID) (*HowHearAboutUsItem, error)
-	GetByOldID(ctx context.Context, oldID uint64) (*HowHearAboutUsItem, error)
+	GetByPublicID(ctx context.Context, oldID uint64) (*HowHearAboutUsItem, error)
 	GetByText(ctx context.Context, text string) (*HowHearAboutUsItem, error)
 	CheckIfExistsByEmail(ctx context.Context, email string) (bool, error)
 	UpdateByID(ctx context.Context, m *HowHearAboutUsItem) error

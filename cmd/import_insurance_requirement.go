@@ -118,7 +118,7 @@ func importInsuranceRequirement(ctx context.Context, irStorer ir_ds.InsuranceReq
 	}
 
 	m := &ir_ds.InsuranceRequirement{
-		OldID:       t.ID,
+		PublicID:       t.ID,
 		ID:          primitive.NewObjectID(),
 		Name:        t.Text,
 		Description: t.Description,

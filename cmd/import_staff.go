@@ -243,7 +243,7 @@ func importStaff(
 
 	// CASE 1: User record exists in our database.
 	if ou.OwnerID.Valid {
-		user, err := us.GetByOldID(ctx, ownerUserID)
+		user, err := us.GetByPublicID(ctx, ownerUserID)
 		if err != nil {
 			log.Fatal("(A)", err)
 		}
@@ -310,9 +310,9 @@ func importStaff(
 	// var createdByID primitive.ObjectID = primitive.NilObjectID
 	// var createdByName string
 	// if ou.CreatedByID.ValueOrZero() > 0 {
-	// 	user, err := us.GetByOldID(ctx, uint64(ou.CreatedByID.ValueOrZero()))
+	// 	user, err := us.GetByPublicID(ctx, uint64(ou.CreatedByID.ValueOrZero()))
 	// 	if err != nil {
-	// 		log.Fatal("ur.GetByOldID", err)
+	// 		log.Fatal("ur.GetByPublicID", err)
 	// 	}
 	// 	if user != nil {
 	// 		createdByID = user.ID
@@ -327,7 +327,7 @@ func importStaff(
 	// var lastModifiedById null.Int
 	// var lastModifiedByName null.String
 	// if ou.LastModifiedByID.ValueOrZero() > 0 {
-	// 	userId, err := ur.GetIdByOldID(ctx, uint64(ou.LastModifiedByID.ValueOrZero()))
+	// 	userId, err := ur.GetIdByPublicID(ctx, uint64(ou.LastModifiedByID.ValueOrZero()))
 	// 	if err != nil {
 	// 		log.Panic("ur.GetIdByOldId", err)
 	// 	}
@@ -378,7 +378,7 @@ func importStaff(
 	howHearId := uint64(ou.HowHearID.Int64)
 	howHearText := ""
 	isHowHearOther := false
-	howHear, err := hhStorer.GetByOldID(ctx, uint64(howHearId))
+	howHear, err := hhStorer.GetByPublicID(ctx, uint64(howHearId))
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -413,7 +413,7 @@ func importStaff(
 
 	var createdByUserID primitive.ObjectID = primitive.NilObjectID
 	var createdByUserName string
-	createdByUser, _ := us.GetByOldID(ctx, uint64(ou.CreatedByID.ValueOrZero()))
+	createdByUser, _ := us.GetByPublicID(ctx, uint64(ou.CreatedByID.ValueOrZero()))
 	if createdByUser != nil {
 		createdByUserID = createdByUser.ID
 		createdByUserName = createdByUser.Name
@@ -425,7 +425,7 @@ func importStaff(
 
 	var modifiedByUserID primitive.ObjectID = primitive.NilObjectID
 	var modifiedByUserName string
-	modifiedByUser, _ := us.GetByOldID(ctx, uint64(ou.LastModifiedByID.ValueOrZero()))
+	modifiedByUser, _ := us.GetByPublicID(ctx, uint64(ou.LastModifiedByID.ValueOrZero()))
 	if modifiedByUser != nil {
 		modifiedByUserID = modifiedByUser.ID
 		modifiedByUserName = modifiedByUser.Name

@@ -73,7 +73,7 @@ type User struct {
 	JoinedTime                  time.Time          `bson:"joined_time" json:"joined_time,omitempty"`
 	PrAccessCode                string             `bson:"pr_access_code" json:"pr_access_code,omitempty"`
 	PrExpiryTime                time.Time          `bson:"pr_expiry_time" json:"pr_expiry_time,omitempty"`
-	OldID                       uint64             `bson:"old_id" json:"old_id,omitempty"`
+	PublicID                       uint64             `bson:"public_id" json:"public_id,omitempty"`
 	Timezone                    string             `bson:"timezone" json:"timezone,omitempty"`
 	// AccessToken       string             `bson:"access_token" json:"access_token,omitempty"`
 	// RefreshToken      string             `bson:"refresh_token" json:"refresh_token,omitempty"`
@@ -127,7 +127,7 @@ type UserAsSelectOption struct {
 type UserStorer interface {
 	Create(ctx context.Context, m *User) error
 	GetByID(ctx context.Context, id primitive.ObjectID) (*User, error)
-	GetByOldID(ctx context.Context, oldID uint64) (*User, error)
+	GetByPublicID(ctx context.Context, oldID uint64) (*User, error)
 	GetByEmail(ctx context.Context, email string) (*User, error)
 	GetByVerificationCode(ctx context.Context, verificationCode string) (*User, error)
 	CheckIfExistsByEmail(ctx context.Context, email string) (bool, error)

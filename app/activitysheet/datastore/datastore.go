@@ -44,7 +44,7 @@ type ActivitySheet struct {
 	Type                  int8               `bson:"type_of" json:"type_of"`
 	TenantID              primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`
 	OrderTenantIDWithWJID string             `bson:"order_tenant_id_with_wjid" json:"order_tenant_id_with_wjid"` // OrderTenantIDWithWJID is a combination of `tenancy_id` and `wjid` values written in the following structure `%v_%v`.
-	OldID                 uint64             `bson:"old_id" json:"old_id"`
+	PublicID                 uint64             `bson:"public_id" json:"public_id"`
 	// OngoingOrderID        primitive.ObjectID `bson:"ongoing_order_id" json:"ongoing_order_id"`
 }
 
@@ -77,7 +77,7 @@ type ActivitySheetAsSelectOption struct {
 type ActivitySheetStorer interface {
 	Create(ctx context.Context, m *ActivitySheet) error
 	GetByID(ctx context.Context, id primitive.ObjectID) (*ActivitySheet, error)
-	GetByOldID(ctx context.Context, oldID uint64) (*ActivitySheet, error)
+	GetByPublicID(ctx context.Context, oldID uint64) (*ActivitySheet, error)
 	GetByEmail(ctx context.Context, email string) (*ActivitySheet, error)
 	GetByVerificationCode(ctx context.Context, verificationCode string) (*ActivitySheet, error)
 	CheckIfExistsByEmail(ctx context.Context, email string) (bool, error)

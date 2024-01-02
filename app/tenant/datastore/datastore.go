@@ -61,7 +61,7 @@ type Tenant struct {
 	OtherTelephone          string             `bson:"other_telephone" json:"other_telephone"`
 	OtherTelephoneExtension string             `bson:"other_telephone_extension" json:"other_telephone_extension"`
 	OtherTelephoneType      int8               `bson:"other_telephone_type" json:"other_telephone_type"`
-	OldID                   uint64             `bson:"old_id" json:"old_id"`
+	PublicID                   uint64             `bson:"public_id" json:"public_id"`
 }
 
 type TenantListFilter struct {
@@ -96,7 +96,7 @@ type TenantAsSelectOption struct {
 type TenantStorer interface {
 	Create(ctx context.Context, m *Tenant) error
 	GetByID(ctx context.Context, id primitive.ObjectID) (*Tenant, error)
-	GetByOldID(ctx context.Context, oldID uint64) (*Tenant, error)
+	GetByPublicID(ctx context.Context, oldID uint64) (*Tenant, error)
 	GetBySchemaName(ctx context.Context, schemaName string) (*Tenant, error)
 	UpdateByID(ctx context.Context, m *Tenant) error
 	ListByFilter(ctx context.Context, m *TenantListFilter) (*TenantListResult, error)

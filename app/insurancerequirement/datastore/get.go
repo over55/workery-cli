@@ -25,8 +25,8 @@ func (impl InsuranceRequirementStorerImpl) GetByID(ctx context.Context, id primi
 	return &result, nil
 }
 
-func (impl InsuranceRequirementStorerImpl) GetByOldID(ctx context.Context, oldID uint64) (*InsuranceRequirement, error) {
-	filter := bson.D{{"old_id", oldID}}
+func (impl InsuranceRequirementStorerImpl) GetByPublicID(ctx context.Context, oldID uint64) (*InsuranceRequirement, error) {
+	filter := bson.D{{"public_id", oldID}}
 
 	var result InsuranceRequirement
 	err := impl.Collection.FindOne(ctx, filter).Decode(&result)

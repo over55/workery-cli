@@ -25,8 +25,8 @@ func (impl TenantStorerImpl) GetByID(ctx context.Context, id primitive.ObjectID)
 	return &result, nil
 }
 
-func (impl TenantStorerImpl) GetByOldID(ctx context.Context, oldID uint64) (*Tenant, error) {
-	filter := bson.M{"old_id": oldID}
+func (impl TenantStorerImpl) GetByPublicID(ctx context.Context, oldID uint64) (*Tenant, error) {
+	filter := bson.M{"public_id": oldID}
 
 	var result Tenant
 	err := impl.Collection.FindOne(ctx, filter).Decode(&result)

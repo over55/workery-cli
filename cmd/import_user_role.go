@@ -97,7 +97,7 @@ func RunImportUserRole(cfg *config.Conf, public *sql.DB, london *sql.DB, tenantS
 }
 
 func importUserRole(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.UserStorer, ou *OldUserGroup) {
-	user, err := us.GetByOldID(ctx, ou.UserId)
+	user, err := us.GetByPublicID(ctx, ou.UserId)
 	if err != nil {
 		log.Fatal(err)
 	}

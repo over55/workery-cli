@@ -28,7 +28,7 @@ type SkillSet struct {
 	SubCategory           string                          `bson:"sub_category" json:"sub_category"`
 	Description           string                          `bson:"description" json:"description"`
 	Status                int8                            `bson:"status" json:"status"`
-	OldID                 uint64                          `bson:"old_id" json:"old_id"`
+	PublicID                 uint64                          `bson:"public_id" json:"public_id"`
 	InsuranceRequirements []*SkillSetInsuranceRequirement `bson:"insurance_requirements" json:"insurance_requirements,omitempty"` // Reference
 }
 
@@ -37,7 +37,7 @@ type SkillSetInsuranceRequirement struct {
 	SkillSetID  primitive.ObjectID `bson:"skill_set_id" json:"skill_set_id"`
 	TenantID    primitive.ObjectID `bson:"tenant_id" json:"tenant_id"`
 	ID          primitive.ObjectID `bson:"_id" json:"id"`
-	OldID       uint64             `bson:"old_id" json:"old_id"`
+	PublicID       uint64             `bson:"public_id" json:"public_id"`
 	Name        string             `bson:"name" json:"name"`
 	Description string             `bson:"description" json:"description"`
 	Status      int8               `bson:"status" json:"status"`
@@ -79,7 +79,7 @@ type SkillSetAsSelectOption struct {
 type SkillSetStorer interface {
 	Create(ctx context.Context, m *SkillSet) error
 	GetByID(ctx context.Context, id primitive.ObjectID) (*SkillSet, error)
-	GetByOldID(ctx context.Context, oldID uint64) (*SkillSet, error)
+	GetByPublicID(ctx context.Context, oldID uint64) (*SkillSet, error)
 	CheckIfExistsByEmail(ctx context.Context, email string) (bool, error)
 	UpdateByID(ctx context.Context, m *SkillSet) error
 	ListByFilter(ctx context.Context, f *SkillSetListFilter) (*SkillSetListResult, error)

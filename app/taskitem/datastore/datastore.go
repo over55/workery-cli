@@ -53,7 +53,7 @@ type TaskItem struct {
 	ModifiedByUserName                    string                          `bson:"modified_by_user_name" json:"modified_by_user_name"`
 	ModifiedFromIPAddress                 string                          `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
 	Status                                int8                            `bson:"status" json:"status"` // 20
-	OldID                                 uint64                          `bson:"old_id" json:"old_id"` // 21
+	PublicID                                 uint64                          `bson:"public_id" json:"public_id"` // 21
 	CustomerID                            primitive.ObjectID              `bson:"customer_id" json:"customer_id"`
 	CustomerFirstName                     string                          `bson:"customer_first_name" json:"customer_first_name,omitempty"`
 	CustomerLastName                      string                          `bson:"customer_last_name" json:"customer_last_name,omitempty"`
@@ -169,7 +169,7 @@ type TaskItemAsSelectOption struct {
 type TaskItemStorer interface {
 	Create(ctx context.Context, m *TaskItem) error
 	GetByID(ctx context.Context, id primitive.ObjectID) (*TaskItem, error)
-	GetByOldID(ctx context.Context, oldID uint64) (*TaskItem, error)
+	GetByPublicID(ctx context.Context, oldID uint64) (*TaskItem, error)
 	GetByEmail(ctx context.Context, email string) (*TaskItem, error)
 	GetByVerificationCode(ctx context.Context, verificationCode string) (*TaskItem, error)
 	CheckIfExistsByEmail(ctx context.Context, email string) (bool, error)

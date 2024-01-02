@@ -114,7 +114,7 @@ func importVehicleType(ctx context.Context, irStorer vt_ds.VehicleTypeStorer, te
 	}
 
 	m := &vt_ds.VehicleType{
-		OldID:       t.ID,
+		PublicID:       t.ID,
 		ID:          primitive.NewObjectID(),
 		Name:        t.Text,
 		Description: t.Description,

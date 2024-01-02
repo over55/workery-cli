@@ -185,7 +185,7 @@ type StaffComment struct {
 	ModifiedFromIPAddress string             `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
 	Content               string             `bson:"content" json:"content"`
 	Status                int8               `bson:"status" json:"status"`
-	OldID                 uint64             `bson:"old_id" json:"old_id"`
+	PublicID                 uint64             `bson:"public_id" json:"public_id"`
 }
 
 type StaffVehicleType struct {
@@ -230,7 +230,7 @@ type StaffAwayLog struct {
 	ModifiedByUserID      primitive.ObjectID `bson:"modified_by_user_id" json:"modified_by_user_id,omitempty"`
 	ModifiedByUserName    string             `bson:"modified_by_user_name" json:"modified_by_user_name"`
 	ModifiedFromIPAddress string             `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
-	OldID                 uint64             `bson:"old_id" json:"old_id"`
+	PublicID                 uint64             `bson:"public_id" json:"public_id"`
 }
 
 type StaffTag struct {
@@ -276,7 +276,7 @@ type StaffAsSelectOption struct {
 type StaffStorer interface {
 	Create(ctx context.Context, m *Staff) error
 	GetByID(ctx context.Context, id primitive.ObjectID) (*Staff, error)
-	GetByOldID(ctx context.Context, oldID uint64) (*Staff, error)
+	GetByPublicID(ctx context.Context, oldID uint64) (*Staff, error)
 	GetByEmail(ctx context.Context, email string) (*Staff, error)
 	GetByVerificationCode(ctx context.Context, verificationCode string) (*Staff, error)
 	CheckIfExistsByEmail(ctx context.Context, email string) (bool, error)

@@ -99,7 +99,7 @@ func RunImportAssociateStatus(cfg *config.Conf, public *sql.DB, london *sql.DB, 
 	}
 
 	for _, a := range res.Results {
-		// Check if a.OldID is in the oaIDs array
+		// Check if a.PublicID is in the oaIDs array
 		if contains(oaIDs, a.PublicID) {
 			a.Status = a_ds.AssociateStatusActive
 			fmt.Println("Changed Associate ID#", a.ID, "to status", a_ds.AssociateStatusActive)

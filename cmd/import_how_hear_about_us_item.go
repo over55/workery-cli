@@ -7,9 +7,10 @@ import (
 	"log"
 	"time"
 
+	"log/slog"
+
 	"github.com/spf13/cobra"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"log/slog"
 
 	"github.com/over55/workery-cli/adapter/storage/mongodb"
 	"github.com/over55/workery-cli/adapter/storage/postgres"
@@ -142,7 +143,7 @@ func importHowHearAboutUsItem(ctx context.Context, hhStorer hh_ds.HowHearAboutUs
 
 	m := &hh_ds.HowHearAboutUsItem{
 		ID:             primitive.NewObjectID(),
-		OldID:          t.ID,
+		PublicID:       t.ID,
 		TenantID:       tenant.ID,
 		Text:           t.Text,
 		IsForAssociate: t.IsForAssociate,

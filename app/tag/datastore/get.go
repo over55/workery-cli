@@ -25,8 +25,8 @@ func (impl TagStorerImpl) GetByID(ctx context.Context, id primitive.ObjectID) (*
 	return &result, nil
 }
 
-func (impl TagStorerImpl) GetByOldID(ctx context.Context, oldID uint64) (*Tag, error) {
-	filter := bson.D{{"old_id", oldID}}
+func (impl TagStorerImpl) GetByPublicID(ctx context.Context, oldID uint64) (*Tag, error) {
+	filter := bson.D{{"public_id", oldID}}
 
 	var result Tag
 	err := impl.Collection.FindOne(ctx, filter).Decode(&result)

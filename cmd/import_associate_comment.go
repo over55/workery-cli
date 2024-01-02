@@ -7,8 +7,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/spf13/cobra"
 	"log/slog"
+
+	"github.com/spf13/cobra"
 
 	"github.com/over55/workery-cli/adapter/storage/mongodb"
 	"github.com/over55/workery-cli/adapter/storage/postgres"
@@ -115,14 +116,14 @@ func importAssociateComment(ctx context.Context, ts tenant_ds.TenantStorer, us u
 	// Lookup related.
 	//
 
-	associate, err := custStorer.GetByOldID(ctx, ou.AssociateId)
+	associate, err := custStorer.GetByPublicID(ctx, ou.AssociateId)
 	if err != nil {
 		log.Fatal(err)
 	}
 	if associate == nil {
 		log.Fatal("associate does not exist")
 	}
-	comment, err := comStorer.GetByOldID(ctx, ou.CommentId)
+	comment, err := comStorer.GetByPublicID(ctx, ou.CommentId)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -147,7 +148,7 @@ func importAssociateComment(ctx context.Context, ts tenant_ds.TenantStorer, us u
 		ModifiedFromIPAddress: comment.ModifiedFromIPAddress,
 		Content:               comment.Content,
 		Status:                comment.Status,
-		OldID:                 comment.OldID,
+		PublicID:              comment.PublicID,
 	}
 
 	// Append comments to associate details.

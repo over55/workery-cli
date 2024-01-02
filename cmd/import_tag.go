@@ -114,7 +114,7 @@ func importTag(ctx context.Context, irStorer tag_ds.TagStorer, tenant *tenant_ds
 	}
 
 	m := &tag_ds.Tag{
-		OldID:       t.ID,
+		PublicID:       t.ID,
 		ID:          primitive.NewObjectID(),
 		Text:        t.Text,
 		Description: t.Description,

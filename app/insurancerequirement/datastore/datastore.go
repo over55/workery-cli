@@ -23,7 +23,7 @@ type InsuranceRequirement struct {
 	Name        string             `bson:"name" json:"name"`
 	Description string             `bson:"description" json:"description"`
 	Status      int8               `bson:"status" json:"status"`
-	OldID       uint64             `bson:"old_id" json:"old_id"`
+	PublicID       uint64             `bson:"public_id" json:"public_id"`
 }
 
 type InsuranceRequirementListFilter struct {
@@ -55,7 +55,7 @@ type InsuranceRequirementAsSelectOption struct {
 type InsuranceRequirementStorer interface {
 	Create(ctx context.Context, m *InsuranceRequirement) error
 	GetByID(ctx context.Context, id primitive.ObjectID) (*InsuranceRequirement, error)
-	GetByOldID(ctx context.Context, oldID uint64) (*InsuranceRequirement, error)
+	GetByPublicID(ctx context.Context, oldID uint64) (*InsuranceRequirement, error)
 	GetByEmail(ctx context.Context, email string) (*InsuranceRequirement, error)
 	GetByVerificationCode(ctx context.Context, verificationCode string) (*InsuranceRequirement, error)
 	CheckIfExistsByEmail(ctx context.Context, email string) (bool, error)

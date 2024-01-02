@@ -23,7 +23,7 @@ type VehicleType struct {
 	Name        string             `bson:"name" json:"name"`
 	Description string             `bson:"description" json:"description"`
 	Status      int8               `bson:"status" json:"status"`
-	OldID       uint64             `bson:"old_id" json:"old_id"`
+	PublicID       uint64             `bson:"public_id" json:"public_id"`
 }
 
 type VehicleTypeListFilter struct {
@@ -54,7 +54,7 @@ type VehicleTypeAsSelectOption struct {
 type VehicleTypeStorer interface {
 	Create(ctx context.Context, m *VehicleType) error
 	GetByID(ctx context.Context, id primitive.ObjectID) (*VehicleType, error)
-	GetByOldID(ctx context.Context, oldID uint64) (*VehicleType, error)
+	GetByPublicID(ctx context.Context, oldID uint64) (*VehicleType, error)
 	GetByEmail(ctx context.Context, email string) (*VehicleType, error)
 	GetByVerificationCode(ctx context.Context, verificationCode string) (*VehicleType, error)
 	CheckIfExistsByEmail(ctx context.Context, email string) (bool, error)

@@ -25,8 +25,8 @@ func (impl CommentStorerImpl) GetByID(ctx context.Context, id primitive.ObjectID
 	return &result, nil
 }
 
-func (impl CommentStorerImpl) GetByOldID(ctx context.Context, oldID uint64) (*Comment, error) {
-	filter := bson.D{{"old_id", oldID}}
+func (impl CommentStorerImpl) GetByPublicID(ctx context.Context, oldID uint64) (*Comment, error) {
+	filter := bson.D{{"public_id", oldID}}
 
 	var result Comment
 	err := impl.Collection.FindOne(ctx, filter).Decode(&result)

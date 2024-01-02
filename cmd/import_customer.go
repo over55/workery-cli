@@ -207,7 +207,7 @@ func importCustomer(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.U
 	// 	tenantID = sql.NullInt64{Int64: ou.TenantID.Int64, Valid: true}
 	// }
 	//
-	// tenant, err := ts.GetByOldID(ctx, uint64(tenantID.Int64))
+	// tenant, err := ts.GetByPublicID(ctx, uint64(tenantID.Int64))
 	// if err != nil {
 	// 	log.Fatal(err)
 	// }
@@ -257,7 +257,7 @@ func importCustomer(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.U
 	howHearId := uint64(ou.HowHearId.Int64)
 	howHearText := ""
 	isHowHearOther := false
-	howHear, err := hhStorer.GetByOldID(ctx, uint64(howHearId))
+	howHear, err := hhStorer.GetByPublicID(ctx, uint64(howHearId))
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -279,7 +279,7 @@ func importCustomer(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.U
 
 	var createdByUserID primitive.ObjectID = primitive.NilObjectID
 	var createdByUserName string
-	createdByUser, _ := us.GetByOldID(ctx, uint64(ou.CreatedById.ValueOrZero()))
+	createdByUser, _ := us.GetByPublicID(ctx, uint64(ou.CreatedById.ValueOrZero()))
 	if createdByUser != nil {
 		createdByUserID = createdByUser.ID
 		createdByUserName = createdByUser.Name
@@ -291,7 +291,7 @@ func importCustomer(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.U
 
 	var modifiedByUserID primitive.ObjectID = primitive.NilObjectID
 	var modifiedByUserName string
-	modifiedByUser, _ := us.GetByOldID(ctx, uint64(ou.LastModifiedById.ValueOrZero()))
+	modifiedByUser, _ := us.GetByPublicID(ctx, uint64(ou.LastModifiedById.ValueOrZero()))
 	if modifiedByUser != nil {
 		modifiedByUserID = modifiedByUser.ID
 		modifiedByUserName = modifiedByUser.Name
@@ -322,7 +322,7 @@ func importCustomer(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.U
 	//
 
 	m := &c_ds.Customer{
-		OldID:                        ou.ID,
+		PublicID:                     ou.ID,
 		ID:                           primitive.NewObjectID(),
 		TenantID:                     tenant.ID,
 		FirstName:                    ou.GivenName.ValueOrZero(),

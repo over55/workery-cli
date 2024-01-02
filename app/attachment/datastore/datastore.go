@@ -42,7 +42,7 @@ type Attachment struct {
 	StaffName             string             `bson:"staff_name" json:"staff_name"`
 	OrderID               primitive.ObjectID `bson:"order_id" json:"order_id"` // 18
 	Status                int8               `bson:"status" json:"status"`     // 19
-	OldID                 uint64             `bson:"old_id" json:"old_id"`     // 20
+	PublicID                 uint64             `bson:"public_id" json:"public_id"`     // 20
 	Type                  int8               `bson:"type" json:"type"`         // 19
 }
 
@@ -75,7 +75,7 @@ type AttachmentAsSelectOption struct {
 type AttachmentStorer interface {
 	Create(ctx context.Context, m *Attachment) error
 	GetByID(ctx context.Context, id primitive.ObjectID) (*Attachment, error)
-	GetByOldID(ctx context.Context, oldID uint64) (*Attachment, error)
+	GetByPublicID(ctx context.Context, oldID uint64) (*Attachment, error)
 	GetByEmail(ctx context.Context, email string) (*Attachment, error)
 	GetByVerificationCode(ctx context.Context, verificationCode string) (*Attachment, error)
 	CheckIfExistsByEmail(ctx context.Context, email string) (bool, error)

@@ -25,8 +25,8 @@ func (impl UserStorerImpl) GetByID(ctx context.Context, id primitive.ObjectID) (
 	return &result, nil
 }
 
-func (impl UserStorerImpl) GetByOldID(ctx context.Context, oldID uint64) (*User, error) {
-	filter := bson.D{{"old_id", oldID}}
+func (impl UserStorerImpl) GetByPublicID(ctx context.Context, oldID uint64) (*User, error) {
+	filter := bson.D{{"public_id", oldID}}
 
 	var result User
 	err := impl.Collection.FindOne(ctx, filter).Decode(&result)

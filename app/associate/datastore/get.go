@@ -25,8 +25,8 @@ func (impl AssociateStorerImpl) GetByID(ctx context.Context, id primitive.Object
 	return &result, nil
 }
 
-func (impl AssociateStorerImpl) GetByOldID(ctx context.Context, oldID uint64) (*Associate, error) {
-	filter := bson.D{{"old_id", oldID}}
+func (impl AssociateStorerImpl) GetByPublicID(ctx context.Context, oldID uint64) (*Associate, error) {
+	filter := bson.D{{"public_id", oldID}}
 
 	var result Associate
 	err := impl.Collection.FindOne(ctx, filter).Decode(&result)

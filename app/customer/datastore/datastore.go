@@ -127,7 +127,7 @@ type Customer struct {
 	ContactType                          string             `bson:"contact_type" json:"contact_type"`
 	OrganizationName                     string             `bson:"organization_name" json:"organization_name"`
 	OrganizationType                     int8               `bson:"organization_type" json:"organization_type"`
-	OldID                                uint64             `bson:"old_id" json:"old_id,omitempty"`
+	PublicID                                uint64             `bson:"public_id" json:"public_id,omitempty"`
 	Comments                             []*CustomerComment `bson:"comments" json:"comments"`
 	Tags                                 []*CustomerTag     `bson:"tags" json:"tags"`
 	//TODO: Add references here...
@@ -146,7 +146,7 @@ type CustomerComment struct {
 	ModifiedFromIPAddress string             `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
 	Content               string             `bson:"content" json:"content"`
 	Status                int8               `bson:"status" json:"status"`
-	OldID                 uint64             `bson:"old_id" json:"old_id"`
+	PublicID                 uint64             `bson:"public_id" json:"public_id"`
 }
 
 type CustomerTag struct {
@@ -192,7 +192,7 @@ type CustomerAsSelectOption struct {
 type CustomerStorer interface {
 	Create(ctx context.Context, m *Customer) error
 	GetByID(ctx context.Context, id primitive.ObjectID) (*Customer, error)
-	GetByOldID(ctx context.Context, oldID uint64) (*Customer, error)
+	GetByPublicID(ctx context.Context, oldID uint64) (*Customer, error)
 	GetByEmail(ctx context.Context, email string) (*Customer, error)
 	GetByVerificationCode(ctx context.Context, verificationCode string) (*Customer, error)
 	CheckIfExistsByEmail(ctx context.Context, email string) (bool, error)

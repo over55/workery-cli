@@ -113,14 +113,14 @@ func importAssociateInsuranceRequirement(ctx context.Context, ts tenant_ds.Tenan
 	// Lookup related.
 	//
 
-	associate, err := aStorer.GetByOldID(ctx, ou.AssociateId)
+	associate, err := aStorer.GetByPublicID(ctx, ou.AssociateId)
 	if err != nil {
 		log.Fatal(err)
 	}
 	if associate == nil {
 		log.Fatal("associate does not exist")
 	}
-	ir, err := irStorer.GetByOldID(ctx, ou.InsuranceRequirementId)
+	ir, err := irStorer.GetByPublicID(ctx, ou.InsuranceRequirementId)
 	if err != nil {
 		log.Fatal(err)
 	}

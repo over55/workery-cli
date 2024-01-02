@@ -7,9 +7,10 @@ import (
 	"log"
 	"time"
 
+	"log/slog"
+
 	"github.com/spf13/cobra"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"log/slog"
 	"gopkg.in/guregu/null.v4"
 
 	"github.com/over55/workery-cli/adapter/storage/mongodb"
@@ -145,9 +146,9 @@ func importActivitySheet(ctx context.Context, aStorer a_ds.AssociateStorer, asSt
 	var createdByID primitive.ObjectID = primitive.NilObjectID
 	var createdByName string
 	if asi.CreatedByID.ValueOrZero() > 0 {
-		user, err := uStorer.GetByOldID(ctx, uint64(asi.CreatedByID.ValueOrZero()))
+		user, err := uStorer.GetByPublicID(ctx, uint64(asi.CreatedByID.ValueOrZero()))
 		if err != nil {
-			log.Fatal("ur.GetByOldID", err)
+			log.Fatal("ur.GetByPublicID", err)
 		}
 		if user != nil {
 			createdByID = user.ID
@@ -162,9 +163,9 @@ func importActivitySheet(ctx context.Context, aStorer a_ds.AssociateStorer, asSt
 	var modifiedByID primitive.ObjectID = primitive.NilObjectID
 	var modifiedByName string
 	if asi.CreatedByID.ValueOrZero() > 0 {
-		user, err := uStorer.GetByOldID(ctx, uint64(asi.CreatedByID.ValueOrZero()))
+		user, err := uStorer.GetByPublicID(ctx, uint64(asi.CreatedByID.ValueOrZero()))
 		if err != nil {
-			log.Fatal("ur.GetByOldID", err)
+			log.Fatal("ur.GetByPublicID", err)
 		}
 		if user != nil {
 			modifiedByID = user.ID
@@ -176,7 +177,7 @@ func importActivitySheet(ctx context.Context, aStorer a_ds.AssociateStorer, asSt
 	// Lookup related.
 	//
 
-	associate, err := aStorer.GetByOldID(ctx, asi.AssociateID)
+	associate, err := aStorer.GetByPublicID(ctx, asi.AssociateID)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -213,7 +214,7 @@ func importActivitySheet(ctx context.Context, aStorer a_ds.AssociateStorer, asSt
 		AssociateLexicalName:  associate.LexicalName,
 		Status:                state,
 		Type:                  associate.Type,
-		OldID:                 asi.ID,
+		PublicID:              asi.ID,
 	}
 
 	if err := asStorer.Create(ctx, m); err != nil {

@@ -118,7 +118,7 @@ func importOrderSkillSet(ctx context.Context, ssStorer ss_ds.SkillSetStorer, oSt
 	if o == nil {
 		log.Fatal("order does not exist")
 	}
-	ss, err := ssStorer.GetByOldID(ctx, oa.SkillSetID)
+	ss, err := ssStorer.GetByPublicID(ctx, oa.SkillSetID)
 	if err != nil {
 		log.Fatal(err)
 	}

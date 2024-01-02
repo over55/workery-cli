@@ -215,7 +215,7 @@ func importTaskItem(
 
 	var createdByUserID primitive.ObjectID = primitive.NilObjectID
 	var createdByUserName string
-	createdByUser, _ := uStorer.GetByOldID(ctx, uint64(ti.CreatedByID.ValueOrZero()))
+	createdByUser, _ := uStorer.GetByPublicID(ctx, uint64(ti.CreatedByID.ValueOrZero()))
 	if createdByUser != nil {
 		createdByUserID = createdByUser.ID
 		createdByUserName = createdByUser.Name
@@ -227,7 +227,7 @@ func importTaskItem(
 
 	var modifiedByUserID primitive.ObjectID = primitive.NilObjectID
 	var modifiedByUserName string
-	modifiedByUser, _ := uStorer.GetByOldID(ctx, uint64(ti.CreatedByID.ValueOrZero()))
+	modifiedByUser, _ := uStorer.GetByPublicID(ctx, uint64(ti.CreatedByID.ValueOrZero()))
 	if modifiedByUser != nil {
 		modifiedByUserID = modifiedByUser.ID
 		modifiedByUserName = modifiedByUser.Name
@@ -366,7 +366,7 @@ func importTaskItem(
 		ModifiedFromIPAddress:                 ti.LastModifiedFrom.ValueOrZero(),
 		Status:                                state,
 		TenantID:                              tenant.ID,
-		OldID:                                 ti.ID,
+		PublicID:                                 ti.ID,
 		AssociateID:                           associateID,
 		AssociateFirstName:                    associateFirstName,
 		AssociateLastName:                     associateLastName,

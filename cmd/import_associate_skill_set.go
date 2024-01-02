@@ -112,14 +112,14 @@ func importAssociateSkillSet(ctx context.Context, ssStorer ss_ds.SkillSetStorer,
 	// Lookup related.
 	//
 
-	a, err := aStorer.GetByOldID(ctx, oa.AssociateID)
+	a, err := aStorer.GetByPublicID(ctx, oa.AssociateID)
 	if err != nil {
 		log.Fatal(err)
 	}
 	if a == nil {
 		log.Fatal("associate does not exist")
 	}
-	ss, err := ssStorer.GetByOldID(ctx, oa.SkillSetID)
+	ss, err := ssStorer.GetByPublicID(ctx, oa.SkillSetID)
 	if err != nil {
 		log.Fatal(err)
 	}

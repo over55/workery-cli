@@ -8,9 +8,10 @@ import (
 	"strings"
 	"time"
 
+	"log/slog"
+
 	"github.com/spf13/cobra"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"log/slog"
 	"gopkg.in/guregu/null.v4"
 
 	"github.com/over55/workery-cli/adapter/storage/mongodb"
@@ -254,7 +255,7 @@ func importAttachment(
 	var createdByID primitive.ObjectID = primitive.NilObjectID
 	var createdByName string
 	if oldDatum.CreatedByID.ValueOrZero() > 0 {
-		user, err := uStorer.GetByOldID(ctx, uint64(oldDatum.CreatedByID.ValueOrZero()))
+		user, err := uStorer.GetByPublicID(ctx, uint64(oldDatum.CreatedByID.ValueOrZero()))
 		if err != nil {
 			logger.Error("get by old id", slog.Any("err", err))
 			panic("get by old id")
@@ -272,7 +273,7 @@ func importAttachment(
 	var modifiedByID primitive.ObjectID = primitive.NilObjectID
 	var modifiedByName string
 	if oldDatum.CreatedByID.ValueOrZero() > 0 {
-		user, err := uStorer.GetByOldID(ctx, uint64(oldDatum.CreatedByID.ValueOrZero()))
+		user, err := uStorer.GetByPublicID(ctx, uint64(oldDatum.CreatedByID.ValueOrZero()))
 		if err != nil {
 			logger.Error("get by old id", slog.Any("err", err))
 			panic("get by old id")
@@ -290,7 +291,7 @@ func importAttachment(
 	var customerID primitive.ObjectID = primitive.NilObjectID
 	var customerName = ""
 	if !oldDatum.CustomerID.IsZero() {
-		customer, err := cStorer.GetByOldID(ctx, uint64(oldDatum.CustomerID.ValueOrZero()))
+		customer, err := cStorer.GetByPublicID(ctx, uint64(oldDatum.CustomerID.ValueOrZero()))
 		if err != nil {
 			logger.Error("get by old id", slog.Any("err", err))
 			panic("get by old id")
@@ -309,7 +310,7 @@ func importAttachment(
 	var associateID primitive.ObjectID = primitive.NilObjectID
 	var associateName string = ""
 	if !oldDatum.AssociateID.IsZero() {
-		associate, err := asStorer.GetByOldID(ctx, uint64(oldDatum.AssociateID.ValueOrZero()))
+		associate, err := asStorer.GetByPublicID(ctx, uint64(oldDatum.AssociateID.ValueOrZero()))
 		if err != nil {
 			logger.Error("get by old id", slog.Any("err", err))
 			panic("get by old id")
@@ -344,7 +345,7 @@ func importAttachment(
 	var staffID primitive.ObjectID = primitive.NilObjectID
 	var staffName string = ""
 	if !oldDatum.StaffID.IsZero() {
-		staff, err := sStorer.GetByOldID(ctx, uint64(oldDatum.StaffID.ValueOrZero()))
+		staff, err := sStorer.GetByPublicID(ctx, uint64(oldDatum.StaffID.ValueOrZero()))
 		if err != nil {
 			logger.Error("get by old id", slog.Any("err", err))
 			panic("get by old id")
@@ -383,7 +384,7 @@ func importAttachment(
 		OrderID:               orderID,
 		Status:                1,
 		Type:                  typeOf,
-		OldID:                 oldDatum.ID,
+		PublicID:              oldDatum.ID,
 	}
 
 	if err := aStorer.Create(context.Background(), m); err != nil {

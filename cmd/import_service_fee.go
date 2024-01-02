@@ -126,7 +126,7 @@ func importServiceFee(ctx context.Context, irStorer sf_ds.ServiceFeeStorer, tena
 	}
 
 	m := &sf_ds.ServiceFee{
-		OldID:       t.ID,
+		PublicID:       t.ID,
 		ID:          primitive.NewObjectID(),
 		Name:        t.Title,
 		Percentage:  t.Percentage,

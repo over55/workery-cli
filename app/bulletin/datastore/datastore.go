@@ -32,7 +32,7 @@ type Bulletin struct {
 	ModifiedFromIPAddress string             `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
 	Text                  string             `bson:"text" json:"text"`
 	Status                int8               `bson:"status" json:"status"`
-	OldID                 uint64             `bson:"old_id" json:"old_id"`
+	PublicID                 uint64             `bson:"public_id" json:"public_id"`
 }
 
 type BulletinListFilter struct {
@@ -64,7 +64,7 @@ type BulletinAsSelectOption struct {
 type BulletinStorer interface {
 	Create(ctx context.Context, m *Bulletin) error
 	GetByID(ctx context.Context, id primitive.ObjectID) (*Bulletin, error)
-	GetByOldID(ctx context.Context, oldID uint64) (*Bulletin, error)
+	GetByPublicID(ctx context.Context, oldID uint64) (*Bulletin, error)
 	GetByEmail(ctx context.Context, email string) (*Bulletin, error)
 	GetByVerificationCode(ctx context.Context, verificationCode string) (*Bulletin, error)
 	CheckIfExistsByEmail(ctx context.Context, email string) (bool, error)

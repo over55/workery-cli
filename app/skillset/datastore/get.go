@@ -25,8 +25,8 @@ func (impl SkillSetStorerImpl) GetByID(ctx context.Context, id primitive.ObjectI
 	return &result, nil
 }
 
-func (impl SkillSetStorerImpl) GetByOldID(ctx context.Context, oldID uint64) (*SkillSet, error) {
-	filter := bson.D{{"old_id", oldID}}
+func (impl SkillSetStorerImpl) GetByPublicID(ctx context.Context, oldID uint64) (*SkillSet, error) {
+	filter := bson.D{{"public_id", oldID}}
 
 	var result SkillSet
 	err := impl.Collection.FindOne(ctx, filter).Decode(&result)

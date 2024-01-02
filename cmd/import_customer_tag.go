@@ -114,14 +114,14 @@ func importCustomerTag(ctx context.Context, ts tenant_ds.TenantStorer, us user_d
 	// Lookup related.
 	//
 
-	customer, err := custStorer.GetByOldID(ctx, ou.CustomerId)
+	customer, err := custStorer.GetByPublicID(ctx, ou.CustomerId)
 	if err != nil {
 		log.Fatal(err)
 	}
 	if customer == nil {
 		log.Fatal("customer does not exist")
 	}
-	tag, err := tagStorer.GetByOldID(ctx, ou.TagId)
+	tag, err := tagStorer.GetByPublicID(ctx, ou.TagId)
 	if err != nil {
 		log.Fatal(err)
 	}

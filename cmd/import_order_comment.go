@@ -122,7 +122,7 @@ func importOrderComment(ctx context.Context, ts tenant_ds.TenantStorer, us user_
 	if order == nil {
 		log.Fatal("order does not exist")
 	}
-	comment, err := comStorer.GetByOldID(ctx, ou.CommentId)
+	comment, err := comStorer.GetByPublicID(ctx, ou.CommentId)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -150,7 +150,7 @@ func importOrderComment(ctx context.Context, ts tenant_ds.TenantStorer, us user_
 		ModifiedFromIPAddress: comment.ModifiedFromIPAddress,
 		Content:               comment.Content,
 		Status:                comment.Status,
-		OldID:                 comment.OldID,
+		PublicID:                 comment.PublicID,
 	}
 
 	// Append comments to order details.

@@ -45,7 +45,7 @@ type Comment struct {
 	ModifiedFromIPAddress string             `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
 	Content               string             `bson:"content" json:"content"`
 	Status                int8               `bson:"status" json:"status"`
-	OldID                 uint64             `bson:"old_id" json:"old_id"`
+	PublicID                 uint64             `bson:"public_id" json:"public_id"`
 }
 
 type CommentListFilter struct {
@@ -77,7 +77,7 @@ type CommentAsSelectOption struct {
 type CommentStorer interface {
 	Create(ctx context.Context, m *Comment) error
 	GetByID(ctx context.Context, id primitive.ObjectID) (*Comment, error)
-	GetByOldID(ctx context.Context, oldID uint64) (*Comment, error)
+	GetByPublicID(ctx context.Context, oldID uint64) (*Comment, error)
 	GetByEmail(ctx context.Context, email string) (*Comment, error)
 	GetByVerificationCode(ctx context.Context, verificationCode string) (*Comment, error)
 	CheckIfExistsByEmail(ctx context.Context, email string) (bool, error)

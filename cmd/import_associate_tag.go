@@ -114,14 +114,14 @@ func importAssociateTag(ctx context.Context, ts tenant_ds.TenantStorer, us user_
 	// Lookup related.
 	//
 
-	associate, err := custStorer.GetByOldID(ctx, ou.AssociateId)
+	associate, err := custStorer.GetByPublicID(ctx, ou.AssociateId)
 	if err != nil {
 		log.Fatal(err)
 	}
 	if associate == nil {
 		log.Fatal("associate does not exist")
 	}
-	tag, err := tagStorer.GetByOldID(ctx, ou.TagId)
+	tag, err := tagStorer.GetByPublicID(ctx, ou.TagId)
 	if err != nil {
 		log.Fatal(err)
 	}

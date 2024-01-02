@@ -25,8 +25,8 @@ func (impl ActivitySheetStorerImpl) GetByID(ctx context.Context, id primitive.Ob
 	return &result, nil
 }
 
-func (impl ActivitySheetStorerImpl) GetByOldID(ctx context.Context, oldID uint64) (*ActivitySheet, error) {
-	filter := bson.D{{"old_id", oldID}}
+func (impl ActivitySheetStorerImpl) GetByPublicID(ctx context.Context, oldID uint64) (*ActivitySheet, error) {
+	filter := bson.D{{"public_id", oldID}}
 
 	var result ActivitySheet
 	err := impl.Collection.FindOne(ctx, filter).Decode(&result)

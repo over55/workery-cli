@@ -7,9 +7,10 @@ import (
 	"log"
 	"time"
 
+	"log/slog"
+
 	"github.com/spf13/cobra"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"log/slog"
 	"gopkg.in/guregu/null.v4"
 
 	"github.com/over55/workery-cli/adapter/storage/mongodb"
@@ -137,9 +138,9 @@ func importComment(ctx context.Context, cStorer comment_ds.CommentStorer, userSt
 	var createdByID primitive.ObjectID = primitive.NilObjectID
 	var createdByName string
 	if oir.CreatedByID.ValueOrZero() > 0 {
-		user, err := userStorer.GetByOldID(ctx, uint64(oir.CreatedByID.ValueOrZero()))
+		user, err := userStorer.GetByPublicID(ctx, uint64(oir.CreatedByID.ValueOrZero()))
 		if err != nil {
-			log.Fatal("ur.GetByOldID", err)
+			log.Fatal("ur.GetByPublicID", err)
 		}
 		if user != nil {
 			createdByID = user.ID
@@ -158,9 +159,9 @@ func importComment(ctx context.Context, cStorer comment_ds.CommentStorer, userSt
 	var modifiedByID primitive.ObjectID = primitive.NilObjectID
 	var modifiedByName string
 	if oir.CreatedByID.ValueOrZero() > 0 {
-		user, err := userStorer.GetByOldID(ctx, uint64(oir.CreatedByID.ValueOrZero()))
+		user, err := userStorer.GetByPublicID(ctx, uint64(oir.CreatedByID.ValueOrZero()))
 		if err != nil {
-			log.Fatal("ur.GetByOldID", err)
+			log.Fatal("ur.GetByPublicID", err)
 		}
 		if user != nil {
 			modifiedByID = user.ID
@@ -189,11 +190,11 @@ func importComment(ctx context.Context, cStorer comment_ds.CommentStorer, userSt
 		ModifiedFromIPAddress: oir.LastModifiedFrom.ValueOrZero(),
 		Content:               oir.Text,
 		Status:                state,
-		OldID:                 oir.ID,
+		PublicID:              oir.ID,
 	}
 	err := cStorer.Create(ctx, m)
 	if err != nil {
-		log.Fatal("ur.GetByOldID", err)
+		log.Fatal("ur.GetByPublicID", err)
 	}
 	fmt.Println("Imported Comment ID#", m.ID)
 }

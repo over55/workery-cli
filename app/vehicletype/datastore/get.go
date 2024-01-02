@@ -25,8 +25,8 @@ func (impl VehicleTypeStorerImpl) GetByID(ctx context.Context, id primitive.Obje
 	return &result, nil
 }
 
-func (impl VehicleTypeStorerImpl) GetByOldID(ctx context.Context, oldID uint64) (*VehicleType, error) {
-	filter := bson.D{{"old_id", oldID}}
+func (impl VehicleTypeStorerImpl) GetByPublicID(ctx context.Context, oldID uint64) (*VehicleType, error) {
+	filter := bson.D{{"public_id", oldID}}
 
 	var result VehicleType
 	err := impl.Collection.FindOne(ctx, filter).Decode(&result)
