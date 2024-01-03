@@ -48,7 +48,7 @@ func (impl StaffStorerImpl) generatePublicID(ctx context.Context, tenantID primi
 		return 0, err
 	}
 	if latest == nil {
-		impl.Logger.Debug("first sstaff creation detected, setting publicID to value of 1",
+		impl.Logger.Debug("first staff creation detected, setting publicID to value of 1",
 			slog.Any("tenant_id", tenantID))
 		publicID = 1
 	} else {

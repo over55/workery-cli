@@ -94,5 +94,5 @@ func (impl OrderStorerImpl) GetLatestOrderByTenantID(ctx context.Context, tenant
 		return &order, nil
 	}
 
-	return nil, mongo.ErrNoDocuments
+	return nil, nil
 }

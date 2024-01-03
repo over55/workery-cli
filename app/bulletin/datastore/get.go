@@ -94,5 +94,5 @@ func (impl BulletinStorerImpl) GetLatestByTenantID(ctx context.Context, tenantID
 		return &record, nil
 	}
 
-	return nil, mongo.ErrNoDocuments
+	return nil, nil
 }

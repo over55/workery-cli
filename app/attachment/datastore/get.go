@@ -94,5 +94,5 @@ func (impl AttachmentStorerImpl) GetLatestByTenantID(ctx context.Context, tenant
 		return &record, nil
 	}
 
-	return nil, mongo.ErrNoDocuments
+	return nil, nil
 }

@@ -93,5 +93,5 @@ func (impl VehicleTypeStorerImpl) GetLatestByTenantID(ctx context.Context, tenan
 		return &order, nil
 	}
 
-	return nil, mongo.ErrNoDocuments
+	return nil, nil
 }

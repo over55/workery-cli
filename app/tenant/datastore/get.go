@@ -78,5 +78,5 @@ func (impl TenantStorerImpl) GetLatest(ctx context.Context) (*Tenant, error) {
 		return &order, nil
 	}
 
-	return nil, mongo.ErrNoDocuments
+	return nil, nil
 }

@@ -94,5 +94,5 @@ func (impl InsuranceRequirementStorerImpl) GetLatestByTenantID(ctx context.Conte
 		return &order, nil
 	}
 
-	return nil, mongo.ErrNoDocuments
+	return nil, nil
 }

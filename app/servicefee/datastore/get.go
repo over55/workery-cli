@@ -94,5 +94,5 @@ func (impl ServiceFeeStorerImpl) GetLatestByTenantID(ctx context.Context, tenant
 		return &order, nil
 	}
 
-	return nil, mongo.ErrNoDocuments
+	return nil, nil
 }
