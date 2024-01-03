@@ -12,36 +12,38 @@ import (
 // AssociateLite represents the limited detail of a associate which is to be
 // displayed in a list view.
 type AssociateLite struct {
-	ID                  primitive.ObjectID `bson:"_id" json:"id"`
-	FirstName           string             `bson:"first_name" json:"first_name"`
-	LastName            string             `bson:"last_name" json:"last_name"`
-	Name                string             `bson:"name" json:"name"`
-	LexicalName         string             `bson:"lexical_name" json:"lexical_name"`
-	Email               string             `bson:"email" json:"email"`
-	Phone               string             `bson:"phone" json:"phone,omitempty"`
-	PhoneType           int8               `bson:"phone_type" json:"phone_type"`
-	PhoneExtension      string             `bson:"phone_extension" json:"phone_extension"`
-	OtherPhone          string             `bson:"other_phone" json:"other_phone"`
-	OtherPhoneExtension string             `bson:"other_phone_extension" json:"other_phone_extension"`
-	OtherPhoneType      int8               `bson:"other_phone_type" json:"other_phone_type"`
-	Status              int8               `bson:"status" json:"status"`
-	Type                int8               `bson:"type" json:"type"`
-	AvatarObjectKey     string             `bson:"avatar_object_key" json:"avatar_object_key"`
-	AvatarFileType      string             `bson:"avatar_file_type" json:"avatar_file_type"`
-	AvatarFileName      string             `bson:"avatar_file_name" json:"avatar_file_name"`
-	Birthdate           time.Time          `bson:"birthdate" json:"birthdate"`
-	JoinDate            time.Time          `bson:"join_date" json:"join_date"`
-	Nationality         string             `bson:"nationality" json:"nationality"`
-	Gender              int8               `bson:"gender" json:"gender"`
-	GenderOther         string             `bson:"gender_other" json:"gender_other"`
-	OrganizationName    string             `bson:"organization_name" json:"organization_name"`
-	OrganizationType    int8               `bson:"organization_type" json:"organization_type"`
-	Country             string             `bson:"country" json:"country,omitempty"`
-	Region              string             `bson:"region" json:"region,omitempty"`
-	City                string             `bson:"city" json:"city,omitempty"`
-	PostalCode          string             `bson:"postal_code" json:"postal_code,omitempty"`
-	AddressLine1        string             `bson:"address_line1" json:"address_line1,omitempty"`
-	AddressLine2        string             `bson:"address_line2" json:"address_line2,omitempty"`
+	ID                  primitive.ObjectID   `bson:"_id" json:"id"`
+	FirstName           string               `bson:"first_name" json:"first_name"`
+	LastName            string               `bson:"last_name" json:"last_name"`
+	Name                string               `bson:"name" json:"name"`
+	LexicalName         string               `bson:"lexical_name" json:"lexical_name"`
+	Email               string               `bson:"email" json:"email"`
+	Phone               string               `bson:"phone" json:"phone,omitempty"`
+	PhoneType           int8                 `bson:"phone_type" json:"phone_type"`
+	PhoneExtension      string               `bson:"phone_extension" json:"phone_extension"`
+	OtherPhone          string               `bson:"other_phone" json:"other_phone"`
+	OtherPhoneExtension string               `bson:"other_phone_extension" json:"other_phone_extension"`
+	OtherPhoneType      int8                 `bson:"other_phone_type" json:"other_phone_type"`
+	Status              int8                 `bson:"status" json:"status"`
+	Type                int8                 `bson:"type" json:"type"`
+	AvatarObjectKey     string               `bson:"avatar_object_key" json:"avatar_object_key"`
+	AvatarFileType      string               `bson:"avatar_file_type" json:"avatar_file_type"`
+	AvatarFileName      string               `bson:"avatar_file_name" json:"avatar_file_name"`
+	Birthdate           time.Time            `bson:"birthdate" json:"birthdate"`
+	JoinDate            time.Time            `bson:"join_date" json:"join_date"`
+	Nationality         string               `bson:"nationality" json:"nationality"`
+	Gender              int8                 `bson:"gender" json:"gender"`
+	GenderOther         string               `bson:"gender_other" json:"gender_other"`
+	OrganizationName    string               `bson:"organization_name" json:"organization_name"`
+	OrganizationType    int8                 `bson:"organization_type" json:"organization_type"`
+	Country             string               `bson:"country" json:"country,omitempty"`
+	Region              string               `bson:"region" json:"region,omitempty"`
+	City                string               `bson:"city" json:"city,omitempty"`
+	PostalCode          string               `bson:"postal_code" json:"postal_code,omitempty"`
+	AddressLine1        string               `bson:"address_line1" json:"address_line1,omitempty"`
+	AddressLine2        string               `bson:"address_line2" json:"address_line2,omitempty"`
+	SkillSets           []*AssociateSkillSet `bson:"skill_sets" json:"skill_sets,omitempty"`
+	Tags                []*AssociateTag      `bson:"tags" json:"tags,omitempty"`
 }
 
 func (impl AssociateStorerImpl) LiteListByFilter(ctx context.Context, f *AssociatePaginationListFilter) (*AssociatePaginationLiteListResult, error) {
@@ -83,6 +85,24 @@ func (impl AssociateStorerImpl) LiteListByFilter(ctx context.Context, f *Associa
 	}
 	if len(f.AllSkillSetIDs) > 0 {
 		filter["skill_sets._id"] = bson.M{"$all": f.AllSkillSetIDs}
+	}
+	if len(f.InTagIDs) > 0 {
+		filter["tags._id"] = bson.M{"$in": f.InTagIDs}
+	}
+	if len(f.AllTagIDs) > 0 {
+		filter["tags._id"] = bson.M{"$all": f.AllTagIDs}
+	}
+	if len(f.InInsuranceRequirementIDs) > 0 {
+		filter["insurance_requirements._id"] = bson.M{"$in": f.InInsuranceRequirementIDs}
+	}
+	if len(f.AllInsuranceRequirementIDs) > 0 {
+		filter["insurance_requirements._id"] = bson.M{"$all": f.AllInsuranceRequirementIDs}
+	}
+	if len(f.InVehicleTypeIDs) > 0 {
+		filter["vehicle_types._id"] = bson.M{"$in": f.InVehicleTypeIDs}
+	}
+	if len(f.AllVehicleTypeIDs) > 0 {
+		filter["vehicle_types._id"] = bson.M{"$all": f.AllVehicleTypeIDs}
 	}
 
 	impl.Logger.Debug("listing filter:",

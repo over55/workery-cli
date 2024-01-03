@@ -5,48 +5,49 @@ import (
 	"log"
 	"time"
 
+	"log/slog"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"log/slog"
 )
 
-func (impl TagStorerImpl) ListByFilter(ctx context.Context, f *TagListFilter) (*TagListResult, error) {
+func (impl TagStorerImpl) ListByFilter(ctx context.Context, f *TagPaginationListFilter) (*TagPaginationListResult, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
 	defer cancel()
 
-	// Create the filter based on the cursor
-	filter := bson.M{}
-	if !f.Cursor.IsZero() {
-		filter["_id"] = bson.M{"$gt": f.Cursor} // Add the cursor condition to the filter
+	// Create the paginated filter based on the cursor
+	filter, err := impl.newPaginationFilter(f)
+	if err != nil {
+		return nil, err
 	}
 
 	// Add filter conditions to the filter
 	if !f.TenantID.IsZero() {
 		filter["tenant_id"] = f.TenantID
 	}
-
-	if f.ExcludeArchived {
-		filter["status"] = bson.M{"$ne": TagStatusArchived} // Do not list archived items! This code
-	}
 	if f.Status != 0 {
 		filter["status"] = f.Status
+	}
+	if f.SearchText != "" {
+		filter["text"] = bson.M{"$regex": primitive.Regex{Pattern: f.SearchText, Options: "i"}}
 	}
 
 	impl.Logger.Debug("listing filter:",
 		slog.Any("filter", filter))
 
 	// Include additional filters for our cursor-based pagination pertaining to sorting and limit.
-	options := options.Find().
-		SetSort(bson.M{f.SortField: f.SortOrder}).
-		SetLimit(f.PageSize)
+	options, err := impl.newPaginationOptions(f)
+	if err != nil {
+		return nil, err
+	}
 
 	// Include Full-text search
-	if f.SearchText != "" {
-		filter["$text"] = bson.M{"$search": f.SearchText}
-		options.SetProjection(bson.M{"score": bson.M{"$meta": "textScore"}})
-		options.SetSort(bson.D{{"score", bson.M{"$meta": "textScore"}}})
-	}
+	// if f.SearchText != "" {
+	// 	filter["$text"] = bson.M{"$search": f.SearchText}
+	// 	options.SetProjection(bson.M{"score": bson.M{"$meta": "textScore"}})
+	// 	options.SetSort(bson.D{{"score", bson.M{"$meta": "textScore"}}})
+	// }
 
 	// Execute the query
 	cursor, err := impl.Collection.Find(ctx, filter, options)
@@ -77,16 +78,15 @@ func (impl TagStorerImpl) ListByFilter(ctx context.Context, f *TagListFilter) (*
 	}
 
 	// Get the next cursor and encode it
-	nextCursor := primitive.NilObjectID
-	if int64(len(results)) == f.PageSize {
-		// Remove the extra document from the current page
-		results = results[:len(results)]
-
-		// Get the last document's _id as the next cursor
-		nextCursor = results[len(results)-1].ID
+	var nextCursor string
+	if hasNextPage {
+		nextCursor, err = impl.newPaginatorNextCursor(f, results)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	return &TagListResult{
+	return &TagPaginationListResult{
 		Results:     results,
 		NextCursor:  nextCursor,
 		HasNextPage: hasNextPage,
@@ -127,10 +127,6 @@ func (impl TagStorerImpl) ListAsSelectOptionByFilter(ctx context.Context, f *Tag
 		}
 		options.SetSkip(1)
 		query["_id"] = bson.M{"$gt": cursor.Lookup("_id").ObjectID()}
-	}
-
-	if f.ExcludeArchived {
-		query["status"] = bson.M{"$ne": TagStatusArchived} // Do not list archived items! This code
 	}
 
 	// Full-text search

@@ -24,10 +24,6 @@ const (
 	StaffDeactivationReasonDeceased      = 4
 	StaffDeactivationReasonDoNotConstact = 5
 
-	StaffTypeUnassigned  = 1
-	StaffTypeResidential = 2
-	StaffTypeCommercial  = 3
-
 	StaffPhoneTypeLandline = 1
 	StaffPhoneTypeMobile   = 2
 	StaffPhoneTypeWork     = 3
@@ -68,8 +64,8 @@ type Staff struct {
 	LastName                             string                       `bson:"last_name" json:"last_name"`
 	Name                                 string                       `bson:"name" json:"name"`
 	LexicalName                          string                       `bson:"lexical_name" json:"lexical_name"`
-	Email                                string                       `bson:"email" json:"email"`
 	PersonalEmail                        string                       `bson:"personal_email" json:"personal_email"`
+	Email                                string                       `bson:"email" json:"email"`
 	IsOkToEmail                          bool                         `bson:"is_ok_to_email" json:"is_ok_to_email"`
 	Phone                                string                       `bson:"phone" json:"phone,omitempty"`
 	PhoneType                            int8                         `bson:"phone_type" json:"phone_type"`
@@ -147,6 +143,7 @@ type Staff struct {
 	AreaServed                           string                       `bson:"area_served" json:"area_served"`
 	PreferredLanguage                    string                       `bson:"preferred_language" json:"preferred_language"`
 	ContactType                          string                       `bson:"contact_type" json:"contact_type"`
+	PublicID                             uint64                       `bson:"public_id" json:"public_id,omitempty"`
 	HourlySalaryDesired                  int64                        `bson:"hourly_salary_desired" json:"hourly_salary_desired"`
 	LimitSpecial                         string                       `bson:"limit_special" json:"limit_special"`
 	DuesDate                             time.Time                    `bson:"dues_date" json:"dues_date"`
@@ -168,6 +165,7 @@ type Staff struct {
 	VehicleTypes                         []*StaffVehicleType          `bson:"vehicle_types" json:"vehicle_types,omitempty"`
 	AwayLogs                             []*StaffAwayLog              `bson:"away_logs" json:"away_logs,omitempty"`
 	Tags                                 []*StaffTag                  `bson:"tags" json:"tags,omitempty"`
+	IdentifyAs                           []int8                       `bson:"identify_as" json:"identify_as,omitempty"`
 	// ServiceFee            *WorkOrderServiceFee             `json:"invoice_service_fee,omitempty"` // Referenced value from 'work_order_service_fee'.
 	// Tags                  []*StaffTag                  `json:"tags,omitempty"`
 }
@@ -185,7 +183,7 @@ type StaffComment struct {
 	ModifiedFromIPAddress string             `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
 	Content               string             `bson:"content" json:"content"`
 	Status                int8               `bson:"status" json:"status"`
-	PublicID                 uint64             `bson:"public_id" json:"public_id"`
+	PublicID              uint64             `bson:"public_id" json:"public_id"`
 }
 
 type StaffVehicleType struct {
@@ -230,7 +228,7 @@ type StaffAwayLog struct {
 	ModifiedByUserID      primitive.ObjectID `bson:"modified_by_user_id" json:"modified_by_user_id,omitempty"`
 	ModifiedByUserName    string             `bson:"modified_by_user_name" json:"modified_by_user_name"`
 	ModifiedFromIPAddress string             `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
-	PublicID                 uint64             `bson:"public_id" json:"public_id"`
+	PublicID              uint64             `bson:"public_id" json:"public_id"`
 }
 
 type StaffTag struct {
@@ -249,8 +247,8 @@ type StaffListFilter struct {
 
 	// Filter related.
 	TenantID        primitive.ObjectID
-	Role            int8
 	Status          int8
+	Type            int8
 	UUIDs           []string
 	ExcludeArchived bool
 	SearchText      string
@@ -279,13 +277,15 @@ type StaffStorer interface {
 	GetByPublicID(ctx context.Context, oldID uint64) (*Staff, error)
 	GetByEmail(ctx context.Context, email string) (*Staff, error)
 	GetByVerificationCode(ctx context.Context, verificationCode string) (*Staff, error)
+	GetLatestByTenantID(ctx context.Context, tenantID primitive.ObjectID) (*Staff, error)
 	CheckIfExistsByEmail(ctx context.Context, email string) (bool, error)
 	UpdateByID(ctx context.Context, m *Staff) error
 	UpsertByID(ctx context.Context, user *Staff) error
-	ListByFilter(ctx context.Context, f *StaffListFilter) (*StaffListResult, error)
+	ListByFilter(ctx context.Context, f *StaffPaginationListFilter) (*StaffPaginationListResult, error)
 	ListAsSelectOptionByFilter(ctx context.Context, f *StaffListFilter) ([]*StaffAsSelectOption, error)
+	LiteListByFilter(ctx context.Context, f *StaffPaginationListFilter) (*StaffPaginationLiteListResult, error)
+	ListByHowDidYouHearAboutUsID(ctx context.Context, howDidYouHearAboutUsID primitive.ObjectID) (*StaffPaginationListResult, error)
 	DeleteByID(ctx context.Context, id primitive.ObjectID) error
-	// //TODO: Add more...
 }
 
 type StaffStorerImpl struct {
@@ -298,10 +298,17 @@ func NewDatastore(appCfg *c.Conf, loggerp *slog.Logger, client *mongo.Client) St
 	// ctx := context.Background()
 	uc := client.Database(appCfg.DB.Name).Collection("staff")
 
-	// The following few lines of code will create the index for our app for this
-	// colleciton.
-	indexModel := mongo.IndexModel{
-		Keys: bson.D{
+	_, err := uc.Indexes().CreateMany(context.TODO(), []mongo.IndexModel{
+		{Keys: bson.D{{Key: "tenant_id", Value: 1}}},
+		{Keys: bson.D{{Key: "email", Value: 1}}},
+		{Keys: bson.D{{Key: "last_name", Value: 1}}},
+		{Keys: bson.D{{Key: "name", Value: 1}}},
+		{Keys: bson.D{{Key: "lexical_name", Value: 1}}},
+		{Keys: bson.D{{Key: "public_id", Value: -1}}},
+		{Keys: bson.D{{Key: "join_date", Value: 1}}},
+		{Keys: bson.D{{Key: "status", Value: 1}}},
+		{Keys: bson.D{{Key: "type", Value: 1}}},
+		{Keys: bson.D{
 			{"name", "text"},
 			{"lexical_name", "text"},
 			{"email", "text"},
@@ -311,9 +318,9 @@ func NewDatastore(appCfg *c.Conf, loggerp *slog.Logger, client *mongo.Client) St
 			{"city", "text"},
 			{"postal_code", "text"},
 			{"address_line1", "text"},
-		},
-	}
-	_, err := uc.Indexes().CreateOne(context.TODO(), indexModel)
+			{"description", "text"},
+		}},
+	})
 	if err != nil {
 		// It is important that we crash the app on startup to meet the
 		// requirements of `google/wire` framework.
@@ -331,12 +338,6 @@ func NewDatastore(appCfg *c.Conf, loggerp *slog.Logger, client *mongo.Client) St
 var StaffStateLabels = map[int8]string{
 	StaffStatusActive:   "Active",
 	StaffStatusArchived: "Archived",
-}
-
-var StaffTypeLabels = map[int8]string{
-	StaffTypeResidential: "Residential",
-	StaffTypeCommercial:  "Commercial",
-	StaffTypeUnassigned:  "Unassigned",
 }
 
 var StaffDeactivationReasonLabels = map[int8]string{

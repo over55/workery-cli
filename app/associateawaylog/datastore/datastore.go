@@ -3,9 +3,8 @@ package datastore
 import (
 	"context"
 	"log"
-	"time"
-
 	"log/slog"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -44,7 +43,7 @@ type AssociateAwayLog struct {
 	ModifiedByUserID      primitive.ObjectID `bson:"modified_by_user_id" json:"modified_by_user_id,omitempty"`
 	ModifiedByUserName    string             `bson:"modified_by_user_name" json:"modified_by_user_name"`
 	ModifiedFromIPAddress string             `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
-	PublicID                 uint64             `bson:"public_id" json:"public_id"`
+	PublicID              uint64             `bson:"public_id" json:"public_id"`
 }
 
 type AssociateAwayLogListFilter struct {
@@ -56,6 +55,7 @@ type AssociateAwayLogListFilter struct {
 
 	// Filter related.
 	TenantID        primitive.ObjectID
+	AssociateID     primitive.ObjectID
 	Status          int8
 	ExcludeArchived bool
 	SearchText      string
@@ -79,10 +79,11 @@ type AssociateAwayLogStorer interface {
 	GetByPublicID(ctx context.Context, oldID uint64) (*AssociateAwayLog, error)
 	GetByEmail(ctx context.Context, email string) (*AssociateAwayLog, error)
 	GetByVerificationCode(ctx context.Context, verificationCode string) (*AssociateAwayLog, error)
+	GetLatestByTenantID(ctx context.Context, tenantID primitive.ObjectID) (*AssociateAwayLog, error)
 	CheckIfExistsByEmail(ctx context.Context, email string) (bool, error)
 	UpdateByID(ctx context.Context, m *AssociateAwayLog) error
-	ListByFilter(ctx context.Context, f *AssociateAwayLogListFilter) (*AssociateAwayLogListResult, error)
-	ListAsSelectOptionByFilter(ctx context.Context, f *AssociateAwayLogListFilter) ([]*AssociateAwayLogAsSelectOption, error)
+	ListByFilter(ctx context.Context, f *AssociateAwayLogPaginationListFilter) (*AssociateAwayLogPaginationListResult, error)
+	ListAsSelectOptionByFilter(ctx context.Context, f *AssociateAwayLogPaginationListFilter) ([]*AssociateAwayLogAsSelectOption, error)
 	DeleteByID(ctx context.Context, id primitive.ObjectID) error
 	// //TODO: Add more...
 }
@@ -97,14 +98,14 @@ func NewDatastore(appCfg *c.Conf, loggerp *slog.Logger, client *mongo.Client) As
 	// ctx := context.Background()
 	uc := client.Database(appCfg.DB.Name).Collection("associate_away_log")
 
-	// The following few lines of code will create the index for our app for this
-	// colleciton.
-	indexModel := mongo.IndexModel{
-		Keys: bson.D{
+	_, err := uc.Indexes().CreateMany(context.TODO(), []mongo.IndexModel{
+		{Keys: bson.D{{Key: "tenant_id", Value: 1}}},
+		{Keys: bson.D{{Key: "public_id", Value: -1}}},
+		{Keys: bson.D{{Key: "status", Value: 1}}},
+		{Keys: bson.D{
 			{"associate_name", "text"},
-		},
-	}
-	_, err := uc.Indexes().CreateOne(context.TODO(), indexModel)
+		}},
+	})
 	if err != nil {
 		// It is important that we crash the app on startup to meet the
 		// requirements of `google/wire` framework.

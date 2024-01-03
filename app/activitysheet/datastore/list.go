@@ -5,27 +5,34 @@ import (
 	"log"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"log/slog"
+
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func (impl ActivitySheetStorerImpl) ListByFilter(ctx context.Context, f *ActivitySheetListFilter) (*ActivitySheetListResult, error) {
+func (impl ActivitySheetStorerImpl) ListByFilter(ctx context.Context, f *ActivitySheetPaginationListFilter) (*ActivitySheetPaginationListResult, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
 	defer cancel()
 
-	// Create the filter based on the cursor
-	filter := bson.M{}
-	if !f.Cursor.IsZero() {
-		filter["_id"] = bson.M{"$gt": f.Cursor} // Add the cursor condition to the filter
+	filter, err := impl.newPaginationFilter(f)
+	if err != nil {
+		return nil, err
 	}
 
 	// Add filter conditions to the filter
 	if !f.TenantID.IsZero() {
 		filter["tenant_id"] = f.TenantID
 	}
-
+	if !f.OrderID.IsZero() {
+		filter["order_id"] = f.OrderID
+	}
+	if !f.AssociateID.IsZero() {
+		filter["associate_id"] = f.AssociateID
+	}
+	if f.OrderWJID != 0 {
+		filter["order_wjid"] = f.OrderWJID
+	}
 	if f.ExcludeArchived {
 		filter["status"] = bson.M{"$ne": ActivitySheetStatusArchived} // Do not list archived items! This code
 	}
@@ -37,9 +44,10 @@ func (impl ActivitySheetStorerImpl) ListByFilter(ctx context.Context, f *Activit
 		slog.Any("filter", filter))
 
 	// Include additional filters for our cursor-based pagination pertaining to sorting and limit.
-	options := options.Find().
-		SetSort(bson.M{f.SortField: f.SortOrder}).
-		SetLimit(f.PageSize)
+	options, err := impl.newPaginationOptions(f)
+	if err != nil {
+		return nil, err
+	}
 
 	// Include Full-text search
 	if f.SearchText != "" {
@@ -77,23 +85,22 @@ func (impl ActivitySheetStorerImpl) ListByFilter(ctx context.Context, f *Activit
 	}
 
 	// Get the next cursor and encode it
-	nextCursor := primitive.NilObjectID
-	if int64(len(results)) == f.PageSize {
-		// Remove the extra document from the current page
-		results = results[:len(results)]
-
-		// Get the last document's _id as the next cursor
-		nextCursor = results[len(results)-1].ID
+	var nextCursor string
+	if hasNextPage {
+		nextCursor, err = impl.newPaginatorNextCursorForFull(f, results)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	return &ActivitySheetListResult{
+	return &ActivitySheetPaginationListResult{
 		Results:     results,
 		NextCursor:  nextCursor,
 		HasNextPage: hasNextPage,
 	}, nil
 }
 
-func (impl ActivitySheetStorerImpl) ListAsSelectOptionByFilter(ctx context.Context, f *ActivitySheetListFilter) ([]*ActivitySheetAsSelectOption, error) {
+func (impl ActivitySheetStorerImpl) ListAsSelectOptionByFilter(ctx context.Context, f *ActivitySheetPaginationListFilter) ([]*ActivitySheetAsSelectOption, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
 	defer cancel()
 
@@ -117,6 +124,9 @@ func (impl ActivitySheetStorerImpl) ListAsSelectOptionByFilter(ctx context.Conte
 	// Add filter conditions to the query
 	if !f.TenantID.IsZero() {
 		query["tenant_id"] = f.TenantID
+	}
+	if !f.OrderID.IsZero() {
+		query["order_id"] = f.OrderID
 	}
 
 	if startAfter != "" {

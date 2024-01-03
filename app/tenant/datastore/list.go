@@ -82,7 +82,7 @@ func (impl TenantStorerImpl) ListByFilter(ctx context.Context, f *TenantListFilt
 	nextCursor := primitive.NilObjectID
 	if int64(len(results)) == f.PageSize {
 		// Remove the extra document from the current page
-		results = results[:len(results)]
+		results = results[:]
 
 		// Get the last document's _id as the next cursor
 		nextCursor = results[len(results)-1].ID

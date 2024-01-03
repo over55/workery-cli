@@ -3,10 +3,12 @@ package datastore
 import (
 	"context"
 
+	"log/slog"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"log/slog"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func (impl AssociateStorerImpl) GetByID(ctx context.Context, id primitive.ObjectID) (*Associate, error) {
@@ -25,8 +27,8 @@ func (impl AssociateStorerImpl) GetByID(ctx context.Context, id primitive.Object
 	return &result, nil
 }
 
-func (impl AssociateStorerImpl) GetByPublicID(ctx context.Context, oldID uint64) (*Associate, error) {
-	filter := bson.D{{"public_id", oldID}}
+func (impl AssociateStorerImpl) GetByPublicID(ctx context.Context, publicID uint64) (*Associate, error) {
+	filter := bson.D{{"public_id", publicID}}
 
 	var result Associate
 	err := impl.Collection.FindOne(ctx, filter).Decode(&result)
@@ -71,4 +73,26 @@ func (impl AssociateStorerImpl) GetByVerificationCode(ctx context.Context, verif
 		return nil, err
 	}
 	return &result, nil
+}
+
+func (impl AssociateStorerImpl) GetLatestByTenantID(ctx context.Context, tenantID primitive.ObjectID) (*Associate, error) {
+	filter := bson.D{{"tenant_id", tenantID}}
+	opts := options.Find().SetSort(bson.D{{"public_id", -1}}).SetLimit(1)
+
+	var order Associate
+	cursor, err := impl.Collection.Find(context.Background(), filter, opts)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(context.Background())
+
+	if cursor.Next(context.Background()) {
+		err := cursor.Decode(&order)
+		if err != nil {
+			return nil, err
+		}
+		return &order, nil
+	}
+
+	return nil, mongo.ErrNoDocuments
 }

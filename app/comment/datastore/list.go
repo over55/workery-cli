@@ -5,10 +5,16 @@ import (
 	"log"
 	"time"
 
+	"log/slog"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"log/slog"
+)
+
+const (
+	OrderAscending  = 1
+	OrderDescending = -1
 )
 
 func (impl CommentStorerImpl) ListByFilter(ctx context.Context, f *CommentListFilter) (*CommentListResult, error) {
@@ -25,12 +31,26 @@ func (impl CommentStorerImpl) ListByFilter(ctx context.Context, f *CommentListFi
 	if !f.TenantID.IsZero() {
 		filter["tenant_id"] = f.TenantID
 	}
-
+	if !f.CustomerID.IsZero() {
+		filter["customer_id"] = f.CustomerID
+	}
+	if !f.AssociateID.IsZero() {
+		filter["associate_id"] = f.AssociateID
+	}
+	if !f.OrderID.IsZero() {
+		filter["order_id"] = f.OrderID
+	}
+	if f.OrderWJID != 0 {
+		filter["order_wjid"] = f.OrderWJID
+	}
 	if f.ExcludeArchived {
 		filter["status"] = bson.M{"$ne": CommentStatusArchived} // Do not list archived items! This code
 	}
 	if f.Status != 0 {
 		filter["status"] = f.Status
+	}
+	if f.BelongsTo != 0 {
+		filter["belongs_to"] = f.BelongsTo
 	}
 
 	impl.Logger.Debug("listing filter:",
@@ -80,7 +100,7 @@ func (impl CommentStorerImpl) ListByFilter(ctx context.Context, f *CommentListFi
 	nextCursor := primitive.NilObjectID
 	if int64(len(results)) == f.PageSize {
 		// Remove the extra document from the current page
-		results = results[:len(results)]
+		results = results[:]
 
 		// Get the last document's _id as the next cursor
 		nextCursor = results[len(results)-1].ID
@@ -131,6 +151,12 @@ func (impl CommentStorerImpl) ListAsSelectOptionByFilter(ctx context.Context, f 
 
 	if f.ExcludeArchived {
 		query["status"] = bson.M{"$ne": CommentStatusArchived} // Do not list archived items! This code
+	}
+	if !f.OrderID.IsZero() {
+		query["order_id"] = f.OrderID
+	}
+	if f.OrderWJID != 0 {
+		query["order_wjid"] = f.OrderWJID
 	}
 
 	// Full-text search

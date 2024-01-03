@@ -23,6 +23,9 @@ func (impl AssociateStorerImpl) ListByFilter(ctx context.Context, f *AssociatePa
 	if !f.TenantID.IsZero() {
 		filter["tenant_id"] = f.TenantID
 	}
+	if !f.HowDidYouHearAboutUsID.IsZero() {
+		filter["how_did_you_hear_about_us_id"] = f.TenantID
+	}
 	if f.Role > 0 {
 		filter["role"] = f.Role
 	}
@@ -52,6 +55,24 @@ func (impl AssociateStorerImpl) ListByFilter(ctx context.Context, f *AssociatePa
 	}
 	if len(f.AllSkillSetIDs) > 0 {
 		filter["skill_sets._id"] = bson.M{"$all": f.AllSkillSetIDs}
+	}
+	if len(f.InTagIDs) > 0 {
+		filter["tags._id"] = bson.M{"$in": f.InTagIDs}
+	}
+	if len(f.AllTagIDs) > 0 {
+		filter["tags._id"] = bson.M{"$all": f.AllTagIDs}
+	}
+	if len(f.InInsuranceRequirementIDs) > 0 {
+		filter["insurance_requirements._id"] = bson.M{"$in": f.InInsuranceRequirementIDs}
+	}
+	if len(f.AllInsuranceRequirementIDs) > 0 {
+		filter["insurance_requirements._id"] = bson.M{"$all": f.AllInsuranceRequirementIDs}
+	}
+	if len(f.InVehicleTypeIDs) > 0 {
+		filter["vehicle_types._id"] = bson.M{"$in": f.InVehicleTypeIDs}
+	}
+	if len(f.AllVehicleTypeIDs) > 0 {
+		filter["vehicle_types._id"] = bson.M{"$all": f.AllVehicleTypeIDs}
 	}
 
 	impl.Logger.Debug("listing filter:",

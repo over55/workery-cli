@@ -51,6 +51,9 @@ func (impl TaskItemStorerImpl) ListAsSelectOptionByFilter(ctx context.Context, f
 	if f.ExcludeArchived {
 		query["status"] = bson.M{"$ne": TaskItemStatusArchived} // Do not list archived items! This code
 	}
+	if f.Type != 0 {
+		query["type"] = f.Type
+	}
 
 	// Full-text search
 	if f.SearchText != "" {

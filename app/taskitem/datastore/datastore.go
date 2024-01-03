@@ -2,10 +2,12 @@ package datastore
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"log/slog"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
@@ -52,8 +54,8 @@ type TaskItem struct {
 	ModifiedByUserID                      primitive.ObjectID              `bson:"modified_by_user_id" json:"modified_by_user_id,omitempty"`
 	ModifiedByUserName                    string                          `bson:"modified_by_user_name" json:"modified_by_user_name"`
 	ModifiedFromIPAddress                 string                          `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
-	Status                                int8                            `bson:"status" json:"status"` // 20
-	PublicID                                 uint64                          `bson:"public_id" json:"public_id"` // 21
+	Status                                int8                            `bson:"status" json:"status"`       // 20
+	PublicID                              uint64                          `bson:"public_id" json:"public_id"` // 21
 	CustomerID                            primitive.ObjectID              `bson:"customer_id" json:"customer_id"`
 	CustomerFirstName                     string                          `bson:"customer_first_name" json:"customer_first_name,omitempty"`
 	CustomerLastName                      string                          `bson:"customer_last_name" json:"customer_last_name,omitempty"`
@@ -148,6 +150,7 @@ type TaskItemListFilter struct {
 	AssociateID     primitive.ObjectID
 	OrderID         primitive.ObjectID
 	OrderWJID       uint64 // A.K.A. `Workery Job ID`
+	Type            int8
 	Status          int8
 	ExcludeArchived bool
 	SearchText      string
@@ -172,15 +175,19 @@ type TaskItemStorer interface {
 	GetByPublicID(ctx context.Context, oldID uint64) (*TaskItem, error)
 	GetByEmail(ctx context.Context, email string) (*TaskItem, error)
 	GetByVerificationCode(ctx context.Context, verificationCode string) (*TaskItem, error)
+	GetLatestByTenantID(ctx context.Context, tenantID primitive.ObjectID) (*TaskItem, error)
 	CheckIfExistsByEmail(ctx context.Context, email string) (bool, error)
 	UpdateByID(ctx context.Context, m *TaskItem) error
 	ListByFilter(ctx context.Context, f *TaskItemPaginationListFilter) (*TaskItemPaginationListResult, error)
 	ListAsSelectOptionByFilter(ctx context.Context, f *TaskItemListFilter) ([]*TaskItemAsSelectOption, error)
+	ListByCustomerID(ctx context.Context, customerID primitive.ObjectID) (*TaskItemPaginationListResult, error)
+	ListByAssociateID(ctx context.Context, associateID primitive.ObjectID) (*TaskItemPaginationListResult, error)
+	ListByOrderID(ctx context.Context, orderID primitive.ObjectID) (*TaskItemPaginationListResult, error)
+	ListByOrderWJID(ctx context.Context, orderWJID uint64) (*TaskItemPaginationListResult, error)
 	DeleteByID(ctx context.Context, id primitive.ObjectID) error
 	PermanentlyDeleteAllByCustomerID(ctx context.Context, customerID primitive.ObjectID) error
 	PermanentlyDeleteAllByAssociateID(ctx context.Context, associateID primitive.ObjectID) error
 	CountByFilter(ctx context.Context, f *TaskItemListFilter) (int64, error)
-	// //TODO: Add more...
 }
 
 type TaskItemStorerImpl struct {
@@ -193,20 +200,43 @@ func NewDatastore(appCfg *c.Conf, loggerp *slog.Logger, client *mongo.Client) Ta
 	// ctx := context.Background()
 	uc := client.Database(appCfg.DB.Name).Collection("task_items")
 
-	// // The following few lines of code will create the index for our app for this
-	// // colleciton.
-	// indexModel := mongo.IndexModel{
-	// 	Keys: bson.D{
-	// 		{"text", "text"},
-	// 		{"description", "text"},
-	// 	},
-	// }
-	// _, err := uc.Indexes().CreateOne(context.TODO(), indexModel)
-	// if err != nil {
+	// // For debugging purposes only.
+	// if _, err := uc.Indexes().DropAll(context.TODO()); err != nil {
+	// 	loggerp.Error("failed deleting all indexes",
+	// 		slog.Any("err", err))
+	//
 	// 	// It is important that we crash the app on startup to meet the
 	// 	// requirements of `google/wire` framework.
 	// 	log.Fatal(err)
 	// }
+
+	_, err := uc.Indexes().CreateMany(context.TODO(), []mongo.IndexModel{
+		{Keys: bson.D{{Key: "tenant_id", Value: 1}}},
+		{Keys: bson.D{{Key: "public_id", Value: -1}}},
+		{Keys: bson.D{{Key: "is_closed", Value: 1}}},
+		{Keys: bson.D{{Key: "due_date", Value: 1}}},
+		{Keys: bson.D{{Key: "created_at", Value: 1}}},
+		{Keys: bson.D{{Key: "status", Value: 1}}},
+		{Keys: bson.D{{Key: "type", Value: 1}}},
+		{Keys: bson.D{
+			{"title", "text"},
+			{"description", "text"},
+			{"closing_reason_other", "text"},
+			{"order_wjid", "text"},
+			{"order_description", "text"},
+			{"order_skill_sets", "text"},
+			{"order_tags", "text"},
+			{"customer_name", "text"},
+			{"customer_lexical_name", "text"},
+			{"associate_name", "text"},
+			{"associate_lexical_name", "text"},
+		}},
+	})
+	if err != nil {
+		// It is important that we crash the app on startup to meet the
+		// requirements of `google/wire` framework.
+		log.Fatal(err)
+	}
 
 	s := &TaskItemStorerImpl{
 		Logger:     loggerp,

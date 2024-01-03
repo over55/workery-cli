@@ -26,16 +26,18 @@ const (
 
 type User struct {
 	ID                          primitive.ObjectID `bson:"_id" json:"id"`
-	TenantID                    primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`
+	Email                       string             `bson:"email" json:"email"`
 	FirstName                   string             `bson:"first_name" json:"first_name"`
 	LastName                    string             `bson:"last_name" json:"last_name"`
 	Name                        string             `bson:"name" json:"name"`
 	LexicalName                 string             `bson:"lexical_name" json:"lexical_name"`
-	Email                       string             `bson:"email" json:"email"`
+	OrganizationName            string             `bson:"organization_name" json:"organization_name"`
+	OrganizationType            int8               `bson:"organization_type" json:"organization_type"`
+	TenantID                    primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`
 	PasswordHashAlgorithm       string             `bson:"password_hash_algorithm" json:"password_hash_algorithm,omitempty"`
 	PasswordHash                string             `bson:"password_hash" json:"password_hash,omitempty"`
 	Role                        int8               `bson:"role" json:"role"`
-	HasStaffRole                bool               `bson:"has_staff_role" json:"-"`
+	HasStaffRole                bool               `bson:"has_staff_role" json:"has_staff_role"`
 	WasEmailVerified            bool               `bson:"was_email_verified" json:"was_email_verified"`
 	EmailVerificationCode       string             `bson:"email_verification_code,omitempty" json:"email_verification_code,omitempty"`
 	EmailVerificationExpiry     time.Time          `bson:"email_verification_expiry,omitempty" json:"email_verification_expiry,omitempty"`
@@ -61,19 +63,21 @@ type User struct {
 	HowDidYouHearAboutUsOther   string             `bson:"how_did_you_hear_about_us_other" json:"how_did_you_hear_about_us_other,omitempty"`
 	AgreeTOS                    bool               `bson:"agree_tos" json:"agree_tos,omitempty"`
 	AgreePromotionsEmail        bool               `bson:"agree_promotions_email" json:"agree_promotions_email,omitempty"`
-	CreatedAt                   time.Time          `bson:"created_at" json:"created_at,omitempty"`
-	CreatedByUserID             primitive.ObjectID `bson:"created_by_user_id" json:"created_by_user_id"`
+	CreatedAt                   time.Time          `bson:"created_at" json:"created_at"`
+	CreatedByUserID             primitive.ObjectID `bson:"created_by_user_id" json:"created_by_user_id,omitempty"`
 	CreatedByUserName           string             `bson:"created_by_user_name" json:"created_by_user_name"`
-	ModifiedAt                  time.Time          `bson:"modified_at" json:"modified_at,omitempty"`
-	ModifiedByUserID            primitive.ObjectID `bson:"modified_by_user_id" json:"modified_by_user_id"`
+	CreatedFromIPAddress        string             `bson:"created_from_ip_address" json:"created_from_ip_address"`
+	ModifiedAt                  time.Time          `bson:"modified_at" json:"modified_at"`
+	ModifiedByUserID            primitive.ObjectID `bson:"modified_by_user_id" json:"modified_by_user_id,omitempty"`
 	ModifiedByUserName          string             `bson:"modified_by_user_name" json:"modified_by_user_name"`
+	ModifiedFromIPAddress       string             `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
 	Status                      int8               `bson:"status" json:"status"`
 	Comments                    []*UserComment     `bson:"comments" json:"comments"`
 	Salt                        string             `bson:"salt" json:"salt,omitempty"`
 	JoinedTime                  time.Time          `bson:"joined_time" json:"joined_time,omitempty"`
 	PrAccessCode                string             `bson:"pr_access_code" json:"pr_access_code,omitempty"`
 	PrExpiryTime                time.Time          `bson:"pr_expiry_time" json:"pr_expiry_time,omitempty"`
-	PublicID                       uint64             `bson:"public_id" json:"public_id,omitempty"`
+	PublicID                    uint64             `bson:"public_id" json:"public_id,omitempty"`
 	Timezone                    string             `bson:"timezone" json:"timezone,omitempty"`
 	// AccessToken       string             `bson:"access_token" json:"access_token,omitempty"`
 	// RefreshToken      string             `bson:"refresh_token" json:"refresh_token,omitempty"`
@@ -81,7 +85,7 @@ type User struct {
 
 type UserComment struct {
 	ID               primitive.ObjectID `bson:"_id" json:"id"`
-	OrganizationID   primitive.ObjectID `bson:"organization_id" json:"organization_id"`
+	TenantID         primitive.ObjectID `bson:"tenant_id" json:"tenant_id"`
 	CreatedAt        time.Time          `bson:"created_at,omitempty" json:"created_at,omitempty"`
 	CreatedByUserID  primitive.ObjectID `bson:"created_by_user_id" json:"created_by_user_id"`
 	CreatedByName    string             `bson:"created_by_name" json:"created_by_name"`
@@ -99,10 +103,9 @@ type UserListFilter struct {
 	SortOrder int8 // 1=ascending | -1=descending
 
 	// Filter related.
-	OrganizationID  primitive.ObjectID
+	TenantID        primitive.ObjectID
 	Role            int8
 	Status          int8
-	UUIDs           []string
 	ExcludeArchived bool
 	SearchText      string
 	FirstName       string
@@ -130,6 +133,7 @@ type UserStorer interface {
 	GetByPublicID(ctx context.Context, oldID uint64) (*User, error)
 	GetByEmail(ctx context.Context, email string) (*User, error)
 	GetByVerificationCode(ctx context.Context, verificationCode string) (*User, error)
+	GetLatestByTenantID(ctx context.Context, tenantID primitive.ObjectID) (*User, error)
 	CheckIfExistsByEmail(ctx context.Context, email string) (bool, error)
 	UpdateByID(ctx context.Context, m *User) error
 	UpsertByID(ctx context.Context, m *User) error
@@ -137,9 +141,9 @@ type UserStorer interface {
 	ListByFilter(ctx context.Context, f *UserListFilter) (*UserListResult, error)
 	ListAsSelectOptionByFilter(ctx context.Context, f *UserListFilter) ([]*UserAsSelectOption, error)
 	ListAllExecutives(ctx context.Context) (*UserListResult, error)
-	ListAllStaffForTenantID(ctx context.Context, organizationID primitive.ObjectID) (*UserListResult, error)
+	ListAllStaffForTenantID(ctx context.Context, tenantID primitive.ObjectID) (*UserListResult, error)
+	CountByFilter(ctx context.Context, f *UserListFilter) (int64, error)
 	DeleteByID(ctx context.Context, id primitive.ObjectID) error
-	// //TODO: Add more...
 }
 
 type UserStorerImpl struct {
@@ -152,10 +156,17 @@ func NewDatastore(appCfg *c.Conf, loggerp *slog.Logger, client *mongo.Client) Us
 	// ctx := context.Background()
 	uc := client.Database(appCfg.DB.Name).Collection("users")
 
-	// The following few lines of code will create the index for our app for this
-	// colleciton.
-	indexModel := mongo.IndexModel{
-		Keys: bson.D{
+	_, err := uc.Indexes().CreateMany(context.TODO(), []mongo.IndexModel{
+		{Keys: bson.D{{Key: "tenant_id", Value: 1}}},
+		{Keys: bson.D{{Key: "email", Value: 1}}},
+		{Keys: bson.D{{Key: "last_name", Value: 1}}},
+		{Keys: bson.D{{Key: "name", Value: 1}}},
+		{Keys: bson.D{{Key: "lexical_name", Value: 1}}},
+		{Keys: bson.D{{Key: "public_id", Value: -1}}},
+		{Keys: bson.D{{Key: "joined_time", Value: 1}}},
+		{Keys: bson.D{{Key: "status", Value: 1}}},
+		{Keys: bson.D{{Key: "type", Value: 1}}},
+		{Keys: bson.D{
 			{"name", "text"},
 			{"lexical_name", "text"},
 			{"email", "text"},
@@ -165,9 +176,9 @@ func NewDatastore(appCfg *c.Conf, loggerp *slog.Logger, client *mongo.Client) Us
 			{"city", "text"},
 			{"postal_code", "text"},
 			{"address_line1", "text"},
-		},
-	}
-	_, err := uc.Indexes().CreateOne(context.TODO(), indexModel)
+			{"description", "text"},
+		}},
+	})
 	if err != nil {
 		// It is important that we crash the app on startup to meet the
 		// requirements of `google/wire` framework.

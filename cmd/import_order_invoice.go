@@ -350,7 +350,7 @@ func importOrderInvoice(
 		OrderWJID: order.WJID,
 		ID:        primitive.NewObjectID(), // 1
 		TenantID:  tenant.ID,               // 2
-		PublicID:     oi.OrderID,              // 3
+		PublicID:  oi.OrderID,              // 3
 		// InvoiceID: order.InvoiceID,         // 4
 		OrderID:                  order.ID,                             // 5
 		InvoiceDate:              oi.InvoiceDate,                       // 6
@@ -359,7 +359,7 @@ func importOrderInvoice(
 		ClientName:               oi.ClientName,                        // 9
 		ClientPhone:              oi.ClientTelephone,                   // 10
 		ClientEmail:              oi.ClientEmail.ValueOrZero(),         // 11
-		Line01Qty:                oi.Line01Qty,                         // 12
+		Line01Qty:                int64(oi.Line01Qty),                  // 12
 		Line01Desc:               oi.Line01Desc,                        // 13
 		Line01Price:              oi.Line01Price,                       // 14
 		Line01Amount:             oi.Line01Amount,                      // 15

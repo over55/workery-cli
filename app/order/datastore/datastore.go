@@ -2,9 +2,11 @@ package datastore
 
 import (
 	"context"
+	"log"
 	"log/slog"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
@@ -144,7 +146,7 @@ type OrderComment struct {
 	ModifiedFromIPAddress string             `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
 	Content               string             `bson:"content" json:"content"`
 	Status                int8               `bson:"status" json:"status"`
-	PublicID                 uint64             `bson:"public_id" json:"public_id"` // Workery Job ID
+	PublicID              uint64             `bson:"public_id" json:"public_id"` // Workery Job ID
 }
 
 type OrderInvoice struct {
@@ -168,7 +170,7 @@ type OrderInvoice struct {
 	ClientName               string             `bson:"client_name" json:"client_name"`
 	ClientPhone              string             `bson:"client_phone" json:"client_phone"`
 	ClientEmail              string             `bson:"client_email" json:"client_email"`
-	Line01Qty                int8               `bson:"line_01_qty" json:"line_01_qty"`
+	Line01Qty                int64              `bson:"line_01_qty" json:"line_01_qty"`
 	Line01Desc               string             `bson:"line_01_desc" json:"line_01_desc"`
 	Line01Price              float64            `bson:"line_01_price" json:"line_01_price"`
 	Line01Amount             float64            `bson:"line_01_amount" json:"line_01_amount"`
@@ -257,9 +259,10 @@ type OrderInvoice struct {
 	SubTotal                 float64            `bson:"sub_total" json:"sub_total"`
 	FileObjectKey            string             `bson:"file_object_key" json:"file_object_key"`
 	FileTitle                string             `bson:"file_title" json:"file_title"`
-	FileObjectURL            string             `bson:"file_object_url" json:"file_object_url,omitempty"` // (Optional, added by endpoint)
+	FileObjectURL            string             `bson:"file_object_url" json:"file_object_url,omitempty"`       // (Optional, added by endpoint)
+	FileObjectExpiry         time.Time          `bson:"file_object_expiry" json:"file_object_expiry,omitempty"` // (Optional, added by endpoint)
 	Status                   int8               `bson:"status" json:"status"`
-	PublicID                    uint64             `bson:"public_id" json:"public_id"`
+	PublicID                 uint64             `bson:"public_id" json:"public_id"`
 }
 
 type OrderDeposit struct {
@@ -283,7 +286,7 @@ type OrderDeposit struct {
 	ModifiedByUserName    string             `bson:"modified_by_user_name" json:"modified_by_user_name"`
 	ModifiedFromIPAddress string             `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
 	Status                int8               `bson:"status" json:"status"`
-	PublicID                 uint64             `bson:"public_id" json:"public_id"`
+	PublicID              uint64             `bson:"public_id" json:"public_id"`
 }
 
 type OrderTag struct {
@@ -355,8 +358,11 @@ type OrderStorer interface {
 	// GetByVerificationCode(ctx context.Context, verificationCode string) (*Order, error)
 	// CheckIfExistsByEmail(ctx context.Context, email string) (bool, error)
 	UpdateByID(ctx context.Context, m *Order) error
-	// ListByFilter(ctx context.Context, f *OrderListFilter) (*OrderListResult, error)
+	ListByFilter(ctx context.Context, f *OrderPaginationListFilter) (*OrderPaginationListResult, error)
 	LiteListByFilter(ctx context.Context, f *OrderPaginationListFilter) (*OrderPaginationLiteListResult, error)
+	ListByCustomerID(ctx context.Context, customerID primitive.ObjectID) (*OrderPaginationListResult, error)
+	ListByAssociateID(ctx context.Context, associateID primitive.ObjectID) (*OrderPaginationListResult, error)
+	ListByServiceFeeID(ctx context.Context, serviceFeeID primitive.ObjectID) (*OrderPaginationListResult, error)
 	// ListAsSelectOptionByFilter(ctx context.Context, f *OrderListFilter) ([]*OrderAsSelectOption, error)
 	// DeleteByID(ctx context.Context, id primitive.ObjectID) error
 	CountByFilter(ctx context.Context, f *OrderListFilter) (int64, error)
@@ -364,7 +370,6 @@ type OrderStorer interface {
 	CountByTenantID(ctx context.Context, tenantID primitive.ObjectID) (int64, error)
 	PermanentlyDeleteAllByCustomerID(ctx context.Context, customerID primitive.ObjectID) error
 	PermanentlyDeleteAllByAssociateID(ctx context.Context, associateID primitive.ObjectID) error
-	// // //TODO: Add more...
 }
 
 type OrderStorerImpl struct {
@@ -376,6 +381,66 @@ type OrderStorerImpl struct {
 func NewDatastore(appCfg *c.Conf, loggerp *slog.Logger, client *mongo.Client) OrderStorer {
 	// ctx := context.Background()
 	uc := client.Database(appCfg.DB.Name).Collection("orders")
+
+	// // For debugging purposes only.
+	// if _, err := uc.Indexes().DropAll(context.TODO()); err != nil {
+	// 	loggerp.Error("failed deleting all indexes",
+	// 		slog.Any("err", err))
+	//
+	// 	// It is important that we crash the app on startup to meet the
+	// 	// requirements of `google/wire` framework.
+	// 	log.Fatal(err)
+	// }
+
+	_, err := uc.Indexes().CreateMany(context.TODO(), []mongo.IndexModel{
+		{Keys: bson.D{{Key: "tenant_id", Value: 1}}},
+		{Keys: bson.D{{Key: "wjid", Value: -1}}},
+		{Keys: bson.D{{Key: "tenant_id_with_wjid", Value: 1}}},
+		{Keys: bson.D{{Key: "customer_id", Value: 1}}},
+		{Keys: bson.D{{Key: "associate_id", Value: 1}}},
+		{Keys: bson.D{{Key: "start_date", Value: 1}}},
+		{Keys: bson.D{{Key: "completion_date", Value: 1}}},
+		{Keys: bson.D{{Key: "assignment_date", Value: -1}}},
+		{Keys: bson.D{{Key: "status", Value: 1}}},
+		{Keys: bson.D{{Key: "type", Value: 1}}},
+		{Keys: bson.D{{Key: "customer_lexical_name", Value: 1}}},
+		{Keys: bson.D{{Key: "associate_lexical_name", Value: 1}}},
+		{Keys: bson.D{
+			{"customer_name", "text"},
+			{"customer_lexical_name", "text"},
+			{"customer_email", "text"},
+			{"customer_phone", "text"},
+			{"customer_other_phone", "text"},
+			{"customer_full_address_without_postal_code", "text"},
+			{"customer_tags", "text"},
+			{"associate_name", "text"},
+			{"associate_lexical_name", "text"},
+			{"associate_email", "text"},
+			{"associate_phone", "text"},
+			{"associate_other_phone", "text"},
+			{"associate_full_address_without_postal_code", "text"},
+			{"associate_tags", "text"},
+			{"associate_skill_sets", "text"},
+			{"associate_insurance_requirements", "text"},
+			{"associate_vehicle_types", "text"},
+			{"tenant_id_with_wjid", "text"},
+			{"description", "text"},
+			{"closing_reason_other", "text"},
+			{"invoice_service_fee_name", "text"},
+			{"invoice_service_fee_description", "text"},
+			{"latest_pending_task_description", "text"},
+			{"no_survey_conducted_reason_other", "text"},
+			{"tags", "text"},
+			{"skill_sets", "text"},
+			{"comments", "text"},
+		}},
+	})
+	if err != nil {
+		// It is important that we crash the app on startup to meet the
+		// requirements of `google/wire` framework.
+		log.Fatal(err)
+	}
+
 	s := &OrderStorerImpl{
 		Logger:     loggerp,
 		DbClient:   client,

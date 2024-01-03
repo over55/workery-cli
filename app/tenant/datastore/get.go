@@ -3,10 +3,12 @@ package datastore
 import (
 	"context"
 
+	"log/slog"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"log/slog"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func (impl TenantStorerImpl) GetByID(ctx context.Context, id primitive.ObjectID) (*Tenant, error) {
@@ -55,4 +57,26 @@ func (impl TenantStorerImpl) GetBySchemaName(ctx context.Context, schemaName str
 		return nil, err
 	}
 	return &result, nil
+}
+
+func (impl TenantStorerImpl) GetLatest(ctx context.Context) (*Tenant, error) {
+	filter := bson.D{}
+	opts := options.Find().SetSort(bson.D{{"public_id", -1}}).SetLimit(1)
+
+	var order Tenant
+	cursor, err := impl.Collection.Find(context.Background(), filter, opts)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(context.Background())
+
+	if cursor.Next(context.Background()) {
+		err := cursor.Decode(&order)
+		if err != nil {
+			return nil, err
+		}
+		return &order, nil
+	}
+
+	return nil, mongo.ErrNoDocuments
 }

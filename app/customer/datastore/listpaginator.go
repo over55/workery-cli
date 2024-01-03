@@ -25,17 +25,26 @@ type CustomerPaginationListFilter struct {
 	SortOrder int8 // 1=ascending | -1=descending
 
 	// Filter related.
-	TenantID     primitive.ObjectID
-	Type         int8
-	Role         int8
-	Status       int8
-	UUIDs        []string
-	SearchText   string
-	FirstName    string
-	LastName     string
-	Email        string
-	Phone        string
-	CreatedAtGTE time.Time
+	TenantID               primitive.ObjectID
+	HowDidYouHearAboutUsID primitive.ObjectID
+	Type                   int8
+	Role                   int8
+	Status                 int8
+	UUIDs                  []string
+	SearchText             string
+	FirstName              string
+	LastName               string
+	Email                  string
+	Phone                  string
+	CreatedAtGTE           time.Time
+
+	// InTagIDs filter is used if you want to find one or more tag
+	// ids inside the customer.
+	InTagIDs []primitive.ObjectID
+
+	// AllTagIDs filter is used if you want to find all tag ids for
+	// the customer.
+	AllTagIDs []primitive.ObjectID
 }
 
 // CustomerPaginationLiteListResult represents the paginated list results for
@@ -44,6 +53,14 @@ type CustomerPaginationLiteListResult struct {
 	Results     []*CustomerLite `json:"results"`
 	NextCursor  string          `json:"next_cursor"`
 	HasNextPage bool            `json:"has_next_page"`
+}
+
+// CustomerPaginationListResult represents the paginated list results for
+// the customer records (meaning limited).
+type CustomerPaginationListResult struct {
+	Results     []*Customer `json:"results"`
+	NextCursor  string      `json:"next_cursor"`
+	HasNextPage bool        `json:"has_next_page"`
 }
 
 // newPaginationFilter will create the mongodb filter to apply the cursor or
@@ -90,15 +107,15 @@ func (impl CustomerStorerImpl) newPaginationFilterBasedOnString(f *CustomerPagin
 	case OrderAscending:
 		filter := bson.M{}
 		filter["$or"] = []bson.M{
-			bson.M{f.SortField: bson.M{"$gt": str}},
-			bson.M{f.SortField: str, "_id": bson.M{"$gt": lastID}},
+			{f.SortField: bson.M{"$gt": str}},
+			{f.SortField: str, "_id": bson.M{"$gt": lastID}},
 		}
 		return filter, nil
 	case OrderDescending:
 		filter := bson.M{}
 		filter["$or"] = []bson.M{
-			bson.M{f.SortField: bson.M{"$lt": str}},
-			bson.M{f.SortField: str, "_id": bson.M{"$lt": lastID}},
+			{f.SortField: bson.M{"$lt": str}},
+			{f.SortField: str, "_id": bson.M{"$lt": lastID}},
 		}
 		return filter, nil
 	default:
@@ -130,15 +147,15 @@ func (impl CustomerStorerImpl) newPaginationFilterBasedOnTimestamp(f *CustomerPa
 	case OrderAscending:
 		filter := bson.M{}
 		filter["$or"] = []bson.M{
-			bson.M{f.SortField: bson.M{"$gt": timestamp}},
-			bson.M{f.SortField: timestamp, "_id": bson.M{"$gt": lastID}},
+			{f.SortField: bson.M{"$gt": timestamp}},
+			{f.SortField: timestamp, "_id": bson.M{"$gt": lastID}},
 		}
 		return filter, nil
 	case OrderDescending:
 		filter := bson.M{}
 		filter["$or"] = []bson.M{
-			bson.M{f.SortField: bson.M{"$lt": timestamp}},
-			bson.M{f.SortField: timestamp, "_id": bson.M{"$lt": lastID}},
+			{f.SortField: bson.M{"$lt": timestamp}},
+			{f.SortField: timestamp, "_id": bson.M{"$lt": lastID}},
 		}
 		return filter, nil
 	default:
@@ -149,12 +166,19 @@ func (impl CustomerStorerImpl) newPaginationFilterBasedOnTimestamp(f *CustomerPa
 // newPaginatorOptions will generate the mongodb options which will support the
 // paginator in ordering the data to work.
 func (impl CustomerStorerImpl) newPaginationOptions(f *CustomerPaginationListFilter) (*options.FindOptions, error) {
-	options := options.Find().
-		SetSort(bson.D{
-			{f.SortField, f.SortOrder},
-			{"_id", f.SortOrder}, // Include _id in sorting for consistency
-		}).
-		SetLimit(f.PageSize)
+	options := options.Find().SetLimit(f.PageSize)
+
+	// DEVELOPERS NOTE:
+	// We want to be able to return a list without sorting so we will need to
+	// run the following code.
+	if f.SortField != "" {
+		options = options.
+			SetSort(bson.D{
+				{f.SortField, f.SortOrder},
+				{"_id", f.SortOrder}, // Include _id in sorting for consistency
+			})
+	}
+
 	return options, nil
 }
 
@@ -164,7 +188,41 @@ func (impl CustomerStorerImpl) newPaginatorNextCursor(f *CustomerPaginationListF
 	var lastDatum *CustomerLite
 
 	// Remove the extra document from the current page
-	results = results[:len(results)]
+	results = results[:]
+
+	// Get the last document's _id as the next cursor
+	lastDatum = results[len(results)-1]
+
+	// Variable used to store the next cursor.
+	var nextCursor string
+
+	switch f.SortField {
+	case "lexical_name":
+		nextCursor = fmt.Sprintf("%v|%v", lastDatum.LexicalName, lastDatum.ID.Hex())
+		break
+	case "join_date":
+		timestamp := lastDatum.JoinDate.UnixMilli()
+		nextCursor = fmt.Sprintf("%v|%v", timestamp, lastDatum.ID.Hex())
+		break
+	default:
+		return "", fmt.Errorf("unsupported sort field in options for `%v`, only supported fields are `lexical_name` and `join_date`", f.SortField)
+	}
+
+	// Encode to base64 without the `=` symbol that would corrupt when we
+	// use the http url argument. Special thanks to:
+	// https://www.golinuxcloud.com/golang-base64-encode/
+	encoded := base64.RawStdEncoding.EncodeToString([]byte(nextCursor))
+
+	return encoded, nil
+}
+
+// newPaginatorNextCursor will return the base64 encoded next cursor which works
+// with our paginator.
+func (impl CustomerStorerImpl) newPaginatorNextCursorForFull(f *CustomerPaginationListFilter, results []*Customer) (string, error) {
+	var lastDatum *Customer
+
+	// Remove the extra document from the current page
+	results = results[:]
 
 	// Get the last document's _id as the next cursor
 	lastDatum = results[len(results)-1]

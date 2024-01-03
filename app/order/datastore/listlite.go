@@ -73,6 +73,42 @@ func (impl OrderStorerImpl) LiteListByFilter(ctx context.Context, f *OrderPagina
 	if !f.ModifiedByUserID.IsZero() {
 		filter["modified_by_user_id"] = f.ModifiedByUserID
 	}
+	if f.CustomerFirstName != "" {
+		filter["customer_first_name"] = bson.M{"$regex": primitive.Regex{Pattern: f.CustomerFirstName, Options: "i"}}
+	}
+	if f.CustomerLastName != "" {
+		filter["customer_last_name"] = bson.M{"$regex": primitive.Regex{Pattern: f.CustomerLastName, Options: "i"}}
+	}
+	if f.CustomerEmail != "" {
+		filter["customer_email"] = bson.M{"$regex": primitive.Regex{Pattern: f.CustomerEmail, Options: "i"}}
+	}
+	if f.CustomerPhone != "" {
+		filter["customer_phone"] = f.CustomerPhone
+	}
+	if f.AssociateFirstName != "" {
+		filter["associate_first_name"] = bson.M{"$regex": primitive.Regex{Pattern: f.AssociateFirstName, Options: "i"}}
+	}
+	if f.AssociateLastName != "" {
+		filter["associate_last_name"] = bson.M{"$regex": primitive.Regex{Pattern: f.AssociateLastName, Options: "i"}}
+	}
+	if f.AssociateEmail != "" {
+		filter["associate_email"] = bson.M{"$regex": primitive.Regex{Pattern: f.AssociateEmail, Options: "i"}}
+	}
+	if f.AssociatePhone != "" {
+		filter["associate_phone"] = f.AssociatePhone
+	}
+	if len(f.InSkillSetIDs) > 0 {
+		filter["skill_sets._id"] = bson.M{"$in": f.InSkillSetIDs}
+	}
+	if len(f.AllSkillSetIDs) > 0 {
+		filter["skill_sets._id"] = bson.M{"$all": f.AllSkillSetIDs}
+	}
+	if len(f.InTagIDs) > 0 {
+		filter["tags._id"] = bson.M{"$in": f.InTagIDs}
+	}
+	if len(f.AllTagIDs) > 0 {
+		filter["tags._id"] = bson.M{"$all": f.AllTagIDs}
+	}
 
 	impl.Logger.Debug("listing filter:",
 		slog.Any("filter", filter))
@@ -116,7 +152,7 @@ func (impl OrderStorerImpl) LiteListByFilter(ctx context.Context, f *OrderPagina
 	// Get the next cursor and encode it
 	var nextCursor string
 	if hasNextPage {
-		nextCursor, err = impl.newPaginatorNextCursor(f, results)
+		nextCursor, err = impl.newPaginatorLiteNextCursor(f, results)
 		if err != nil {
 			return nil, err
 		}

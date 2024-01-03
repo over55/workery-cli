@@ -14,11 +14,12 @@ import (
 )
 
 const (
-	ActivitySheetStatusPending  = 5
+	ActivitySheetStatusPending  = 5 // Deprecated.
 	ActivitySheetStatusDeclined = 4
 	ActivitySheetStatusAccepted = 3
 	ActivitySheetStatusError    = 2
 	ActivitySheetStatusArchived = 1
+
 	ActivitySheetTypeUnassigned = 1
 	ActivitySheetTypeResidentia = 2
 	ActivitySheetTypeCommercial = 3
@@ -43,8 +44,8 @@ type ActivitySheet struct {
 	Status                int8               `bson:"status" json:"status"`
 	Type                  int8               `bson:"type_of" json:"type_of"`
 	TenantID              primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`
-	OrderTenantIDWithWJID string             `bson:"order_tenant_id_with_wjid" json:"order_tenant_id_with_wjid"` // OrderTenantIDWithWJID is a combination of `tenancy_id` and `wjid` values written in the following structure `%v_%v`.
-	PublicID                 uint64             `bson:"public_id" json:"public_id"`
+	OrderTenantIDWithWJID string             `bson:"order_tenant_id_with_wjid" json:"order_tenant_id_with_wjid"` // TenantIDWithWJID is a combination of `tenancy_id` and `wjid` values written in the following structure `%v_%v`.
+	PublicID              uint64             `bson:"public_id" json:"public_id"`
 	// OngoingOrderID        primitive.ObjectID `bson:"ongoing_order_id" json:"ongoing_order_id"`
 }
 
@@ -57,6 +58,9 @@ type ActivitySheetListFilter struct {
 
 	// Filter related.
 	TenantID        primitive.ObjectID
+	AssociateID     primitive.ObjectID
+	OrderID         primitive.ObjectID
+	OrderWJID       uint64 // A.K.A. `Workery Job ID`
 	Status          int8
 	ExcludeArchived bool
 	SearchText      string
@@ -82,10 +86,15 @@ type ActivitySheetStorer interface {
 	GetByVerificationCode(ctx context.Context, verificationCode string) (*ActivitySheet, error)
 	CheckIfExistsByEmail(ctx context.Context, email string) (bool, error)
 	UpdateByID(ctx context.Context, m *ActivitySheet) error
-	ListByFilter(ctx context.Context, f *ActivitySheetListFilter) (*ActivitySheetListResult, error)
-	ListAsSelectOptionByFilter(ctx context.Context, f *ActivitySheetListFilter) ([]*ActivitySheetAsSelectOption, error)
+	ListByFilter(ctx context.Context, f *ActivitySheetPaginationListFilter) (*ActivitySheetPaginationListResult, error)
+	LiteListByFilter(ctx context.Context, f *ActivitySheetPaginationListFilter) (*ActivitySheetPaginationLiteListResult, error)
+	ListAsSelectOptionByFilter(ctx context.Context, f *ActivitySheetPaginationListFilter) ([]*ActivitySheetAsSelectOption, error)
+	ListByOrderID(ctx context.Context, orderID primitive.ObjectID) (*ActivitySheetPaginationListResult, error)
+	ListByOrderWJID(ctx context.Context, orderWJID uint64) (*ActivitySheetPaginationListResult, error)
 	DeleteByID(ctx context.Context, id primitive.ObjectID) error
-	// //TODO: Add more...
+	PermanentlyDeleteAllByAssociateID(ctx context.Context, associateID primitive.ObjectID) error
+	CountByFilter(ctx context.Context, f *ActivitySheetPaginationListFilter) (int64, error)
+	CountByLast30DaysForAssociateID(ctx context.Context, associateID primitive.ObjectID) (int64, error)
 }
 
 type ActivitySheetStorerImpl struct {
@@ -99,14 +108,16 @@ func NewDatastore(appCfg *c.Conf, loggerp *slog.Logger, client *mongo.Client) Ac
 	uc := client.Database(appCfg.DB.Name).Collection("activity_sheets")
 
 	// The following few lines of code will create the index for our app for this
-	// colleciton.
-	indexModel := mongo.IndexModel{
-		Keys: bson.D{
+	_, err := uc.Indexes().CreateMany(context.TODO(), []mongo.IndexModel{
+		{Keys: bson.D{{Key: "tenant_id", Value: 1}}},
+		{Keys: bson.D{{Key: "public_id", Value: -1}}},
+		{Keys: bson.D{{Key: "status", Value: 1}}},
+		{Keys: bson.D{{Key: "type", Value: 1}}},
+		{Keys: bson.D{
 			{"comment", "text"},
 			{"associate_name", "text"},
-		},
-	}
-	_, err := uc.Indexes().CreateOne(context.TODO(), indexModel)
+		}},
+	})
 	if err != nil {
 		// It is important that we crash the app on startup to meet the
 		// requirements of `google/wire` framework.

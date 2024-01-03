@@ -18,7 +18,21 @@ const (
 
 	OrderInvoicePaidToAssociate    = 1
 	OrderInvoicePaidToOrganization = 2
+
+	OrderUnassignedReasonOther                        = 1
+	OrderUnassignedReasonAossicateNotAFit             = 2
+	OrderUnassignedReasonJobBiggerThanThought         = 3
+	OrderUnassignedReasonClientChangedJobRequirements = 4
+	OrderUnassignedReasonAssociateNeedsMoreTime       = 5
 )
+
+var OrderUnassignedReasonToLabels = map[int8]string{
+	OrderUnassignedReasonOther:                        "Other",
+	OrderUnassignedReasonAossicateNotAFit:             "Associate not a fit",
+	OrderUnassignedReasonJobBiggerThanThought:         "Job bigger than thought",
+	OrderUnassignedReasonClientChangedJobRequirements: "Client changed job requirements",
+	OrderUnassignedReasonAssociateNeedsMoreTime:       "Associate needs more time",
+}
 
 var OrderOrganizationInvoicePaidToLabels = map[int8]string{
 	OrderInvoicePaidToAssociate:    "Associate",

@@ -5,10 +5,11 @@ import (
 	"log"
 	"time"
 
+	"log/slog"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"log/slog"
 
 	c "github.com/over55/workery-cli/config"
 )
@@ -61,7 +62,21 @@ type Tenant struct {
 	OtherTelephone          string             `bson:"other_telephone" json:"other_telephone"`
 	OtherTelephoneExtension string             `bson:"other_telephone_extension" json:"other_telephone_extension"`
 	OtherTelephoneType      int8               `bson:"other_telephone_type" json:"other_telephone_type"`
-	PublicID                   uint64             `bson:"public_id" json:"public_id"`
+	PublicID                uint64             `bson:"public_id" json:"public_id"`
+	Comments                []*TenantComment   `bson:"comments" json:"comments"`
+}
+
+type TenantComment struct {
+	ID               primitive.ObjectID `bson:"_id" json:"id"`
+	TenantID         primitive.ObjectID `bson:"tenant_id" json:"tenant_id"`
+	CreatedAt        time.Time          `bson:"created_at,omitempty" json:"created_at,omitempty"`
+	CreatedByUserID  primitive.ObjectID `bson:"created_by_user_id" json:"created_by_user_id"`
+	CreatedByName    string             `bson:"created_by_name" json:"created_by_name"`
+	ModifiedAt       time.Time          `bson:"modified_at,omitempty" json:"modified_at,omitempty"`
+	ModifiedByUserID primitive.ObjectID `bson:"modified_by_user_id" json:"modified_by_user_id"`
+	ModifiedByName   string             `bson:"modified_by_name" json:"modified_by_name"`
+	Content          string             `bson:"content" json:"content"`
+	PublicID         uint64             `bson:"public_id" json:"public_id"`
 }
 
 type TenantListFilter struct {
@@ -98,11 +113,11 @@ type TenantStorer interface {
 	GetByID(ctx context.Context, id primitive.ObjectID) (*Tenant, error)
 	GetByPublicID(ctx context.Context, oldID uint64) (*Tenant, error)
 	GetBySchemaName(ctx context.Context, schemaName string) (*Tenant, error)
+	GetLatest(ctx context.Context) (*Tenant, error)
 	UpdateByID(ctx context.Context, m *Tenant) error
 	ListByFilter(ctx context.Context, m *TenantListFilter) (*TenantListResult, error)
 	ListAsSelectOptionByFilter(ctx context.Context, f *TenantListFilter) ([]*TenantAsSelectOption, error)
 	DeleteByID(ctx context.Context, id primitive.ObjectID) error
-	// //TODO: Add more...
 }
 
 type TenantStorerImpl struct {
@@ -115,14 +130,15 @@ func NewDatastore(appCfg *c.Conf, loggerp *slog.Logger, client *mongo.Client) Te
 	// ctx := context.Background()
 	uc := client.Database(appCfg.DB.Name).Collection("tenants")
 
-	// The following few lines of code will create the index for our app for this
-	// colleciton.
-	indexModel := mongo.IndexModel{
-		Keys: bson.D{
+	_, err := uc.Indexes().CreateMany(context.TODO(), []mongo.IndexModel{
+		{Keys: bson.D{{Key: "public_id", Value: -1}}},
+		{Keys: bson.D{{Key: "schema_name", Value: 1}}},
+		{Keys: bson.D{{Key: "status", Value: 1}}},
+		{Keys: bson.D{
 			{"name", "text"},
-		},
-	}
-	_, err := uc.Indexes().CreateOne(context.TODO(), indexModel)
+			{"schema_name", "text"},
+		}},
+	})
 	if err != nil {
 		// It is important that we crash the app on startup to meet the
 		// requirements of `google/wire` framework.

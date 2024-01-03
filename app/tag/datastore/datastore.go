@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"log/slog"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -18,12 +19,20 @@ const (
 )
 
 type Tag struct {
-	ID          primitive.ObjectID `bson:"_id" json:"id"`
-	TenantID    primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`
-	Text        string             `bson:"text" json:"text"`
-	Description string             `bson:"description" json:"description"`
-	Status      int8               `bson:"status" json:"status"`
-	PublicID       uint64             `bson:"public_id" json:"public_id"`
+	ID                    primitive.ObjectID `bson:"_id" json:"id"`
+	TenantID              primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`
+	Text                  string             `bson:"text" json:"text"`
+	Description           string             `bson:"description" json:"description"`
+	Status                int8               `bson:"status" json:"status"`
+	PublicID              uint64             `bson:"public_id" json:"public_id"`
+	CreatedAt             time.Time          `bson:"created_at" json:"created_at"`
+	CreatedByUserID       primitive.ObjectID `bson:"created_by_user_id" json:"created_by_user_id,omitempty"`
+	CreatedByUserName     string             `bson:"created_by_user_name" json:"created_by_user_name"`
+	CreatedFromIPAddress  string             `bson:"created_from_ip_address" json:"created_from_ip_address"`
+	ModifiedAt            time.Time          `bson:"modified_at" json:"modified_at"`
+	ModifiedByUserID      primitive.ObjectID `bson:"modified_by_user_id" json:"modified_by_user_id,omitempty"`
+	ModifiedByUserName    string             `bson:"modified_by_user_name" json:"modified_by_user_name"`
+	ModifiedFromIPAddress string             `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
 }
 
 type TagListFilter struct {
@@ -48,7 +57,7 @@ type TagListResult struct {
 
 type TagAsSelectOption struct {
 	Value primitive.ObjectID `bson:"_id" json:"value"` // Extract from the database `_id` field and output through API as `value`.
-	Label string             `bson:"name" json:"label"`
+	Label string             `bson:"text" json:"label"`
 }
 
 // TagStorer Interface for user.
@@ -58,12 +67,12 @@ type TagStorer interface {
 	GetByPublicID(ctx context.Context, oldID uint64) (*Tag, error)
 	GetByEmail(ctx context.Context, email string) (*Tag, error)
 	GetByVerificationCode(ctx context.Context, verificationCode string) (*Tag, error)
+	GetLatestByTenantID(ctx context.Context, tenantID primitive.ObjectID) (*Tag, error)
 	CheckIfExistsByEmail(ctx context.Context, email string) (bool, error)
 	UpdateByID(ctx context.Context, m *Tag) error
-	ListByFilter(ctx context.Context, f *TagListFilter) (*TagListResult, error)
+	ListByFilter(ctx context.Context, f *TagPaginationListFilter) (*TagPaginationListResult, error)
 	ListAsSelectOptionByFilter(ctx context.Context, f *TagListFilter) ([]*TagAsSelectOption, error)
 	DeleteByID(ctx context.Context, id primitive.ObjectID) error
-	// //TODO: Add more...
 }
 
 type TagStorerImpl struct {
@@ -76,15 +85,27 @@ func NewDatastore(appCfg *c.Conf, loggerp *slog.Logger, client *mongo.Client) Ta
 	// ctx := context.Background()
 	uc := client.Database(appCfg.DB.Name).Collection("tags")
 
-	// The following few lines of code will create the index for our app for this
-	// colleciton.
-	indexModel := mongo.IndexModel{
-		Keys: bson.D{
+	// // For debugging purposes only.
+	// if _, err := uc.Indexes().DropAll(context.TODO()); err != nil {
+	// 	loggerp.Error("failed deleting all indexes",
+	// 		slog.Any("err", err))
+	//
+	// 	// It is important that we crash the app on startup to meet the
+	// 	// requirements of `google/wire` framework.
+	// 	log.Fatal(err)
+	// }
+
+	_, err := uc.Indexes().CreateMany(context.TODO(), []mongo.IndexModel{
+		{Keys: bson.D{{Key: "tenant_id", Value: 1}}},
+		{Keys: bson.D{{Key: "public_id", Value: -1}}},
+		{Keys: bson.D{{Key: "status", Value: 1}}},
+		{Keys: bson.D{{Key: "text", Value: 1}}},
+		{Keys: bson.D{{Key: "created_at", Value: 1}}},
+		{Keys: bson.D{
 			{"text", "text"},
 			{"description", "text"},
-		},
-	}
-	_, err := uc.Indexes().CreateOne(context.TODO(), indexModel)
+		}},
+	})
 	if err != nil {
 		// It is important that we crash the app on startup to meet the
 		// requirements of `google/wire` framework.

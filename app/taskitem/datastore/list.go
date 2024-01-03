@@ -40,11 +40,20 @@ func (impl TaskItemStorerImpl) ListByFilter(ctx context.Context, f *TaskItemPagi
 	if f.Status != 0 {
 		filter["status"] = f.Status
 	}
+	if f.Type != 0 {
+		filter["type"] = f.Type
+	}
 	if f.IsClosed == 1 {
 		filter["is_closed"] = true
 	}
 	if f.IsClosed == 2 {
 		filter["is_closed"] = false
+	}
+	if len(f.InSkillSetIDs) > 0 {
+		filter["skill_sets._id"] = bson.M{"$in": f.InSkillSetIDs}
+	}
+	if len(f.AllSkillSetIDs) > 0 {
+		filter["skill_sets._id"] = bson.M{"$all": f.AllSkillSetIDs}
 	}
 
 	impl.Logger.Debug("listing filter:",

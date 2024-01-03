@@ -17,8 +17,8 @@ func (impl OrderStorerImpl) DeleteByID(ctx context.Context, id primitive.ObjectI
 }
 
 func (impl *OrderStorerImpl) PermanentlyDeleteAllByCustomerID(ctx context.Context, customerID primitive.ObjectID) error {
-	f := &OrderListFilter{
-		Cursor:     primitive.NilObjectID,
+	f := &OrderPaginationListFilter{
+		Cursor:     "",
 		PageSize:   1_000_000,
 		SortField:  "_id",
 		SortOrder:  1, // 1=ascending | -1=descending
@@ -41,8 +41,8 @@ func (impl *OrderStorerImpl) PermanentlyDeleteAllByCustomerID(ctx context.Contex
 }
 
 func (impl *OrderStorerImpl) PermanentlyDeleteAllByAssociateID(ctx context.Context, associateID primitive.ObjectID) error {
-	f := &OrderListFilter{
-		Cursor:      primitive.NilObjectID,
+	f := &OrderPaginationListFilter{
+		Cursor:      "",
 		PageSize:    1_000_000,
 		SortField:   "_id",
 		SortOrder:   1, // 1=ascending | -1=descending

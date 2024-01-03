@@ -78,6 +78,12 @@ func (impl CustomerStorerImpl) LiteListByFilter(ctx context.Context, f *Customer
 	if !f.CreatedAtGTE.IsZero() {
 		filter["created_at"] = bson.M{"$gt": f.CreatedAtGTE} // Add the cursor condition to the filter
 	}
+	if len(f.InTagIDs) > 0 {
+		filter["tags._id"] = bson.M{"$in": f.InTagIDs}
+	}
+	if len(f.AllTagIDs) > 0 {
+		filter["tags._id"] = bson.M{"$all": f.AllTagIDs}
+	}
 
 	impl.Logger.Debug("listing filter:",
 		slog.Any("filter", filter))

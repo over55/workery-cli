@@ -3,9 +3,8 @@ package datastore
 import (
 	"context"
 	"log"
-	"time"
-
 	"log/slog"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -32,7 +31,7 @@ type Bulletin struct {
 	ModifiedFromIPAddress string             `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
 	Text                  string             `bson:"text" json:"text"`
 	Status                int8               `bson:"status" json:"status"`
-	PublicID                 uint64             `bson:"public_id" json:"public_id"`
+	PublicID              uint64             `bson:"public_id" json:"public_id"`
 }
 
 type BulletinListFilter struct {
@@ -67,12 +66,12 @@ type BulletinStorer interface {
 	GetByPublicID(ctx context.Context, oldID uint64) (*Bulletin, error)
 	GetByEmail(ctx context.Context, email string) (*Bulletin, error)
 	GetByVerificationCode(ctx context.Context, verificationCode string) (*Bulletin, error)
+	GetLatestByTenantID(ctx context.Context, tenantID primitive.ObjectID) (*Bulletin, error)
 	CheckIfExistsByEmail(ctx context.Context, email string) (bool, error)
 	UpdateByID(ctx context.Context, m *Bulletin) error
-	ListByFilter(ctx context.Context, f *BulletinListFilter) (*BulletinListResult, error)
+	ListByFilter(ctx context.Context, f *BulletinPaginationListFilter) (*BulletinPaginationListResult, error)
 	ListAsSelectOptionByFilter(ctx context.Context, f *BulletinListFilter) ([]*BulletinAsSelectOption, error)
 	DeleteByID(ctx context.Context, id primitive.ObjectID) error
-	// //TODO: Add more...
 }
 
 type BulletinStorerImpl struct {
@@ -85,20 +84,19 @@ func NewDatastore(appCfg *c.Conf, loggerp *slog.Logger, client *mongo.Client) Bu
 	// ctx := context.Background()
 	uc := client.Database(appCfg.DB.Name).Collection("bulletins")
 
-	// The following few lines of code will create the index for our app for this
-	// colleciton.
-	indexModel := mongo.IndexModel{
-		Keys: bson.D{
+	_, err := uc.Indexes().CreateMany(context.TODO(), []mongo.IndexModel{
+		{Keys: bson.D{{Key: "tenant_id", Value: 1}}},
+		{Keys: bson.D{{Key: "public_id", Value: -1}}},
+		{Keys: bson.D{{Key: "status", Value: 1}}},
+		{Keys: bson.D{
 			{"text", "text"},
-		},
-	}
-	_, err := uc.Indexes().CreateOne(context.TODO(), indexModel)
+		}},
+	})
 	if err != nil {
 		// It is important that we crash the app on startup to meet the
 		// requirements of `google/wire` framework.
 		log.Fatal(err)
 	}
-
 	s := &BulletinStorerImpl{
 		Logger:     loggerp,
 		DbClient:   client,

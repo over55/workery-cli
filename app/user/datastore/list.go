@@ -5,10 +5,11 @@ import (
 	"log"
 	"time"
 
+	"log/slog"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"log/slog"
 )
 
 func (impl UserStorerImpl) ListByFilter(ctx context.Context, f *UserListFilter) (*UserListResult, error) {
@@ -22,8 +23,8 @@ func (impl UserStorerImpl) ListByFilter(ctx context.Context, f *UserListFilter) 
 	}
 
 	// Add filter conditions to the filter
-	if !f.OrganizationID.IsZero() {
-		filter["organization_id"] = f.OrganizationID
+	if !f.TenantID.IsZero() {
+		filter["tenant_id"] = f.TenantID
 	}
 	if f.Role > 0 {
 		filter["role"] = f.Role
@@ -97,7 +98,7 @@ func (impl UserStorerImpl) ListByFilter(ctx context.Context, f *UserListFilter) 
 	nextCursor := primitive.NilObjectID
 	if int64(len(results)) == f.PageSize {
 		// Remove the extra document from the current page
-		results = results[:len(results)]
+		results = results[:]
 
 		// Get the last document's _id as the next cursor
 		nextCursor = results[len(results)-1].ID
@@ -132,8 +133,8 @@ func (impl UserStorerImpl) ListAsSelectOptionByFilter(ctx context.Context, f *Us
 		SetSort(bson.D{{sortField, sortOrder}})
 
 	// Add filter conditions to the query
-	if !f.OrganizationID.IsZero() {
-		query["organization_id"] = f.OrganizationID
+	if !f.TenantID.IsZero() {
+		query["tenant_id"] = f.TenantID
 	}
 	if f.Role > 0 {
 		query["role"] = f.Role
@@ -196,10 +197,10 @@ func (impl UserStorerImpl) ListAllExecutives(ctx context.Context) (*UserListResu
 	return impl.ListByFilter(ctx, f)
 }
 
-func (impl UserStorerImpl) ListAllStaffForTenantID(ctx context.Context, organizationID primitive.ObjectID) (*UserListResult, error) {
+func (impl UserStorerImpl) ListAllStaffForTenantID(ctx context.Context, tenantID primitive.ObjectID) (*UserListResult, error) {
 	f := &UserListFilter{
-		Role:           UserRoleStaff,
-		OrganizationID: organizationID,
+		Role:     UserRoleStaff,
+		TenantID: tenantID,
 	}
 	return impl.ListByFilter(ctx, f)
 }

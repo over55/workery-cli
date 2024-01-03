@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"log/slog"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -18,29 +19,23 @@ const (
 )
 
 type HowHearAboutUsItem struct {
-	ID             primitive.ObjectID `bson:"_id" json:"id"`
-	TenantID       primitive.ObjectID `bson:"tenant_id" json:"tenant_id"`
-	Text           string             `bson:"text" json:"text"`
-	SortNumber     int8               `bson:"sort_number" json:"sort_number"`
-	IsForAssociate bool               `bson:"is_for_associate" json:"is_for_associate"`
-	IsForCustomer  bool               `bson:"is_for_customer" json:"is_for_customer"`
-	IsForStaff     bool               `bson:"is_for_staff" json:"is_for_staff"`
-	Status         int8               `bson:"status" json:"status"`
-	PublicID          uint64             `bson:"public_id" json:"public_id"`
-}
-
-type HowHearAboutUsItemListFilter struct {
-	// Pagination related.
-	Cursor    primitive.ObjectID
-	PageSize  int64
-	SortField string
-	SortOrder int8 // 1=ascending | -1=descending
-
-	// Filter related.
-	TenantID        primitive.ObjectID
-	Status          int8
-	ExcludeArchived bool
-	SearchText      string
+	ID                    primitive.ObjectID `bson:"_id" json:"id"`
+	TenantID              primitive.ObjectID `bson:"tenant_id" json:"tenant_id"`
+	Text                  string             `bson:"text" json:"text"`
+	SortNumber            int8               `bson:"sort_number" json:"sort_number"`
+	IsForAssociate        bool               `bson:"is_for_associate" json:"is_for_associate"`
+	IsForCustomer         bool               `bson:"is_for_customer" json:"is_for_customer"`
+	IsForStaff            bool               `bson:"is_for_staff" json:"is_for_staff"`
+	Status                int8               `bson:"status" json:"status"`
+	PublicID              uint64             `bson:"public_id" json:"public_id"`
+	CreatedAt             time.Time          `bson:"created_at" json:"created_at"`
+	CreatedByUserID       primitive.ObjectID `bson:"created_by_user_id" json:"created_by_user_id,omitempty"`
+	CreatedByUserName     string             `bson:"created_by_user_name" json:"created_by_user_name"`
+	CreatedFromIPAddress  string             `bson:"created_from_ip_address" json:"created_from_ip_address"`
+	ModifiedAt            time.Time          `bson:"modified_at" json:"modified_at"`
+	ModifiedByUserID      primitive.ObjectID `bson:"modified_by_user_id" json:"modified_by_user_id,omitempty"`
+	ModifiedByUserName    string             `bson:"modified_by_user_name" json:"modified_by_user_name"`
+	ModifiedFromIPAddress string             `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
 }
 
 type HowHearAboutUsItemListResult struct {
@@ -51,7 +46,7 @@ type HowHearAboutUsItemListResult struct {
 
 type HowHearAboutUsItemAsSelectOption struct {
 	Value primitive.ObjectID `bson:"_id" json:"value"` // Extract from the database `_id` field and output through API as `value`.
-	Label string             `bson:"name" json:"label"`
+	Label string             `bson:"text" json:"label"`
 }
 
 // HowHearAboutUsItemStorer Interface for user.
@@ -60,12 +55,12 @@ type HowHearAboutUsItemStorer interface {
 	GetByID(ctx context.Context, id primitive.ObjectID) (*HowHearAboutUsItem, error)
 	GetByPublicID(ctx context.Context, oldID uint64) (*HowHearAboutUsItem, error)
 	GetByText(ctx context.Context, text string) (*HowHearAboutUsItem, error)
+	GetLatestByTenantID(ctx context.Context, tenantID primitive.ObjectID) (*HowHearAboutUsItem, error)
 	CheckIfExistsByEmail(ctx context.Context, email string) (bool, error)
 	UpdateByID(ctx context.Context, m *HowHearAboutUsItem) error
-	ListByFilter(ctx context.Context, f *HowHearAboutUsItemListFilter) (*HowHearAboutUsItemListResult, error)
-	ListAsSelectOptionByFilter(ctx context.Context, f *HowHearAboutUsItemListFilter) ([]*HowHearAboutUsItemAsSelectOption, error)
+	ListByFilter(ctx context.Context, f *HowHearAboutUsItemPaginationListFilter) (*HowHearAboutUsItemPaginationListResult, error)
+	ListAsSelectOptionByFilter(ctx context.Context, f *HowHearAboutUsItemPaginationListFilter) ([]*HowHearAboutUsItemAsSelectOption, error)
 	DeleteByID(ctx context.Context, id primitive.ObjectID) error
-	// //TODO: Add more...
 }
 
 type HowHearAboutUsItemStorerImpl struct {
@@ -78,14 +73,14 @@ func NewDatastore(appCfg *c.Conf, loggerp *slog.Logger, client *mongo.Client) Ho
 	// ctx := context.Background()
 	uc := client.Database(appCfg.DB.Name).Collection("how_hear_about_us_items")
 
-	// The following few lines of code will create the index for our app for this
-	// colleciton.
-	indexModel := mongo.IndexModel{
-		Keys: bson.D{
+	_, err := uc.Indexes().CreateMany(context.TODO(), []mongo.IndexModel{
+		{Keys: bson.D{{Key: "tenant_id", Value: 1}}},
+		{Keys: bson.D{{Key: "public_id", Value: -1}}},
+		{Keys: bson.D{{Key: "status", Value: 1}}},
+		{Keys: bson.D{
 			{"text", "text"},
-		},
-	}
-	_, err := uc.Indexes().CreateOne(context.TODO(), indexModel)
+		}},
+	})
 	if err != nil {
 		// It is important that we crash the app on startup to meet the
 		// requirements of `google/wire` framework.

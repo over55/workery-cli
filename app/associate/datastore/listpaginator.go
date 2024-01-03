@@ -25,17 +25,18 @@ type AssociatePaginationListFilter struct {
 	SortOrder int8 // 1=ascending | -1=descending
 
 	// Filter related.
-	TenantID     primitive.ObjectID
-	Type         int8
-	Role         int8
-	Status       int8
-	UUIDs        []string
-	SearchText   string
-	FirstName    string
-	LastName     string
-	Email        string
-	Phone        string
-	CreatedAtGTE time.Time
+	TenantID               primitive.ObjectID
+	HowDidYouHearAboutUsID primitive.ObjectID
+	Type                   int8
+	Role                   int8
+	Status                 int8
+	UUIDs                  []string
+	SearchText             string
+	FirstName              string
+	LastName               string
+	Email                  string
+	Phone                  string
+	CreatedAtGTE           time.Time
 
 	// InSkillSetIDs filter is used if you want to find one or more skill set
 	// ids inside the associate.
@@ -44,6 +45,30 @@ type AssociatePaginationListFilter struct {
 	// AllSkillSetIDs filter is used if you want to find all skill set ids for
 	// the associate.
 	AllSkillSetIDs []primitive.ObjectID
+
+	// InTagIDs filter is used if you want to find one or more tag
+	// ids inside the associate.
+	InTagIDs []primitive.ObjectID
+
+	// AllTagIDs filter is used if you want to find all tag ids for
+	// the associate.
+	AllTagIDs []primitive.ObjectID
+
+	// InInsuranceRequirementIDs filter is used if you want to find one or more tag
+	// ids inside the associate.
+	InInsuranceRequirementIDs []primitive.ObjectID
+
+	// AllInsuranceRequirementIDs filter is used if you want to find all tag ids for
+	// the associate.
+	AllInsuranceRequirementIDs []primitive.ObjectID
+
+	// InVehicleTypeIDs filter is used if you want to find one or more tag
+	// ids inside the associate.
+	InVehicleTypeIDs []primitive.ObjectID
+
+	// AllVehicleTypeIDs filter is used if you want to find all tag ids for
+	// the associate.
+	AllVehicleTypeIDs []primitive.ObjectID
 }
 
 // AssociatePaginationLiteListResult represents the paginated list results for
@@ -106,15 +131,15 @@ func (impl AssociateStorerImpl) newPaginationFilterBasedOnString(f *AssociatePag
 	case OrderAscending:
 		filter := bson.M{}
 		filter["$or"] = []bson.M{
-			bson.M{f.SortField: bson.M{"$gt": str}},
-			bson.M{f.SortField: str, "_id": bson.M{"$gt": lastID}},
+			{f.SortField: bson.M{"$gt": str}},
+			{f.SortField: str, "_id": bson.M{"$gt": lastID}},
 		}
 		return filter, nil
 	case OrderDescending:
 		filter := bson.M{}
 		filter["$or"] = []bson.M{
-			bson.M{f.SortField: bson.M{"$lt": str}},
-			bson.M{f.SortField: str, "_id": bson.M{"$lt": lastID}},
+			{f.SortField: bson.M{"$lt": str}},
+			{f.SortField: str, "_id": bson.M{"$lt": lastID}},
 		}
 		return filter, nil
 	default:
@@ -146,15 +171,15 @@ func (impl AssociateStorerImpl) newPaginationFilterBasedOnTimestamp(f *Associate
 	case OrderAscending:
 		filter := bson.M{}
 		filter["$or"] = []bson.M{
-			bson.M{f.SortField: bson.M{"$gt": timestamp}},
-			bson.M{f.SortField: timestamp, "_id": bson.M{"$gt": lastID}},
+			{f.SortField: bson.M{"$gt": timestamp}},
+			{f.SortField: timestamp, "_id": bson.M{"$gt": lastID}},
 		}
 		return filter, nil
 	case OrderDescending:
 		filter := bson.M{}
 		filter["$or"] = []bson.M{
-			bson.M{f.SortField: bson.M{"$lt": timestamp}},
-			bson.M{f.SortField: timestamp, "_id": bson.M{"$lt": lastID}},
+			{f.SortField: bson.M{"$lt": timestamp}},
+			{f.SortField: timestamp, "_id": bson.M{"$lt": lastID}},
 		}
 		return filter, nil
 	default:
@@ -187,7 +212,7 @@ func (impl AssociateStorerImpl) newPaginatorNextCursor(f *AssociatePaginationLis
 	var lastDatum *AssociateLite
 
 	// Remove the extra document from the current page
-	results = results[:len(results)]
+	results = results[:]
 
 	// Get the last document's _id as the next cursor
 	lastDatum = results[len(results)-1]
@@ -221,7 +246,7 @@ func (impl AssociateStorerImpl) newPaginatorNextCursorForFull(f *AssociatePagina
 	var lastDatum *Associate
 
 	// Remove the extra document from the current page
-	results = results[:len(results)]
+	results = results[:]
 
 	// Get the last document's _id as the next cursor
 	lastDatum = results[len(results)-1]

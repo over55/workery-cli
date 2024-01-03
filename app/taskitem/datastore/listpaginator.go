@@ -29,10 +29,19 @@ type TaskItemPaginationListFilter struct {
 	AssociateID     primitive.ObjectID
 	OrderID         primitive.ObjectID
 	OrderWJID       uint64 // A.K.A. `Workery Job ID`
+	Type            int8
 	Status          int8
 	ExcludeArchived bool
 	IsClosed        int8 //0=all, 1=true, 2=false
 	SearchText      string
+
+	// InSkillSetIDs filter is used if you want to find one or more skill set
+	// ids inside the associate.
+	InSkillSetIDs []primitive.ObjectID
+
+	// AllSkillSetIDs filter is used if you want to find all skill set ids for
+	// the associate.
+	AllSkillSetIDs []primitive.ObjectID
 }
 
 // TaskItemPaginationListResult represents the paginated list results for
@@ -87,15 +96,15 @@ func (impl TaskItemStorerImpl) newPaginationFilterBasedOnString(f *TaskItemPagin
 	case SortOrderAscending:
 		filter := bson.M{}
 		filter["$or"] = []bson.M{
-			bson.M{f.SortField: bson.M{"$gt": str}},
-			bson.M{f.SortField: str, "_id": bson.M{"$gt": lastID}},
+			{f.SortField: bson.M{"$gt": str}},
+			{f.SortField: str, "_id": bson.M{"$gt": lastID}},
 		}
 		return filter, nil
 	case SortOrderDescending:
 		filter := bson.M{}
 		filter["$or"] = []bson.M{
-			bson.M{f.SortField: bson.M{"$lt": str}},
-			bson.M{f.SortField: str, "_id": bson.M{"$lt": lastID}},
+			{f.SortField: bson.M{"$lt": str}},
+			{f.SortField: str, "_id": bson.M{"$lt": lastID}},
 		}
 		return filter, nil
 	default:
@@ -127,15 +136,15 @@ func (impl TaskItemStorerImpl) newPaginationFilterBasedOnTimestamp(f *TaskItemPa
 	case SortOrderAscending:
 		filter := bson.M{}
 		filter["$or"] = []bson.M{
-			bson.M{f.SortField: bson.M{"$gt": timestamp}},
-			bson.M{f.SortField: timestamp, "_id": bson.M{"$gt": lastID}},
+			{f.SortField: bson.M{"$gt": timestamp}},
+			{f.SortField: timestamp, "_id": bson.M{"$gt": lastID}},
 		}
 		return filter, nil
 	case SortOrderDescending:
 		filter := bson.M{}
 		filter["$or"] = []bson.M{
-			bson.M{f.SortField: bson.M{"$lt": timestamp}},
-			bson.M{f.SortField: timestamp, "_id": bson.M{"$lt": lastID}},
+			{f.SortField: bson.M{"$lt": timestamp}},
+			{f.SortField: timestamp, "_id": bson.M{"$lt": lastID}},
 		}
 		return filter, nil
 	default:
@@ -146,12 +155,19 @@ func (impl TaskItemStorerImpl) newPaginationFilterBasedOnTimestamp(f *TaskItemPa
 // newPaginatorOptions will generate the mongodb options which will support the
 // paginator in ordering the data to work.
 func (impl TaskItemStorerImpl) newPaginationOptions(f *TaskItemPaginationListFilter) (*options.FindOptions, error) {
-	options := options.Find().
-		SetSort(bson.D{
-			{f.SortField, f.SortOrder},
-			{"_id", f.SortOrder}, // Include _id in sorting for consistency
-		}).
-		SetLimit(f.PageSize)
+	options := options.Find().SetLimit(f.PageSize)
+
+	// DEVELOPERS NOTE:
+	// We want to be able to return a list without sorting so we will need to
+	// run the following code.
+	if f.SortField != "" {
+		options = options.
+			SetSort(bson.D{
+				{f.SortField, f.SortOrder},
+				{"_id", f.SortOrder}, // Include _id in sorting for consistency
+			})
+	}
+
 	return options, nil
 }
 
@@ -161,7 +177,7 @@ func (impl TaskItemStorerImpl) newPaginatorNextCursor(f *TaskItemPaginationListF
 	var lastDatum *TaskItem
 
 	// Remove the extra document from the current page
-	results = results[:len(results)]
+	results = results[:]
 
 	// Get the last document's _id as the next cursor
 	lastDatum = results[len(results)-1]

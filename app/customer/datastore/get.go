@@ -7,6 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func (impl CustomerStorerImpl) GetByID(ctx context.Context, id primitive.ObjectID) (*Customer, error) {
@@ -71,4 +72,26 @@ func (impl CustomerStorerImpl) GetByVerificationCode(ctx context.Context, verifi
 		return nil, err
 	}
 	return &result, nil
+}
+
+func (impl CustomerStorerImpl) GetLatestByTenantID(ctx context.Context, tenantID primitive.ObjectID) (*Customer, error) {
+	filter := bson.D{{"tenant_id", tenantID}}
+	opts := options.Find().SetSort(bson.D{{"public_id", -1}}).SetLimit(1)
+
+	var order Customer
+	cursor, err := impl.Collection.Find(context.Background(), filter, opts)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(context.Background())
+
+	if cursor.Next(context.Background()) {
+		err := cursor.Decode(&order)
+		if err != nil {
+			return nil, err
+		}
+		return &order, nil
+	}
+
+	return nil, mongo.ErrNoDocuments
 }

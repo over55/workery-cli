@@ -7,22 +7,23 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func (impl CustomerStorerImpl) ListByFilter(ctx context.Context, f *CustomerListFilter) (*CustomerListResult, error) {
+func (impl CustomerStorerImpl) ListByFilter(ctx context.Context, f *CustomerPaginationListFilter) (*CustomerPaginationListResult, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
 	defer cancel()
 
-	// Create the filter based on the cursor
-	filter := bson.M{}
-	if !f.Cursor.IsZero() {
-		filter["_id"] = bson.M{"$gt": f.Cursor} // Add the cursor condition to the filter
+	filter, err := impl.newPaginationFilter(f)
+	if err != nil {
+		return nil, err
 	}
 
 	// Add filter conditions to the filter
 	if !f.TenantID.IsZero() {
 		filter["tenant_id"] = f.TenantID
+	}
+	if !f.HowDidYouHearAboutUsID.IsZero() {
+		filter["how_did_you_hear_about_us_id"] = f.HowDidYouHearAboutUsID
 	}
 	if f.Type > 0 {
 		filter["type"] = f.Type
@@ -45,14 +46,21 @@ func (impl CustomerStorerImpl) ListByFilter(ctx context.Context, f *CustomerList
 	if !f.CreatedAtGTE.IsZero() {
 		filter["created_at"] = bson.M{"$gt": f.CreatedAtGTE} // Add the cursor condition to the filter
 	}
+	if len(f.InTagIDs) > 0 {
+		filter["tags._id"] = bson.M{"$in": f.InTagIDs}
+	}
+	if len(f.AllTagIDs) > 0 {
+		filter["tags._id"] = bson.M{"$all": f.AllTagIDs}
+	}
 
 	impl.Logger.Debug("listing filter:",
 		slog.Any("filter", filter))
 
 	// Include additional filters for our cursor-based pagination pertaining to sorting and limit.
-	options := options.Find().
-		SetSort(bson.M{f.SortField: f.SortOrder}).
-		SetLimit(f.PageSize)
+	options, err := impl.newPaginationOptions(f)
+	if err != nil {
+		return nil, err
+	}
 
 	// Include Full-text search
 	if f.SearchText != "" {
@@ -90,16 +98,15 @@ func (impl CustomerStorerImpl) ListByFilter(ctx context.Context, f *CustomerList
 	}
 
 	// Get the next cursor and encode it
-	nextCursor := primitive.NilObjectID
-	if int64(len(results)) == f.PageSize {
-		// Remove the extra document from the current page
-		results = results[:len(results)]
-
-		// Get the last document's _id as the next cursor
-		nextCursor = results[len(results)-1].ID
+	var nextCursor string
+	if hasNextPage {
+		nextCursor, err = impl.newPaginatorNextCursorForFull(f, results)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	return &CustomerListResult{
+	return &CustomerPaginationListResult{
 		Results:     results,
 		NextCursor:  nextCursor,
 		HasNextPage: hasNextPage,

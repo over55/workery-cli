@@ -19,6 +19,7 @@ func (impl OrderStorerImpl) UpdateByID(ctx context.Context, m *Order) error {
 	_, err := impl.Collection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		impl.Logger.Error("database update by user id error", slog.Any("error", err))
+		return err
 	}
 
 	return nil

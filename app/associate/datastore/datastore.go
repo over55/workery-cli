@@ -2,9 +2,11 @@ package datastore
 
 import (
 	"context"
+	"log"
 	"log/slog"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
@@ -53,13 +55,15 @@ const (
 )
 
 type Associate struct {
-	PublicID                             uint64                           `bson:"public_id" json:"public_id"`
-	Email                                string                           `bson:"email" json:"email"`
-	Name                                 string                           `bson:"name" json:"name"`
-	LexicalName                          string                           `bson:"lexical_name" json:"lexical_name"`
 	ID                                   primitive.ObjectID               `bson:"_id" json:"id"`
+	PublicID                             uint64                           `bson:"public_id" json:"public_id"`
+	TenantID                             primitive.ObjectID               `bson:"tenant_id" json:"tenant_id,omitempty"`
 	FirstName                            string                           `bson:"first_name" json:"first_name"`
 	LastName                             string                           `bson:"last_name" json:"last_name"`
+	Name                                 string                           `bson:"name" json:"name"`
+	LexicalName                          string                           `bson:"lexical_name" json:"lexical_name"`
+	Email                                string                           `bson:"email" json:"email"`
+	PersonalEmail                        string                           `bson:"personal_email" json:"personal_email"`
 	IsOkToEmail                          bool                             `bson:"is_ok_to_email" json:"is_ok_to_email"`
 	Phone                                string                           `bson:"phone" json:"phone,omitempty"`
 	PhoneType                            int8                             `bson:"phone_type" json:"phone_type"`
@@ -157,7 +161,6 @@ type Associate struct {
 	EmergencyContactRelationship         string                           `bson:"emergency_contact_relationship" json:"emergency_contact_relationship"`
 	EmergencyContactTelephone            string                           `bson:"emergency_contact_telephone" json:"emergency_contact_telephone"`
 	EmergencyContactAlternativeTelephone string                           `bson:"emergency_contact_alternative_telephone" json:"emergency_contact_alternative_telephone"`
-	TenantID                             primitive.ObjectID               `bson:"tenant_id" json:"tenant_id,omitempty"`
 	Comments                             []*AssociateComment              `bson:"comments" json:"comments"`
 	SkillSets                            []*AssociateSkillSet             `bson:"skill_sets" json:"skill_sets,omitempty"`
 	InsuranceRequirements                []*AssociateInsuranceRequirement `bson:"insurance_requirements" json:"insurance_requirements,omitempty"`
@@ -192,7 +195,7 @@ type AssociateComment struct {
 	ModifiedFromIPAddress string             `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
 	Content               string             `bson:"content" json:"content"`
 	Status                int8               `bson:"status" json:"status"`
-	PublicID                 uint64             `bson:"public_id" json:"public_id"`
+	PublicID              uint64             `bson:"public_id" json:"public_id"`
 }
 
 type AssociateVehicleType struct {
@@ -237,7 +240,7 @@ type AssociateAwayLog struct {
 	ModifiedByUserID      primitive.ObjectID `bson:"modified_by_user_id" json:"modified_by_user_id,omitempty"`
 	ModifiedByUserName    string             `bson:"modified_by_user_name" json:"modified_by_user_name"`
 	ModifiedFromIPAddress string             `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
-	PublicID                 uint64             `bson:"public_id" json:"public_id"`
+	PublicID              uint64             `bson:"public_id" json:"public_id"`
 }
 
 type AssociateTag struct {
@@ -285,18 +288,20 @@ type AssociateAsSelectOption struct {
 type AssociateStorer interface {
 	Create(ctx context.Context, m *Associate) error
 	GetByID(ctx context.Context, id primitive.ObjectID) (*Associate, error)
-	GetByPublicID(ctx context.Context, oldID uint64) (*Associate, error)
+	GetByPublicID(ctx context.Context, publicID uint64) (*Associate, error)
 	GetByEmail(ctx context.Context, email string) (*Associate, error)
 	GetByVerificationCode(ctx context.Context, verificationCode string) (*Associate, error)
+	GetLatestByTenantID(ctx context.Context, tenantID primitive.ObjectID) (*Associate, error)
 	CheckIfExistsByEmail(ctx context.Context, email string) (bool, error)
 	UpdateByID(ctx context.Context, m *Associate) error
 	UpsertByID(ctx context.Context, user *Associate) error
 	ListByFilter(ctx context.Context, f *AssociatePaginationListFilter) (*AssociatePaginationListResult, error)
+	ListByInsuranceRequirementID(ctx context.Context, irID primitive.ObjectID) (*AssociatePaginationListResult, error)
+	ListByHowDidYouHearAboutUsID(ctx context.Context, howDidYouHearAboutUsID primitive.ObjectID) (*AssociatePaginationListResult, error)
 	ListAsSelectOptionByFilter(ctx context.Context, f *AssociateListFilter) ([]*AssociateAsSelectOption, error)
 	LiteListByFilter(ctx context.Context, f *AssociatePaginationListFilter) (*AssociatePaginationLiteListResult, error)
 	DeleteByID(ctx context.Context, id primitive.ObjectID) error
 	CountByFilter(ctx context.Context, f *AssociateListFilter) (int64, error)
-	// //TODO: Add more...
 }
 
 type AssociateStorerImpl struct {
@@ -308,6 +313,45 @@ type AssociateStorerImpl struct {
 func NewDatastore(appCfg *c.Conf, loggerp *slog.Logger, client *mongo.Client) AssociateStorer {
 	// ctx := context.Background()
 	uc := client.Database(appCfg.DB.Name).Collection("associates")
+
+	// // For debugging purposes only.
+	// if _, err := uc.Indexes().DropAll(context.TODO()); err != nil {
+	// 	loggerp.Error("failed deleting all indexes",
+	// 		slog.Any("err", err))
+	//
+	// 	// It is important that we crash the app on startup to meet the
+	// 	// requirements of `google/wire` framework.
+	// 	log.Fatal(err)
+	// }
+
+	_, err := uc.Indexes().CreateMany(context.TODO(), []mongo.IndexModel{
+		{Keys: bson.D{{Key: "tenant_id", Value: 1}}},
+		{Keys: bson.D{{Key: "email", Value: 1}}},
+		{Keys: bson.D{{Key: "last_name", Value: 1}}},
+		{Keys: bson.D{{Key: "name", Value: 1}}},
+		{Keys: bson.D{{Key: "lexical_name", Value: 1}}},
+		{Keys: bson.D{{Key: "public_id", Value: -1}}},
+		{Keys: bson.D{{Key: "join_date", Value: 1}}},
+		{Keys: bson.D{{Key: "status", Value: 1}}},
+		{Keys: bson.D{{Key: "type", Value: 1}}},
+		{Keys: bson.D{
+			{"name", "text"},
+			{"lexical_name", "text"},
+			{"email", "text"},
+			{"phone", "text"},
+			{"country", "text"},
+			{"region", "text"},
+			{"city", "text"},
+			{"postal_code", "text"},
+			{"address_line1", "text"},
+			{"description", "text"},
+		}},
+	})
+	if err != nil {
+		// It is important that we crash the app on startup to meet the
+		// requirements of `google/wire` framework.
+		log.Fatal(err)
+	}
 
 	s := &AssociateStorerImpl{
 		Logger:     loggerp,

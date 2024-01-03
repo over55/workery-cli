@@ -8,17 +8,15 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func (impl OrderStorerImpl) ListByFilter(ctx context.Context, f *OrderListFilter) (*OrderListResult, error) {
+func (impl OrderStorerImpl) ListByFilter(ctx context.Context, f *OrderPaginationListFilter) (*OrderPaginationListResult, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
 	defer cancel()
 
-	// Create the filter based on the cursor
-	filter := bson.M{}
-	if !f.Cursor.IsZero() {
-		filter["_id"] = bson.M{"$gt": f.Cursor} // Add the cursor condition to the filter
+	filter, err := impl.newPaginationFilter(f)
+	if err != nil {
+		return nil, err
 	}
 
 	// Add filter conditions to the filter
@@ -43,14 +41,48 @@ func (impl OrderStorerImpl) ListByFilter(ctx context.Context, f *OrderListFilter
 	if !f.ModifiedByUserID.IsZero() {
 		filter["modified_by_user_id"] = f.ModifiedByUserID
 	}
+	if f.CustomerFirstName != "" {
+		filter["customer_first_name"] = bson.M{"$regex": primitive.Regex{Pattern: f.CustomerFirstName, Options: "i"}}
+	}
+	if f.CustomerLastName != "" {
+		filter["customer_last_name"] = bson.M{"$regex": primitive.Regex{Pattern: f.CustomerLastName, Options: "i"}}
+	}
+	if f.CustomerEmail != "" {
+		filter["customer_email"] = bson.M{"$regex": primitive.Regex{Pattern: f.CustomerEmail, Options: "i"}}
+	}
+	if f.CustomerPhone != "" {
+		filter["customer_phone"] = f.CustomerPhone
+	}
+	if f.AssociateFirstName != "" {
+		filter["associate_first_name"] = bson.M{"$regex": primitive.Regex{Pattern: f.AssociateFirstName, Options: "i"}}
+	}
+	if f.AssociateLastName != "" {
+		filter["associate_last_name"] = bson.M{"$regex": primitive.Regex{Pattern: f.AssociateLastName, Options: "i"}}
+	}
+	if f.AssociateEmail != "" {
+		filter["associate_email"] = bson.M{"$regex": primitive.Regex{Pattern: f.AssociateEmail, Options: "i"}}
+	}
+	if f.AssociatePhone != "" {
+		filter["associate_phone"] = f.AssociatePhone
+	}
+	if len(f.InSkillSetIDs) > 0 {
+		filter["skill_sets._id"] = bson.M{"$in": f.InSkillSetIDs}
+	}
+	if len(f.AllSkillSetIDs) > 0 {
+		filter["skill_sets._id"] = bson.M{"$all": f.AllSkillSetIDs}
+	}
+	if !f.InvoiceServiceFeeID.IsZero() {
+		filter["invoice_service_fee_id"] = f.InvoiceServiceFeeID
+	}
 
 	impl.Logger.Debug("listing filter:",
 		slog.Any("filter", filter))
 
 	// Include additional filters for our cursor-based pagination pertaining to sorting and limit.
-	options := options.Find().
-		SetSort(bson.M{f.SortField: f.SortOrder}).
-		SetLimit(f.PageSize)
+	options, err := impl.newPaginationOptions(f)
+	if err != nil {
+		return nil, err
+	}
 
 	// Include Full-text search
 	if f.SearchText != "" {
@@ -65,11 +97,6 @@ func (impl OrderStorerImpl) ListByFilter(ctx context.Context, f *OrderListFilter
 		return nil, err
 	}
 	defer cursor.Close(ctx)
-
-	// var results = []*ComicSubmission{}
-	// if err = cursor.All(ctx, &results); err != nil {
-	// 	panic(err)
-	// }
 
 	// Retrieve the documents and check if there is a next page
 	results := []*Order{}
@@ -88,16 +115,15 @@ func (impl OrderStorerImpl) ListByFilter(ctx context.Context, f *OrderListFilter
 	}
 
 	// Get the next cursor and encode it
-	nextCursor := primitive.NilObjectID
-	if int64(len(results)) == f.PageSize {
-		// Remove the extra document from the current page
-		results = results[:len(results)]
-
-		// Get the last document's _id as the next cursor
-		nextCursor = results[len(results)-1].ID
+	var nextCursor string
+	if hasNextPage {
+		nextCursor, err = impl.newPaginatorNextCursor(f, results)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	return &OrderListResult{
+	return &OrderPaginationListResult{
 		Results:     results,
 		NextCursor:  nextCursor,
 		HasNextPage: hasNextPage,

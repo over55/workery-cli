@@ -24,14 +24,39 @@ type OrderPaginationListFilter struct {
 	SortOrder int8 // 1=ascending | -1=descending
 
 	// Filter related.
-	TenantID         primitive.ObjectID
-	CustomerID       primitive.ObjectID
-	AssociateID      primitive.ObjectID
-	Status           int8
-	Type             int8
-	ExcludeArchived  bool
-	SearchText       string
-	ModifiedByUserID primitive.ObjectID
+	TenantID            primitive.ObjectID
+	CustomerID          primitive.ObjectID
+	AssociateID         primitive.ObjectID
+	InvoiceServiceFeeID primitive.ObjectID
+	Status              int8
+	Type                int8
+	ExcludeArchived     bool
+	SearchText          string
+	CustomerFirstName   string
+	CustomerLastName    string
+	CustomerEmail       string
+	CustomerPhone       string
+	ModifiedByUserID    primitive.ObjectID
+	AssociateFirstName  string
+	AssociateLastName   string
+	AssociateEmail      string
+	AssociatePhone      string
+
+	// InSkillSetIDs filter is used if you want to find one or more skill set
+	// ids inside the associate.
+	InSkillSetIDs []primitive.ObjectID
+
+	// AllSkillSetIDs filter is used if you want to find all skill set ids for
+	// the associate.
+	AllSkillSetIDs []primitive.ObjectID
+
+	// InTagIDs filter is used if you want to find one or more tag
+	// ids inside the associate.
+	InTagIDs []primitive.ObjectID
+
+	// AllTagIDs filter is used if you want to find all tag ids for
+	// the associate.
+	AllTagIDs []primitive.ObjectID
 }
 
 // OrderPaginationLiteListResult represents the paginated list results for
@@ -40,6 +65,14 @@ type OrderPaginationLiteListResult struct {
 	Results     []*OrderLite `json:"results"`
 	NextCursor  string       `json:"next_cursor"`
 	HasNextPage bool         `json:"has_next_page"`
+}
+
+// OrderPaginationListResult represents the paginated list results for
+// the order lite records (meaning limited).
+type OrderPaginationListResult struct {
+	Results     []*Order `json:"results"`
+	NextCursor  string   `json:"next_cursor"`
+	HasNextPage bool     `json:"has_next_page"`
 }
 
 // newPaginationFilter will create the mongodb filter to apply the cursor or
@@ -86,15 +119,15 @@ func (impl OrderStorerImpl) newPaginationFilterBasedOnString(f *OrderPaginationL
 	case SortOrderAscending:
 		filter := bson.M{}
 		filter["$or"] = []bson.M{
-			bson.M{f.SortField: bson.M{"$gt": str}},
-			bson.M{f.SortField: str, "_id": bson.M{"$gt": lastID}},
+			{f.SortField: bson.M{"$gt": str}},
+			{f.SortField: str, "_id": bson.M{"$gt": lastID}},
 		}
 		return filter, nil
 	case SortOrderDescending:
 		filter := bson.M{}
 		filter["$or"] = []bson.M{
-			bson.M{f.SortField: bson.M{"$lt": str}},
-			bson.M{f.SortField: str, "_id": bson.M{"$lt": lastID}},
+			{f.SortField: bson.M{"$lt": str}},
+			{f.SortField: str, "_id": bson.M{"$lt": lastID}},
 		}
 		return filter, nil
 	default:
@@ -126,15 +159,15 @@ func (impl OrderStorerImpl) newPaginationFilterBasedOnTimestamp(f *OrderPaginati
 	case SortOrderAscending:
 		filter := bson.M{}
 		filter["$or"] = []bson.M{
-			bson.M{f.SortField: bson.M{"$gt": timestamp}},
-			bson.M{f.SortField: timestamp, "_id": bson.M{"$gt": lastID}},
+			{f.SortField: bson.M{"$gt": timestamp}},
+			{f.SortField: timestamp, "_id": bson.M{"$gt": lastID}},
 		}
 		return filter, nil
 	case SortOrderDescending:
 		filter := bson.M{}
 		filter["$or"] = []bson.M{
-			bson.M{f.SortField: bson.M{"$lt": timestamp}},
-			bson.M{f.SortField: timestamp, "_id": bson.M{"$lt": lastID}},
+			{f.SortField: bson.M{"$lt": timestamp}},
+			{f.SortField: timestamp, "_id": bson.M{"$lt": lastID}},
 		}
 		return filter, nil
 	default:
@@ -145,22 +178,71 @@ func (impl OrderStorerImpl) newPaginationFilterBasedOnTimestamp(f *OrderPaginati
 // newPaginatorOptions will generate the mongodb options which will support the
 // paginator in ordering the data to work.
 func (impl OrderStorerImpl) newPaginationOptions(f *OrderPaginationListFilter) (*options.FindOptions, error) {
-	options := options.Find().
-		SetSort(bson.D{
-			{f.SortField, f.SortOrder},
-			{"_id", f.SortOrder}, // Include _id in sorting for consistency
-		}).
-		SetLimit(f.PageSize)
+	options := options.Find().SetLimit(f.PageSize)
+
+	// DEVELOPERS NOTE:
+	// We want to be able to return a list without sorting so we will need to
+	// run the following code.
+	if f.SortField != "" {
+		options = options.
+			SetSort(bson.D{
+				{f.SortField, f.SortOrder},
+				{"_id", f.SortOrder}, // Include _id in sorting for consistency
+			})
+	}
+
 	return options, nil
+}
+
+// newPaginatorLiteNextCursor will return the base64 encoded next cursor which works
+// with our paginator.
+func (impl OrderStorerImpl) newPaginatorLiteNextCursor(f *OrderPaginationListFilter, results []*OrderLite) (string, error) {
+	var lastDatum *OrderLite
+
+	// Remove the extra document from the current page
+	results = results[:]
+
+	// Get the last document's _id as the next cursor
+	lastDatum = results[len(results)-1]
+
+	// Variable used to store the next cursor.
+	var nextCursor string
+
+	switch f.SortField {
+	case "customer_lexical_name":
+		nextCursor = fmt.Sprintf("%v|%v", lastDatum.CustomerLexicalName, lastDatum.ID.Hex())
+		break
+	case "associate_lexical_name":
+		// Generate the unique next cursor.
+		nextCursor = fmt.Sprintf("%v|%v", lastDatum.AssociateLexicalName, lastDatum.ID.Hex())
+		break
+	case "assignment_date":
+		timestamp := lastDatum.AssignmentDate.UnixMilli()
+		nextCursor = fmt.Sprintf("%v|%v", timestamp, lastDatum.ID.Hex())
+		break
+	case "start_date":
+		timestamp := lastDatum.StartDate.UnixMilli()
+		nextCursor = fmt.Sprintf("%v|%v", timestamp, lastDatum.ID.Hex())
+		break
+	default:
+		return "", fmt.Errorf("unsupported sort field in options for `%v`, only supported fields are `customer_lexical_name` and `assignment_date`", f.SortField)
+	}
+
+	// Encode to base64 without the `=` symbol that would corrupt when we
+	// use the http url argument. Special thanks to:
+	// https://www.golinuxcloud.com/golang-base64-encode/
+	encoded := base64.RawStdEncoding.EncodeToString([]byte(nextCursor))
+
+	return encoded, nil
 }
 
 // newPaginatorNextCursor will return the base64 encoded next cursor which works
 // with our paginator.
-func (impl OrderStorerImpl) newPaginatorNextCursor(f *OrderPaginationListFilter, results []*OrderLite) (string, error) {
-	var lastDatum *OrderLite
+func (impl OrderStorerImpl) newPaginatorNextCursor(f *OrderPaginationListFilter, results []*Order) (string, error) {
+	var lastDatum *Order
 
 	// Remove the extra document from the current page
-	results = results[:len(results)]
+	results = results[:]
 
 	// Get the last document's _id as the next cursor
 	lastDatum = results[len(results)-1]
