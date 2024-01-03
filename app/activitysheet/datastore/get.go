@@ -3,10 +3,12 @@ package datastore
 import (
 	"context"
 
+	"log/slog"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"log/slog"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func (impl ActivitySheetStorerImpl) GetByID(ctx context.Context, id primitive.ObjectID) (*ActivitySheet, error) {
@@ -71,4 +73,26 @@ func (impl ActivitySheetStorerImpl) GetByVerificationCode(ctx context.Context, v
 		return nil, err
 	}
 	return &result, nil
+}
+
+func (impl ActivitySheetStorerImpl) GetLatestByTenantID(ctx context.Context, tenantID primitive.ObjectID) (*ActivitySheet, error) {
+	filter := bson.D{{"tenant_id", tenantID}}
+	opts := options.Find().SetSort(bson.D{{"public_id", -1}}).SetLimit(1)
+
+	var record ActivitySheet
+	cursor, err := impl.Collection.Find(context.Background(), filter, opts)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(context.Background())
+
+	if cursor.Next(context.Background()) {
+		err := cursor.Decode(&record)
+		if err != nil {
+			return nil, err
+		}
+		return &record, nil
+	}
+
+	return nil, nil
 }

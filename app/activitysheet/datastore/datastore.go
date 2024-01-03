@@ -84,6 +84,7 @@ type ActivitySheetStorer interface {
 	GetByPublicID(ctx context.Context, oldID uint64) (*ActivitySheet, error)
 	GetByEmail(ctx context.Context, email string) (*ActivitySheet, error)
 	GetByVerificationCode(ctx context.Context, verificationCode string) (*ActivitySheet, error)
+	GetLatestByTenantID(ctx context.Context, tenantID primitive.ObjectID) (*ActivitySheet, error)
 	CheckIfExistsByEmail(ctx context.Context, email string) (bool, error)
 	UpdateByID(ctx context.Context, m *ActivitySheet) error
 	ListByFilter(ctx context.Context, f *ActivitySheetPaginationListFilter) (*ActivitySheetPaginationListResult, error)
