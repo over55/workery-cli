@@ -238,6 +238,7 @@ func importTaskItem(
 	//
 
 	var associateID primitive.ObjectID = primitive.NilObjectID
+	var associatePublicID uint64
 	var associateFirstName string
 	var associateLastName string
 	var associateName string
@@ -265,6 +266,7 @@ func importTaskItem(
 	}
 	if a != nil {
 		associateID = a.ID
+		associatePublicID = a.PublicID
 		associateFirstName = a.FirstName
 		associateLastName = a.LastName
 		associateName = a.Name
@@ -293,6 +295,7 @@ func importTaskItem(
 	//
 
 	var customerID primitive.ObjectID = primitive.NilObjectID
+	var customerPublicID uint64
 	var customerFirstName string
 	var customerLastName string
 	var customerName string
@@ -317,6 +320,7 @@ func importTaskItem(
 	}
 	if c != nil {
 		customerID = c.ID
+		customerPublicID = c.PublicID
 		customerFirstName = c.FirstName
 		customerLastName = c.LastName
 		customerName = c.Name
@@ -366,8 +370,9 @@ func importTaskItem(
 		ModifiedFromIPAddress:                 ti.LastModifiedFrom.ValueOrZero(),
 		Status:                                state,
 		TenantID:                              tenant.ID,
-		PublicID:                                 ti.ID,
+		PublicID:                              ti.ID,
 		AssociateID:                           associateID,
+		AssociatePublicID:                     associatePublicID,
 		AssociateFirstName:                    associateFirstName,
 		AssociateLastName:                     associateLastName,
 		AssociateName:                         associateName,
@@ -390,6 +395,7 @@ func importTaskItem(
 		AssociateVehicleTypes:                 toTaskItemVehicleTypesFromAssociateVehicleTypes(associateVehicleTypes),
 		AssociateTaxID:                        associateTaxID,
 		CustomerID:                            customerID,
+		CustomerPublicID:                      customerPublicID,
 		CustomerFirstName:                     customerFirstName,
 		CustomerLastName:                      customerLastName,
 		CustomerName:                          customerName,

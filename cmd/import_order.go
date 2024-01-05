@@ -235,6 +235,7 @@ func importOrder(
 	//
 
 	var associateID primitive.ObjectID = primitive.NilObjectID
+	var associatePublicID uint64
 	var associateFirstName string
 	var associateLastName string
 	var associateName string
@@ -262,6 +263,7 @@ func importOrder(
 	}
 	if a != nil {
 		associateID = a.ID
+		associatePublicID = a.PublicID
 		associateFirstName = a.FirstName
 		associateLastName = a.LastName
 		associateName = a.Name
@@ -287,6 +289,7 @@ func importOrder(
 	//
 
 	var customerID primitive.ObjectID = primitive.NilObjectID
+	var customerPublicID uint64
 	var customerFirstName string
 	var customerLastName string
 	var customerName string
@@ -310,6 +313,7 @@ func importOrder(
 	}
 	if c != nil {
 		customerID = c.ID
+		customerPublicID = c.PublicID
 		customerFirstName = c.FirstName
 		customerLastName = c.LastName
 		customerName = c.Name
@@ -440,6 +444,7 @@ func importOrder(
 		TenantIDWithWJID:                      fmt.Sprintf("%v_%v", tenant.ID.Hex(), wo.ID),
 		ID:                                    primitive.NewObjectID(),
 		CustomerID:                            customerID,
+		CustomerPublicID:                      customerPublicID,
 		CustomerFirstName:                     customerFirstName,
 		CustomerLastName:                      customerLastName,
 		CustomerName:                          customerName,
@@ -458,6 +463,7 @@ func importOrder(
 		CustomerFullAddressURL:                customerFullAddressURL,
 		CustomerTags:                          toOrderTagsFromCustomerTags(customerTags),
 		AssociateID:                           associateID,
+		AssociatePublicID:                     associatePublicID,
 		AssociateFirstName:                    associateFirstName,
 		AssociateLastName:                     associateLastName,
 		AssociateName:                         associateName,

@@ -57,6 +57,7 @@ type TaskItem struct {
 	Status                                int8                            `bson:"status" json:"status"`       // 20
 	PublicID                              uint64                          `bson:"public_id" json:"public_id"` // 21
 	CustomerID                            primitive.ObjectID              `bson:"customer_id" json:"customer_id"`
+	CustomerPublicID                      uint64                          `bson:"customer_public_id" json:"customer_public_id"`
 	CustomerFirstName                     string                          `bson:"customer_first_name" json:"customer_first_name,omitempty"`
 	CustomerLastName                      string                          `bson:"customer_last_name" json:"customer_last_name,omitempty"`
 	CustomerName                          string                          `bson:"customer_name" json:"customer_name,omitempty"`
@@ -75,6 +76,7 @@ type TaskItem struct {
 	CustomerFullAddressURL                string                          `bson:"customer_full_address_url" json:"customer_full_address_url"`
 	CustomerTags                          []*TaskItemTag                  `bson:"customer_tags" json:"customer_tags,omitempty"` // Related
 	AssociateID                           primitive.ObjectID              `bson:"associate_id" json:"associate_id"`
+	AssociatePublicID                     uint64                          `bson:"associate_public_id" json:"associate_public_id"`
 	AssociateFirstName                    string                          `bson:"associate_first_name" json:"associate_first_name,omitempty"`
 	AssociateLastName                     string                          `bson:"associate_last_name" json:"associate_last_name,omitempty"`
 	AssociateName                         string                          `bson:"associate_name" json:"associate_name,omitempty"`
