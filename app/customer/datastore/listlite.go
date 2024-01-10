@@ -84,6 +84,12 @@ func (impl CustomerStorerImpl) LiteListByFilter(ctx context.Context, f *Customer
 	if len(f.AllTagIDs) > 0 {
 		filter["tags._id"] = bson.M{"$all": f.AllTagIDs}
 	}
+	if f.IsOkToEmail == 1 {
+		filter["is_ok_to_email"] = true
+	}
+	if f.IsOkToEmail == 2 {
+		filter["is_ok_to_email"] = false
+	}
 
 	impl.Logger.Debug("listing filter:",
 		slog.Any("filter", filter))

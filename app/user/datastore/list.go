@@ -5,11 +5,10 @@ import (
 	"log"
 	"time"
 
-	"log/slog"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"log/slog"
 )
 
 func (impl UserStorerImpl) ListByFilter(ctx context.Context, f *UserListFilter) (*UserListResult, error) {

@@ -109,7 +109,57 @@ func (impl OrderStorerImpl) LiteListByFilter(ctx context.Context, f *OrderPagina
 	if len(f.AllTagIDs) > 0 {
 		filter["tags._id"] = bson.M{"$all": f.AllTagIDs}
 	}
+	if len(f.Statuses) > 0 {
+		filter["status"] = bson.M{"$in": f.Statuses}
+	}
 
+	// Create a slice to store conditions
+	var conditions []bson.M
+
+	// Add filter conditions to the slice
+	if !f.AssignmentDateGTE.IsZero() {
+		conditions = append(conditions, bson.M{"assignment_date": bson.M{"$gte": f.AssignmentDateGTE}})
+	}
+	if !f.AssignmentDateGT.IsZero() {
+		conditions = append(conditions, bson.M{"assignment_date": bson.M{"$gt": f.AssignmentDateGT}})
+	}
+	if !f.AssignmentDateLTE.IsZero() {
+		conditions = append(conditions, bson.M{"assignment_date": bson.M{"$lte": f.AssignmentDateLTE}})
+	}
+	if !f.AssignmentDateLT.IsZero() {
+		conditions = append(conditions, bson.M{"assignment_date": bson.M{"$lt": f.AssignmentDateLT}})
+	}
+	if !f.InvoiceServiceFeePaymentDateGTE.IsZero() {
+		conditions = append(conditions, bson.M{"invoice_service_fee_payment_date": bson.M{"$gte": f.InvoiceServiceFeePaymentDateGTE}})
+	}
+	if !f.InvoiceServiceFeePaymentDateGT.IsZero() {
+		conditions = append(conditions, bson.M{"invoice_service_fee_payment_date": bson.M{"$gt": f.InvoiceServiceFeePaymentDateGT}})
+	}
+	if !f.InvoiceServiceFeePaymentDateLTE.IsZero() {
+		conditions = append(conditions, bson.M{"invoice_service_fee_payment_date": bson.M{"$lte": f.InvoiceServiceFeePaymentDateLTE}})
+	}
+	if !f.InvoiceServiceFeePaymentDateLT.IsZero() {
+		conditions = append(conditions, bson.M{"invoice_service_fee_payment_date": bson.M{"$lt": f.InvoiceServiceFeePaymentDateLT}})
+	}
+	if !f.CompletionDateGTE.IsZero() {
+		conditions = append(conditions, bson.M{"completion_date": bson.M{"$gte": f.CompletionDateGTE}})
+	}
+	if !f.CompletionDateGT.IsZero() {
+		conditions = append(conditions, bson.M{"completion_date": bson.M{"$gt": f.CompletionDateGT}})
+	}
+	if !f.CompletionDateLTE.IsZero() {
+		conditions = append(conditions, bson.M{"completion_date": bson.M{"$lte": f.CompletionDateLTE}})
+	}
+	if !f.CompletionDateLT.IsZero() {
+		conditions = append(conditions, bson.M{"completion_date": bson.M{"$lt": f.CompletionDateLT}})
+	}
+
+	// Combine conditions with $and operator
+	if len(conditions) > 0 {
+		filter["$and"] = conditions
+	}
+
+	// For debugging purposes only.
 	impl.Logger.Debug("listing filter:",
 		slog.Any("filter", filter))
 

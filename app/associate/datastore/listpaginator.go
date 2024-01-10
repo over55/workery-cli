@@ -38,6 +38,16 @@ type AssociatePaginationListFilter struct {
 	Phone                  string
 	CreatedAtGTE           time.Time
 
+	CommercialInsuranceExpiryDateGTE time.Time
+	CommercialInsuranceExpiryDateGT  time.Time
+	CommercialInsuranceExpiryDateLTE time.Time
+	CommercialInsuranceExpiryDateLT  time.Time
+
+	PoliceCheckGTE time.Time
+	PoliceCheckGT  time.Time
+	PoliceCheckLTE time.Time
+	PoliceCheckLT  time.Time
+
 	// InSkillSetIDs filter is used if you want to find one or more skill set
 	// ids inside the associate.
 	InSkillSetIDs []primitive.ObjectID

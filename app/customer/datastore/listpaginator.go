@@ -45,6 +45,8 @@ type CustomerPaginationListFilter struct {
 	// AllTagIDs filter is used if you want to find all tag ids for
 	// the customer.
 	AllTagIDs []primitive.ObjectID
+
+	IsOkToEmail int8 // 0=All, 1=Yes, 2=No
 }
 
 // CustomerPaginationLiteListResult represents the paginated list results for

@@ -2,7 +2,6 @@ package datastore
 
 import (
 	"context"
-
 	"log/slog"
 
 	"go.mongodb.org/mongo-driver/bson"

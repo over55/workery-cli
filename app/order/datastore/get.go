@@ -8,7 +8,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func (impl OrderStorerImpl) GetByID(ctx context.Context, id primitive.ObjectID) (*Order, error) {
@@ -73,26 +72,4 @@ func (impl OrderStorerImpl) GetByVerificationCode(ctx context.Context, verificat
 		return nil, err
 	}
 	return &result, nil
-}
-
-func (impl OrderStorerImpl) GetLatestOrderByTenantID(ctx context.Context, tenantID primitive.ObjectID) (*Order, error) {
-	filter := bson.D{{"tenant_id", tenantID}}
-	opts := options.Find().SetSort(bson.D{{"wjid", -1}}).SetLimit(1)
-
-	var order Order
-	cursor, err := impl.Collection.Find(context.Background(), filter, opts)
-	if err != nil {
-		return nil, err
-	}
-	defer cursor.Close(context.Background())
-
-	if cursor.Next(context.Background()) {
-		err := cursor.Decode(&order)
-		if err != nil {
-			return nil, err
-		}
-		return &order, nil
-	}
-
-	return nil, nil
 }

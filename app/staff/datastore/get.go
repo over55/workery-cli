@@ -82,7 +82,6 @@ func (impl StaffStorerImpl) GetLatestByTenantID(ctx context.Context, tenantID pr
 	var order Staff
 	cursor, err := impl.Collection.Find(context.Background(), filter, opts)
 	if err != nil {
-		impl.Logger.Error("database find error", slog.Any("error", err))
 		return nil, err
 	}
 	defer cursor.Close(context.Background())
@@ -90,7 +89,6 @@ func (impl StaffStorerImpl) GetLatestByTenantID(ctx context.Context, tenantID pr
 	if cursor.Next(context.Background()) {
 		err := cursor.Decode(&order)
 		if err != nil {
-			impl.Logger.Error("database decode error", slog.Any("error", err))
 			return nil, err
 		}
 		return &order, nil

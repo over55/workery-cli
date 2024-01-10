@@ -97,6 +97,7 @@ func NewDatastore(appCfg *c.Conf, loggerp *slog.Logger, client *mongo.Client) Bu
 		// requirements of `google/wire` framework.
 		log.Fatal(err)
 	}
+
 	s := &BulletinStorerImpl{
 		Logger:     loggerp,
 		DbClient:   client,

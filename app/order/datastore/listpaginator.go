@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/bartmika/timekit"
 	"go.mongodb.org/mongo-driver/bson"
@@ -29,6 +30,7 @@ type OrderPaginationListFilter struct {
 	AssociateID         primitive.ObjectID
 	InvoiceServiceFeeID primitive.ObjectID
 	Status              int8
+	Statuses            []int8
 	Type                int8
 	ExcludeArchived     bool
 	SearchText          string
@@ -57,6 +59,21 @@ type OrderPaginationListFilter struct {
 	// AllTagIDs filter is used if you want to find all tag ids for
 	// the associate.
 	AllTagIDs []primitive.ObjectID
+
+	AssignmentDateGT  time.Time
+	AssignmentDateGTE time.Time
+	AssignmentDateLT  time.Time
+	AssignmentDateLTE time.Time
+
+	InvoiceServiceFeePaymentDateGT  time.Time
+	InvoiceServiceFeePaymentDateGTE time.Time
+	InvoiceServiceFeePaymentDateLT  time.Time
+	InvoiceServiceFeePaymentDateLTE time.Time
+
+	CompletionDateGT  time.Time
+	CompletionDateGTE time.Time
+	CompletionDateLT  time.Time
+	CompletionDateLTE time.Time
 }
 
 // OrderPaginationLiteListResult represents the paginated list results for

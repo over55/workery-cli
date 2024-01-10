@@ -2,9 +2,9 @@ package datastore
 
 import (
 	"context"
+	"log/slog"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"log/slog"
 )
 
 func (impl OrderStorerImpl) CheckIfExistsByEmail(ctx context.Context, email string) (bool, error) {

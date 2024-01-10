@@ -299,10 +299,10 @@ type OrderTag struct {
 }
 
 type OrderSkillSet struct {
-	ID          primitive.ObjectID `bson:"id" json:"id"`
-	Category    string             `bson:"category" json:"category,omitempty"`         // Referenced value from 'tags'.
-	SubCategory string             `bson:"sub_category" json:"sub_category,omitempty"` // Referenced value from 'tags'.
-	Description string             `bson:"description" json:"description,omitempty"`   // Referenced value from 'tags'.
+	ID          primitive.ObjectID `bson:"_id" json:"id"`                              // Referenced value from 'skillsets'.
+	Category    string             `bson:"category" json:"category,omitempty"`         // Referenced value from 'skillsets'.
+	SubCategory string             `bson:"sub_category" json:"sub_category,omitempty"` // Referenced value from 'skillsets'.
+	Description string             `bson:"description" json:"description,omitempty"`   // Referenced value from 'skillsets'.
 	Status      int8               `bson:"status" json:"status"`
 }
 
@@ -355,6 +355,7 @@ type OrderStorer interface {
 	GetByID(ctx context.Context, id primitive.ObjectID) (*Order, error)
 	GetByWJID(ctx context.Context, wjid uint64) (*Order, error)
 	GetLatestOrderByTenantID(ctx context.Context, tenantID primitive.ObjectID) (*Order, error)
+	GetLatestCommentByOrderID(ctx context.Context, orderID primitive.ObjectID) (*OrderComment, error)
 	// GetByPublicID(ctx context.Context, oldID uint64) (*Order, error)
 	// GetByEmail(ctx context.Context, email string) (*Order, error)
 	// GetByVerificationCode(ctx context.Context, verificationCode string) (*Order, error)

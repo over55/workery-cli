@@ -2,9 +2,8 @@ package datastore
 
 import (
 	"context"
-	"time"
-
 	"log/slog"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 )

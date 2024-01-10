@@ -94,6 +94,7 @@ type SkillSetStorer interface {
 	UpdateByID(ctx context.Context, m *SkillSet) error
 	ListByFilter(ctx context.Context, f *SkillSetPaginationListFilter) (*SkillSetPaginationListResult, error)
 	ListAsSelectOptionByFilter(ctx context.Context, f *SkillSetListFilter) ([]*SkillSetAsSelectOption, error)
+	ListByTenantID(ctx context.Context, tenantID primitive.ObjectID) (*SkillSetPaginationListResult, error)
 	DeleteByID(ctx context.Context, id primitive.ObjectID) error
 }
 

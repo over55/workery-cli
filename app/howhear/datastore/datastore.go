@@ -60,6 +60,7 @@ type HowHearAboutUsItemStorer interface {
 	UpdateByID(ctx context.Context, m *HowHearAboutUsItem) error
 	ListByFilter(ctx context.Context, f *HowHearAboutUsItemPaginationListFilter) (*HowHearAboutUsItemPaginationListResult, error)
 	ListAsSelectOptionByFilter(ctx context.Context, f *HowHearAboutUsItemPaginationListFilter) ([]*HowHearAboutUsItemAsSelectOption, error)
+	ListByTenantID(ctx context.Context, tid primitive.ObjectID) (*HowHearAboutUsItemPaginationListResult, error)
 	DeleteByID(ctx context.Context, id primitive.ObjectID) error
 }
 

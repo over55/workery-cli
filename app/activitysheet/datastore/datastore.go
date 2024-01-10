@@ -108,7 +108,6 @@ func NewDatastore(appCfg *c.Conf, loggerp *slog.Logger, client *mongo.Client) Ac
 	// ctx := context.Background()
 	uc := client.Database(appCfg.DB.Name).Collection("activity_sheets")
 
-	// The following few lines of code will create the index for our app for this
 	_, err := uc.Indexes().CreateMany(context.TODO(), []mongo.IndexModel{
 		{Keys: bson.D{{Key: "tenant_id", Value: 1}}},
 		{Keys: bson.D{{Key: "public_id", Value: -1}}},

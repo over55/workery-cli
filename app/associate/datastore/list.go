@@ -75,6 +75,41 @@ func (impl AssociateStorerImpl) ListByFilter(ctx context.Context, f *AssociatePa
 		filter["vehicle_types._id"] = bson.M{"$all": f.AllVehicleTypeIDs}
 	}
 
+	// Create a slice to store conditions
+	var conditions []bson.M
+
+	// Add filter conditions to the slice
+	if !f.CommercialInsuranceExpiryDateGTE.IsZero() {
+		conditions = append(conditions, bson.M{"commercial_insurance_expiry_date": bson.M{"$gte": f.CommercialInsuranceExpiryDateGTE}})
+	}
+	if !f.CommercialInsuranceExpiryDateGT.IsZero() {
+		conditions = append(conditions, bson.M{"commercial_insurance_expiry_date": bson.M{"$gt": f.CommercialInsuranceExpiryDateGT}})
+	}
+	if !f.CommercialInsuranceExpiryDateLTE.IsZero() {
+		conditions = append(conditions, bson.M{"commercial_insurance_expiry_date": bson.M{"$lte": f.CommercialInsuranceExpiryDateLTE}})
+	}
+	if !f.CommercialInsuranceExpiryDateLT.IsZero() {
+		conditions = append(conditions, bson.M{"commercial_insurance_expiry_date": bson.M{"$lt": f.CommercialInsuranceExpiryDateLT}})
+	}
+
+	if !f.PoliceCheckGTE.IsZero() {
+		conditions = append(conditions, bson.M{"police_check": bson.M{"$gte": f.PoliceCheckGTE}})
+	}
+	if !f.PoliceCheckGT.IsZero() {
+		conditions = append(conditions, bson.M{"police_check": bson.M{"$gt": f.PoliceCheckGT}})
+	}
+	if !f.PoliceCheckLTE.IsZero() {
+		conditions = append(conditions, bson.M{"police_check": bson.M{"$lte": f.PoliceCheckLTE}})
+	}
+	if !f.PoliceCheckLT.IsZero() {
+		conditions = append(conditions, bson.M{"police_check": bson.M{"$lt": f.PoliceCheckLT}})
+	}
+
+	// Combine conditions with $and operator
+	if len(conditions) > 0 {
+		filter["$and"] = conditions
+	}
+
 	impl.Logger.Debug("listing filter:",
 		slog.Any("filter", filter))
 
