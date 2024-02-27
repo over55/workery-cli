@@ -26,26 +26,28 @@ const (
 )
 
 type ActivitySheet struct {
-	ID                    primitive.ObjectID `bson:"_id" json:"id"`
-	OrderID               primitive.ObjectID `bson:"order_id" json:"order_id"`
-	OrderWJID             uint64             `bson:"order_wjid" json:"order_wjid"` // A.K.A. `Workery Job ID`
-	AssociateID           primitive.ObjectID `bson:"associate_id" json:"associate_id"`
-	AssociateName         string             `bson:"associate_name" json:"associate_name"`
-	AssociateLexicalName  string             `bson:"associate_lexical_name" json:"associate_lexical_name"`
-	Comment               string             `bson:"comment" json:"comment"`
-	CreatedAt             time.Time          `bson:"created_at" json:"created_at"`
-	CreatedByUserID       primitive.ObjectID `bson:"created_by_user_id" json:"created_by_user_id,omitempty"`
-	CreatedByUserName     string             `bson:"created_by_user_name" json:"created_by_user_name"`
-	CreatedFromIPAddress  string             `bson:"created_from_ip_address" json:"created_from_ip_address"`
-	ModifiedAt            time.Time          `bson:"modified_at" json:"modified_at"`
-	ModifiedByUserID      primitive.ObjectID `bson:"modified_by_user_id" json:"modified_by_user_id,omitempty"`
-	ModifiedByUserName    string             `bson:"modified_by_user_name" json:"modified_by_user_name"`
-	ModifiedFromIPAddress string             `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
-	Status                int8               `bson:"status" json:"status"`
-	Type                  int8               `bson:"type_of" json:"type_of"`
-	TenantID              primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`
-	OrderTenantIDWithWJID string             `bson:"order_tenant_id_with_wjid" json:"order_tenant_id_with_wjid"` // TenantIDWithWJID is a combination of `tenancy_id` and `wjid` values written in the following structure `%v_%v`.
-	PublicID              uint64             `bson:"public_id" json:"public_id"`
+	ID                        primitive.ObjectID `bson:"_id" json:"id"`
+	OrderID                   primitive.ObjectID `bson:"order_id" json:"order_id"`
+	OrderWJID                 uint64             `bson:"order_wjid" json:"order_wjid"` // A.K.A. `Workery Job ID`
+	AssociateOrganizationName string             `bson:"associate_organization_name" json:"associate_organization_name"`
+	AssociateOrganizationType int8               `bson:"associate_organization_type" json:"associate_organization_type"`
+	AssociateID               primitive.ObjectID `bson:"associate_id" json:"associate_id"`
+	AssociateName             string             `bson:"associate_name" json:"associate_name"`
+	AssociateLexicalName      string             `bson:"associate_lexical_name" json:"associate_lexical_name"`
+	Comment                   string             `bson:"comment" json:"comment"`
+	CreatedAt                 time.Time          `bson:"created_at" json:"created_at"`
+	CreatedByUserID           primitive.ObjectID `bson:"created_by_user_id" json:"created_by_user_id,omitempty"`
+	CreatedByUserName         string             `bson:"created_by_user_name" json:"created_by_user_name"`
+	CreatedFromIPAddress      string             `bson:"created_from_ip_address" json:"created_from_ip_address"`
+	ModifiedAt                time.Time          `bson:"modified_at" json:"modified_at"`
+	ModifiedByUserID          primitive.ObjectID `bson:"modified_by_user_id" json:"modified_by_user_id,omitempty"`
+	ModifiedByUserName        string             `bson:"modified_by_user_name" json:"modified_by_user_name"`
+	ModifiedFromIPAddress     string             `bson:"modified_from_ip_address" json:"modified_from_ip_address"`
+	Status                    int8               `bson:"status" json:"status"`
+	Type                      int8               `bson:"type_of" json:"type_of"`
+	TenantID                  primitive.ObjectID `bson:"tenant_id" json:"tenant_id,omitempty"`
+	OrderTenantIDWithWJID     string             `bson:"order_tenant_id_with_wjid" json:"order_tenant_id_with_wjid"` // TenantIDWithWJID is a combination of `tenancy_id` and `wjid` values written in the following structure `%v_%v`.
+	PublicID                  uint64             `bson:"public_id" json:"public_id"`
 	// OngoingOrderID        primitive.ObjectID `bson:"ongoing_order_id" json:"ongoing_order_id"`
 }
 

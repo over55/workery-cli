@@ -57,6 +57,8 @@ type TaskItem struct {
 	Status                                int8                            `bson:"status" json:"status"`       // 20
 	PublicID                              uint64                          `bson:"public_id" json:"public_id"` // 21
 	CustomerID                            primitive.ObjectID              `bson:"customer_id" json:"customer_id"`
+	CustomerOrganizationName              string                          `bson:"customer_organization_name" json:"customer_organization_name"`
+	CustomerOrganizationType              int8                            `bson:"customer_organization_type" json:"customer_organization_type"`
 	CustomerPublicID                      uint64                          `bson:"customer_public_id" json:"customer_public_id"` // 21
 	CustomerFirstName                     string                          `bson:"customer_first_name" json:"customer_first_name,omitempty"`
 	CustomerLastName                      string                          `bson:"customer_last_name" json:"customer_last_name,omitempty"`
@@ -76,6 +78,8 @@ type TaskItem struct {
 	CustomerFullAddressURL                string                          `bson:"customer_full_address_url" json:"customer_full_address_url"`
 	CustomerTags                          []*TaskItemTag                  `bson:"customer_tags" json:"customer_tags,omitempty"` // Related
 	AssociateID                           primitive.ObjectID              `bson:"associate_id" json:"associate_id"`
+	AssociateOrganizationName             string                          `bson:"associate_organization_name" json:"associate_organization_name"`
+	AssociateOrganizationType             int8                            `bson:"associate_organization_type" json:"associate_organization_type"`
 	AssociatePublicID                     uint64                          `bson:"associate_public_id" json:"associate_public_id"` // 21
 	AssociateFirstName                    string                          `bson:"associate_first_name" json:"associate_first_name,omitempty"`
 	AssociateLastName                     string                          `bson:"associate_last_name" json:"associate_last_name,omitempty"`

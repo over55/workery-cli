@@ -236,6 +236,8 @@ func importOrder(
 
 	var associateID primitive.ObjectID = primitive.NilObjectID
 	var associatePublicID uint64
+	var associateOrganizationName string
+	var associateOrganizationType int8
 	var associateFirstName string
 	var associateLastName string
 	var associateName string
@@ -263,6 +265,8 @@ func importOrder(
 	}
 	if a != nil {
 		associateID = a.ID
+		associateOrganizationName = a.OrganizationName
+		associateOrganizationType = a.OrganizationType
 		associatePublicID = a.PublicID
 		associateFirstName = a.FirstName
 		associateLastName = a.LastName
@@ -289,6 +293,8 @@ func importOrder(
 	//
 
 	var customerID primitive.ObjectID = primitive.NilObjectID
+	var customerOrganizationName string
+	var customerOrganizationType int8
 	var customerPublicID uint64
 	var customerFirstName string
 	var customerLastName string
@@ -313,6 +319,8 @@ func importOrder(
 	}
 	if c != nil {
 		customerID = c.ID
+		customerOrganizationName = c.OrganizationName
+		customerOrganizationType = c.OrganizationType
 		customerPublicID = c.PublicID
 		customerFirstName = c.FirstName
 		customerLastName = c.LastName
@@ -444,6 +452,8 @@ func importOrder(
 		TenantIDWithWJID:                      fmt.Sprintf("%v_%v", tenant.ID.Hex(), wo.ID),
 		ID:                                    primitive.NewObjectID(),
 		CustomerID:                            customerID,
+		CustomerOrganizationName:              customerOrganizationName,
+		CustomerOrganizationType:              customerOrganizationType,
 		CustomerPublicID:                      customerPublicID,
 		CustomerFirstName:                     customerFirstName,
 		CustomerLastName:                      customerLastName,
@@ -463,6 +473,8 @@ func importOrder(
 		CustomerFullAddressURL:                customerFullAddressURL,
 		CustomerTags:                          toOrderTagsFromCustomerTags(customerTags),
 		AssociateID:                           associateID,
+		AssociateOrganizationName:             associateOrganizationName,
+		AssociateOrganizationType:             associateOrganizationType,
 		AssociatePublicID:                     associatePublicID,
 		AssociateFirstName:                    associateFirstName,
 		AssociateLastName:                     associateLastName,
