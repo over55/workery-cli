@@ -232,10 +232,18 @@ func NewDatastore(appCfg *c.Conf, loggerp *slog.Logger, client *mongo.Client) Ta
 			{"order_description", "text"},
 			{"order_skill_sets", "text"},
 			{"order_tags", "text"},
+			{"customer_organization_name", "text"},
 			{"customer_name", "text"},
 			{"customer_lexical_name", "text"},
+			{"customer_email", "text"},
+			{"customer_phone", "text"},
+			{"customer_other_phone", "text"},
+			{"associate_organization_name", "text"},
 			{"associate_name", "text"},
 			{"associate_lexical_name", "text"},
+			{"associate_email", "text"},
+			{"associate_phone", "text"},
+			{"associate_other_phone", "text"},
 		}},
 	})
 	if err != nil {

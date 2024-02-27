@@ -413,6 +413,7 @@ func NewDatastore(appCfg *c.Conf, loggerp *slog.Logger, client *mongo.Client) Or
 		{Keys: bson.D{{Key: "customer_lexical_name", Value: 1}}},
 		{Keys: bson.D{{Key: "associate_lexical_name", Value: 1}}},
 		{Keys: bson.D{
+			{"customer_organization_name", "text"},
 			{"customer_name", "text"},
 			{"customer_lexical_name", "text"},
 			{"customer_email", "text"},
@@ -420,6 +421,7 @@ func NewDatastore(appCfg *c.Conf, loggerp *slog.Logger, client *mongo.Client) Or
 			{"customer_other_phone", "text"},
 			{"customer_full_address_without_postal_code", "text"},
 			{"customer_tags", "text"},
+			{"associate_organization_name", "text"},
 			{"associate_name", "text"},
 			{"associate_lexical_name", "text"},
 			{"associate_email", "text"},
