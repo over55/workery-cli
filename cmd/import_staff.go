@@ -203,6 +203,12 @@ func importStaff(
 	ou *OldStaff,
 ) {
 	//
+	// Create staff id.
+	//
+
+	staffID := primitive.NewObjectID()
+
+	//
 	// Set the `state`.
 	//
 
@@ -241,8 +247,7 @@ func importStaff(
 
 	var ownerUser *user_ds.User
 
-	// CASE 1: User record exists in our database.
-	if ou.OwnerID.Valid {
+	if ou.OwnerID.Valid { // CASE 1: User record exists in our database.
 		user, err := us.GetByPublicID(ctx, ownerUserID)
 		if err != nil {
 			log.Fatal("(A)", err)
@@ -251,9 +256,13 @@ func importStaff(
 			log.Fatal("(B) User is null")
 		}
 		ownerUser = user
+		ownerUser.Role = 5
+		ownerUser.ReferenceID = staffID
+		if err := us.UpdateByID(ctx, ownerUser); err != nil {
+			log.Panic(err)
+		}
 
-		// CASE 2: Record D.N.E.
-	} else {
+	} else { // CASE 2: Record D.N.E.
 		var email string
 
 		// CASE 2A: Email specified
@@ -290,6 +299,7 @@ func importStaff(
 				PrExpiryTime:     time.Now(),
 				TenantID:         tenant.ID,
 				Role:             5, // Staff
+				ReferenceID:      staffID,
 			}
 			err = us.UpsertByEmail(ctx, um)
 			if err != nil {
@@ -460,7 +470,7 @@ func importStaff(
 	//
 
 	m := &s_ds.Staff{
-		ID:                           primitive.NewObjectID(),
+		ID:                           staffID,
 		TenantID:                     tenant.ID,
 		FirstName:                    ou.GivenName.ValueOrZero(),
 		LastName:                     ou.LastName.ValueOrZero(),

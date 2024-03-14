@@ -41,7 +41,7 @@ var importAttachmentDownloadCmd = &cobra.Command{
 		cfg := config.New()
 		mc := mongodb.NewStorage(cfg)
 		s3 := s3storage.NewStorage(cfg, defaultLogger)
-		oldS3 := s3storage.NewStorageWithCustom(defaultLogger, cfg.OldAWS.Endpoint, cfg.OldAWS.Region, cfg.OldAWS.AccessKey, cfg.OldAWS.SecretKey, cfg.OldAWS.BucketName)
+		oldS3 := s3storage.NewStorageWithCustom(defaultLogger, cfg.OldAWS.Endpoint, cfg.OldAWS.Region, cfg.OldAWS.AccessKey, cfg.OldAWS.SecretKey, cfg.OldAWS.BucketName, false)
 		ppc := postgres.NewStorage(cfg, cfg.PostgresDB.DatabasePublicSchemaName)
 		lpc := postgres.NewStorage(cfg, cfg.PostgresDB.DatabaseLondonSchemaName)
 

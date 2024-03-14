@@ -341,11 +341,96 @@ func importAssociate(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.
 	}
 
 	//
+	// Generate associate ID.
+	//
+
+	associateID := primitive.NewObjectID()
+
+	//
+	// Check for unique email.
+	//
+
+	u := &user_ds.User{}
+
+	emailExists, err := us.CheckIfExistsByEmail(ctx, ou.Email.ValueOrZero())
+	if err != nil {
+		log.Panic(err)
+	}
+	if emailExists {
+		u, err = us.GetByEmail(ctx, ou.Email.ValueOrZero())
+		if err != nil {
+			log.Panic(err)
+		}
+		u.Role = user_ds.UserRoleAssociate
+		u.ReferenceID = associateID // Important!
+		if err := us.UpdateByID(ctx, u); err != nil {
+			log.Panic(err)
+		}
+	} else {
+		//
+		// Insert our `User` data.
+		//
+
+		u.ID = primitive.NewObjectID()
+		u.TenantID = tenant.ID
+		u.FirstName = ou.GivenName.ValueOrZero()
+		u.LastName = ou.LastName.ValueOrZero()
+		u.Name = fmt.Sprintf("%s %s", ou.GivenName.ValueOrZero(), ou.LastName.ValueOrZero())
+		u.LexicalName = fmt.Sprintf("%s, %s", ou.LastName.ValueOrZero(), ou.GivenName.ValueOrZero())
+		u.OrganizationName = ou.OrganizationName.ValueOrZero()
+		u.OrganizationType = ou.OrganizationTypeOf
+		if ou.Email.IsZero() {
+			u.Email = ou.Email.ValueOrZero()
+			u.Status = status
+		} else {
+			u.Email = fmt.Sprintf("associate_%s@workery.ca", u.ID.Hex())
+			u.Status = user_ds.UserStatusArchived
+		}
+		u.PasswordHashAlgorithm = primitive.NewObjectID().Hex()
+		u.PasswordHash = "MongoDB Primitive"
+		u.Role = user_ds.UserRoleAssociate
+		u.ReferenceID = associateID // Important!
+		u.WasEmailVerified = true
+		u.EmailVerificationCode = ""
+		u.EmailVerificationExpiry = time.Now()
+		u.Phone = ou.Telephone.ValueOrZero()
+		u.Country = ou.AddressCountry
+		u.Region = ou.AddressRegion
+		u.City = ou.AddressLocality
+		u.AgreeTOS = true
+		u.AgreePromotionsEmail = true
+		u.CreatedAt = time.Now()
+		// u.CreatedByUserID = userID
+		// u.CreatedByUserName = userName
+		// u.CreatedFromIPAddress = ipAddress
+		u.ModifiedAt = time.Now()
+		// u.ModifiedByUserID = userID
+		// u.ModifiedByUserName = userName
+		// u.ModifiedFromIPAddress = ipAddress
+		u.Status = user_ds.UserStatusActive
+		u.Comments = make([]*user_ds.UserComment, 0)
+		u.Salt = ""
+		// u.JoinedTime = req.JoinDateDT
+		u.PrAccessCode = ""
+		u.PrExpiryTime = time.Now()
+		u.PublicID = 0
+		u.Timezone = "American/Toronto"
+		u.OTPEnabled = false // impl.Config.AppServer.Enable2FAOnRegistration
+		u.OTPVerified = false
+		u.OTPValidated = false
+		u.OTPSecret = ""
+		u.OTPAuthURL = ""
+		if err := us.Create(ctx, u); err != nil {
+			log.Panic(err)
+		}
+	}
+
+	//
 	// Insert our `Associate` data.
 	//
 
 	m := &a_ds.Associate{
-		ID:                           primitive.NewObjectID(),
+		ID:                           associateID,
 		PublicID:                     ou.ID,
 		TenantID:                     tenant.ID,
 		FirstName:                    ou.GivenName.ValueOrZero(),
@@ -386,7 +471,7 @@ func importAssociate(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.
 		Status:                       status,
 		Timezone:                     "American/Toronto",
 		HasUserAccount:               false,
-		UserID:                       primitive.NilObjectID,
+		UserID:                       u.ID,
 		Type:                         ou.TypeOf,
 		IsOkToEmail:                  ou.IsOkToEmail,
 		IsOkToText:                   ou.IsOkToText,

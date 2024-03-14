@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 	"log"
+	"log/slog"
 	"mime/multipart"
 	"os"
 	"strings"
@@ -17,12 +18,12 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/aws/smithy-go"
-	"log/slog"
 
 	c "github.com/over55/workery-cli/config"
 )
 
 type S3Storager interface {
+	CreateBucket(name string, region string) error
 	UploadContent(ctx context.Context, objectKey string, content []byte) error
 	UploadContentFromMulipart(ctx context.Context, objectKey string, file multipart.File) error
 	BucketExists(ctx context.Context, bucketName string) (bool, error)
@@ -42,7 +43,7 @@ type s3Storager struct {
 	BucketName    string
 }
 
-func NewStorageWithCustom(logger *slog.Logger, endpoint, region, accessKey, secretKey, bucketName string) S3Storager {
+func NewStorageWithCustom(logger *slog.Logger, endpoint, region, accessKey, secretKey, bucketName string, usePathStyle bool) S3Storager {
 	// DEVELOPERS NOTE:
 	// How can I use the AWS SDK v2 for Go with DigitalOcean Spaces? via https://stackoverflow.com/a/74284205
 	logger.Debug("s3 initializing...")
@@ -65,7 +66,9 @@ func NewStorageWithCustom(logger *slog.Logger, endpoint, region, accessKey, secr
 	}
 
 	// STEP 3\: Load up s3 instance.
-	s3Client := s3.NewFromConfig(sdkConfig)
+	s3Client := s3.NewFromConfig(sdkConfig, func(o *s3.Options) {
+		o.UsePathStyle = usePathStyle
+	})
 
 	// For debugging purposes only.
 	logger.Debug("s3 connected to remote service")
@@ -84,7 +87,9 @@ func NewStorageWithCustom(logger *slog.Logger, endpoint, region, accessKey, secr
 		log.Fatal(err) // We need to crash the program at start to satisfy google wire requirement of having no errors.
 	}
 	if !doesExist {
-		log.Fatal("bucket name does not exist") // We need to crash the program at start to satisfy google wire requirement of having no errors.
+		if err := s3Storage.CreateBucket(bucketName, region); err != nil {
+			log.Fatal(err) // We need to crash the program at start to satisfy google wire requirement of having no errors.
+		}
 	}
 
 	// For debugging purposes only.
@@ -146,6 +151,20 @@ func NewStorage(appConf *c.Conf, logger *slog.Logger) S3Storager {
 
 	// Return our s3 storage handler.
 	return s3Storage
+}
+
+// CreateBucket creates a bucket with the specified name in the specified Region.
+func (s *s3Storager) CreateBucket(name string, region string) error {
+	_, err := s.S3Client.CreateBucket(context.TODO(), &s3.CreateBucketInput{
+		Bucket: aws.String(name),
+		CreateBucketConfiguration: &types.CreateBucketConfiguration{
+			LocationConstraint: types.BucketLocationConstraint(region),
+		},
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *s3Storager) UploadContent(ctx context.Context, objectKey string, content []byte) error {

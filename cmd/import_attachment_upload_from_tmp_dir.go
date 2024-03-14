@@ -46,6 +46,7 @@ var importAttachmentUploadCmd = &cobra.Command{
 			cfg.OldAWS.AccessKey,
 			cfg.OldAWS.SecretKey,
 			cfg.OldAWS.BucketName,
+			false,
 		)
 		ppc := postgres.NewStorage(cfg, cfg.PostgresDB.DatabasePublicSchemaName)
 		lpc := postgres.NewStorage(cfg, cfg.PostgresDB.DatabaseLondonSchemaName)
