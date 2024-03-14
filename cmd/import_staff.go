@@ -12,6 +12,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"gopkg.in/guregu/null.v4"
 
 	"github.com/over55/workery-cli/adapter/storage/mongodb"
@@ -47,7 +48,7 @@ var importStaffCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		RunImportStaff(cfg, ppc, lpc, tenantStorer, userStorer, sStorer, hhStorer, tenant)
+		RunImportStaff(cfg, ppc, lpc, mc, tenantStorer, userStorer, sStorer, hhStorer, tenant)
 	},
 }
 
@@ -180,17 +181,49 @@ func ListAllStaffs(db *sql.DB) ([]*OldStaff, error) {
 	return arr, err
 }
 
-func RunImportStaff(cfg *config.Conf, public *sql.DB, london *sql.DB, tenantStorer tenant_ds.TenantStorer, userStorer user_ds.UserStorer, sStorer s_ds.StaffStorer, hhStorer hh_ds.HowHearAboutUsItemStorer, tenant *tenant_ds.Tenant) {
+func RunImportStaff(
+	cfg *config.Conf,
+	public *sql.DB,
+	london *sql.DB,
+	mc *mongo.Client,
+	tenantStorer tenant_ds.TenantStorer,
+	userStorer user_ds.UserStorer,
+	sStorer s_ds.StaffStorer,
+	hhStorer hh_ds.HowHearAboutUsItemStorer,
+	tenant *tenant_ds.Tenant,
+) {
 	fmt.Println("Beginning importing staffs")
 	data, err := ListAllStaffs(london)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	for _, datum := range data {
-		importStaff(context.Background(), tenantStorer, userStorer, sStorer, hhStorer, tenant, datum)
+	////
+	//// Start the transaction.
+	////
+
+	session, err := mc.StartSession()
+	if err != nil {
+		log.Fatal(err)
 	}
-	fmt.Println("Finished importing staffs")
+	defer session.EndSession(context.Background())
+
+	// Define a transaction function with a series of operations
+	transactionFunc := func(sessCtx mongo.SessionContext) (interface{}, error) {
+		// Iterate over all the staff in the old database and import them.
+		for _, datum := range data {
+			if err := importStaff(sessCtx, tenantStorer, userStorer, sStorer, hhStorer, tenant, datum); err != nil {
+				return nil, err
+			}
+		}
+		fmt.Println("Finished importing staffs")
+		return nil, nil
+	}
+
+	// Start a transaction
+	if _, err := session.WithTransaction(context.Background(), transactionFunc); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func importStaff(
@@ -201,7 +234,7 @@ func importStaff(
 	hhStorer hh_ds.HowHearAboutUsItemStorer,
 	tenant *tenant_ds.Tenant,
 	ou *OldStaff,
-) {
+) error {
 	//
 	// Create staff id.
 	//
@@ -221,8 +254,9 @@ func importStaff(
 	// Variable used to keep the ID of the user record in our database.
 	//
 
-	ownerUserID := uint64(ou.OwnerID.Int64)
 	var userRoleID int8
+
+	ownerUserEmail := ou.Email.ValueOrZero()
 
 	//
 	// Generate our full name / lexical full name.
@@ -247,68 +281,46 @@ func importStaff(
 
 	var ownerUser *user_ds.User
 
-	if ou.OwnerID.Valid { // CASE 1: User record exists in our database.
-		user, err := us.GetByPublicID(ctx, ownerUserID)
+	if ownerUserEmail == "" {
+		staffIdStr := strconv.FormatUint(ou.ID, 10)
+		ownerUserEmail = "staff_" + staffIdStr + "@workery.ca"
+	}
+	user, err := us.GetByEmail(ctx, ownerUserEmail)
+	if err != nil {
+		return err
+	}
+	if user == nil {
+		um := &user_ds.User{
+			ID:          primitive.NewObjectID(),
+			FirstName:   ou.GivenName.String,
+			LastName:    ou.LastName.String,
+			Name:        name,
+			LexicalName: lexicalName,
+			Email:       ownerUserEmail,
+			// JoinedTime:        ou.DateJoined,
+			Status:   status,
+			Timezone: "America/Toronto",
+			// CreatedTime:       ou.DateJoined,
+			// ModifiedTime:      ou.LastModified,
+			Salt:             "",
+			WasEmailVerified: false,
+			PrAccessCode:     "",
+			PrExpiryTime:     time.Now(),
+			TenantID:         tenant.ID,
+			Role:             5, // Staff
+			ReferenceID:      staffID,
+		}
+		err = us.UpsertByEmail(ctx, um)
 		if err != nil {
-			log.Fatal("(A)", err)
+			return err
 		}
-		if user == nil {
-			log.Fatal("(B) User is null")
-		}
-		ownerUser = user
-		ownerUser.Role = 5
-		ownerUser.ReferenceID = staffID
-		if err := us.UpdateByID(ctx, ownerUser); err != nil {
-			log.Panic(err)
-		}
-
-	} else { // CASE 2: Record D.N.E.
-		var email string
-
-		// CASE 2A: Email specified
-		if ou.Email.Valid {
-			email = ou.Email.String
-
-			// CASE 2B: Email is not specified
-		} else {
-			staffIdStr := strconv.FormatUint(ou.ID, 10)
-			email = "staff+" + staffIdStr + "@workery.ca"
-		}
-
-		user, err := us.GetByEmail(ctx, email)
-		if err != nil {
-			log.Panic("(C)", err)
-		}
-
-		if user == nil {
-			um := &user_ds.User{
-				ID:          primitive.NewObjectID(),
-				FirstName:   ou.GivenName.String,
-				LastName:    ou.LastName.String,
-				Name:        name,
-				LexicalName: lexicalName,
-				Email:       email,
-				// JoinedTime:        ou.DateJoined,
-				Status:   status,
-				Timezone: "America/Toronto",
-				// CreatedTime:       ou.DateJoined,
-				// ModifiedTime:      ou.LastModified,
-				Salt:             "",
-				WasEmailVerified: false,
-				PrAccessCode:     "",
-				PrExpiryTime:     time.Now(),
-				TenantID:         tenant.ID,
-				Role:             5, // Staff
-				ReferenceID:      staffID,
-			}
-			err = us.UpsertByEmail(ctx, um)
-			if err != nil {
-				log.Panic("(D)", err)
-			}
-			user = um
-		}
-
-		ownerUser = user
+		user = um
+	}
+	ownerUser = user
+	ownerUser.Role = 5
+	ownerUser.ReferenceID = staffID
+	if err := us.UpdateByID(ctx, ownerUser); err != nil {
+		return err
 	}
 
 	userRoleID = ownerUser.Role
@@ -390,8 +402,7 @@ func importStaff(
 	isHowHearOther := false
 	howHear, err := hhStorer.GetByPublicID(ctx, uint64(howHearId))
 	if err != nil {
-		log.Fatal(err)
-		return
+		return err
 	}
 	if howHear != nil {
 		if howHearId == 1 {
@@ -407,14 +418,17 @@ func importStaff(
 	} else {
 		howHear, err = hhStorer.GetByText(ctx, "Other")
 		if err != nil {
-			log.Fatal(err)
-			return
+			return err
 		}
 	}
 
 	// Defensive code.
 	if howHear == nil {
-		log.Fatal("how hear does not exist")
+		// If no how-hear selected then default to `Other`.
+		howHear, err = hhStorer.GetByText(ctx, "Other")
+		if err != nil {
+			return err
+		}
 	}
 
 	//
@@ -476,7 +490,7 @@ func importStaff(
 		LastName:                     ou.LastName.ValueOrZero(),
 		Name:                         name,
 		LexicalName:                  lexicalName,
-		Email:                        ou.Email.ValueOrZero(),
+		Email:                        ownerUserEmail,
 		Phone:                        ou.Telephone.ValueOrZero(),
 		PhoneType:                    ou.TelephoneTypeOf,
 		PhoneExtension:               ou.TelephoneExtension.ValueOrZero(),
@@ -549,7 +563,9 @@ func importStaff(
 		PoliceCheck:                          ou.PoliceCheck.ValueOrZero(),
 	}
 	if err := sStorer.Create(ctx, m); err != nil {
-		log.Panic(err)
+		return err
 	}
-	fmt.Println("Imported staff ID#", m.ID)
+
+	fmt.Println("Imported staff ID#", m.ID.Hex(), "| Email:", m.Email, "| Name:", m.Name, "| Role:", ownerUser.Role)
+	return nil
 }

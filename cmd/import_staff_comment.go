@@ -7,8 +7,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/spf13/cobra"
 	"log/slog"
+
+	"github.com/spf13/cobra"
 
 	"github.com/over55/workery-cli/adapter/storage/mongodb"
 	"github.com/over55/workery-cli/adapter/storage/postgres"
@@ -120,7 +121,8 @@ func importStaffComment(ctx context.Context, ts tenant_ds.TenantStorer, us user_
 		log.Fatal(err)
 	}
 	if staff == nil {
-		log.Fatal("staff does not exist")
+		log.Println("staff does not exist")
+		return
 	}
 	comment, err := comStorer.GetByPublicID(ctx, ou.CommentId)
 	if err != nil {
@@ -147,7 +149,7 @@ func importStaffComment(ctx context.Context, ts tenant_ds.TenantStorer, us user_
 		ModifiedFromIPAddress: comment.ModifiedFromIPAddress,
 		Content:               comment.Content,
 		Status:                comment.Status,
-		PublicID:                 comment.PublicID,
+		PublicID:              comment.PublicID,
 	}
 
 	// Append comments to staff details.

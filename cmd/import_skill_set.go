@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -41,6 +42,11 @@ var importSkillSetCmd = &cobra.Command{
 
 		tenant, err := tenantStorer.GetBySchemaName(ctx, cfg.PostgresDB.DatabaseLondonSchemaName)
 		if err != nil {
+			log.Fatal(err)
+		}
+
+		if tenant == nil {
+			err := errors.New("tenant does not exist in `importSkillSetCmd` function")
 			log.Fatal(err)
 		}
 
@@ -127,6 +133,11 @@ func ListAllSkillSets(db *sql.DB) ([]*OldUSkillSet, error) {
 }
 
 func importSkillSet(ctx context.Context, ssStorer ss_ds.SkillSetStorer, tenant *tenant_ds.Tenant, t *OldUSkillSet) {
+	if tenant == nil {
+		err := errors.New("tenant does not exist in `importSkillSet` function")
+		log.Fatal(err)
+	}
+
 	var state int8 = 1
 	if t.IsArchived == true {
 		state = 2
