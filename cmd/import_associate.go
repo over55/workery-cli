@@ -470,7 +470,6 @@ func importAssociate(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.
 		ModifiedFromIPAddress:        ou.LastModifiedFrom.String,
 		Status:                       status,
 		Timezone:                     "American/Toronto",
-		HasUserAccount:               false,
 		UserID:                       u.ID,
 		Type:                         ou.TypeOf,
 		IsOkToEmail:                  ou.IsOkToEmail,

@@ -116,7 +116,6 @@ type Staff struct {
 	PrAccessCode                         string                       `bson:"pr_access_code" json:"pr_access_code,omitempty"`
 	PrExpiryTime                         time.Time                    `bson:"pr_expiry_time" json:"pr_expiry_time,omitempty"`
 	Timezone                             string                       `bson:"timezone" json:"timezone,omitempty"`
-	HasUserAccount                       bool                         `bson:"has_user_account" json:"has_user_account,omitempty"`
 	UserID                               primitive.ObjectID           `bson:"user_id" json:"user_id,omitempty"`
 	Type                                 int8                         `bson:"type" json:"type"`
 	IsBusiness                           bool                         `bson:"is_business" json:"is_business"`

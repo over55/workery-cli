@@ -448,7 +448,6 @@ func importCustomer(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.U
 		Status:                       status,
 		Comments:                     cc,
 		Timezone:                     "American/Toronto",
-		HasUserAccount:               false,
 		UserID:                       u.ID,
 		Type:                         ou.TypeOf,
 		IsOkToEmail:                  ou.IsOkToEmail,
