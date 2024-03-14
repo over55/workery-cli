@@ -307,8 +307,9 @@ func importStaff(
 			PrAccessCode:     "",
 			PrExpiryTime:     time.Now(),
 			TenantID:         tenant.ID,
-			Role:             5, // Staff
+			Role:             3, // 3=Staff
 			ReferenceID:      staffID,
+			HasStaffRole:     true,
 		}
 		err = us.UpsertByEmail(ctx, um)
 		if err != nil {
@@ -317,7 +318,6 @@ func importStaff(
 		user = um
 	}
 	ownerUser = user
-	ownerUser.Role = 5
 	ownerUser.ReferenceID = staffID
 	if err := us.UpdateByID(ctx, ownerUser); err != nil {
 		return err
