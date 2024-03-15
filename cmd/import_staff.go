@@ -480,6 +480,15 @@ func importStaff(
 	}
 
 	//
+	// Preference language
+	//
+
+	preferredLanguage := ou.AvailableLanguage.ValueOrZero()
+	if preferredLanguage == "" {
+		preferredLanguage = "English"
+	}
+
+	//
 	// Insert our `Staff` data.
 	//
 
@@ -546,7 +555,7 @@ func importStaff(
 		Latitude:    ou.Elevation.ValueOrZero(),
 		Longitude:   ou.Longitude.ValueOrZero(),
 		// AreaServed:            ou.AreaServed.ValueOrZero(),
-		PreferredLanguage:                    ou.AvailableLanguage.ValueOrZero(),
+		PreferredLanguage:                    preferredLanguage,
 		ContactType:                          ou.ContactType.ValueOrZero(),
 		Tags:                                 at,
 		Comments:                             cc,
