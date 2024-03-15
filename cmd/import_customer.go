@@ -403,6 +403,15 @@ func importCustomer(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.U
 	}
 
 	//
+	// Preference language
+	//
+
+	preferredLanguage := ou.AvailableLanguage.ValueOrZero()
+	if preferredLanguage == "" {
+		preferredLanguage = "English"
+	}
+
+	//
 	// Insert our `Customer` data.
 	//
 
@@ -476,6 +485,7 @@ func importCustomer(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.U
 		OrganizationName:  ou.OrganizationName.ValueOrZero(),
 		OrganizationType:  ou.OrganizationTypeOf,
 		Tags:              at,
+		PreferredLanguage: preferredLanguage,
 	}
 	if err := cStorer.Create(ctx, m); err != nil {
 		log.Panic(err)

@@ -99,6 +99,7 @@ type Customer struct {
 	ContactType                          string             `bson:"contact_type" json:"contact_type"`
 	OrganizationName                     string             `bson:"organization_name" json:"organization_name"`
 	OrganizationType                     int8               `bson:"organization_type" json:"organization_type"`
+	PreferredLanguage                    string             `bson:"preferred_language" json:"preferred_language"`
 	PublicID                             uint64             `bson:"public_id" json:"public_id,omitempty"`
 	Comments                             []*CustomerComment `bson:"comments" json:"comments"`
 	Tags                                 []*CustomerTag     `bson:"tags" json:"tags"`

@@ -426,6 +426,15 @@ func importAssociate(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.
 	}
 
 	//
+	// Preference language
+	//
+
+	preferredLanguage := ou.AvailableLanguage.ValueOrZero()
+	if preferredLanguage == "" {
+		preferredLanguage = "English"
+	}
+
+	//
 	// Insert our `Associate` data.
 	//
 
@@ -492,7 +501,7 @@ func importAssociate(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.
 		Latitude:                      ou.Elevation.ValueOrZero(),
 		Longitude:                     ou.Longitude.ValueOrZero(),
 		AreaServed:                    ou.AreaServed.ValueOrZero(),
-		PreferredLanguage:             ou.AvailableLanguage.ValueOrZero(),
+		PreferredLanguage:             preferredLanguage,
 		ContactType:                   ou.ContactType.ValueOrZero(),
 		OrganizationName:              ou.OrganizationName.ValueOrZero(),
 		OrganizationType:              ou.OrganizationTypeOf,
