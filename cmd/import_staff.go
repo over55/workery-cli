@@ -305,7 +305,7 @@ func importStaff(
 			// CreatedTime:       ou.DateJoined,
 			// ModifiedTime:      ou.LastModified,
 			Salt:             "",
-			WasEmailVerified: false,
+			WasEmailVerified: true,
 			PrAccessCode:     "",
 			PrExpiryTime:     time.Now(),
 			TenantID:         tenant.ID,
