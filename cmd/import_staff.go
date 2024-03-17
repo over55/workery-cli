@@ -247,6 +247,8 @@ func importStaff(
 
 	var status int8 = s_ds.StaffStatusArchived
 	if ou.IsArchived == true {
+		status = s_ds.StaffStatusArchived
+	} else {
 		status = s_ds.StaffStatusActive
 	}
 
