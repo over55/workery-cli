@@ -258,7 +258,10 @@ func importStaff(
 
 	var userRoleID int8
 
+	// Defensive Code: For security purposes we need to remove all whitespaces from the email and lower the characters.
 	ownerUserEmail := ou.Email.ValueOrZero()
+	ownerUserEmail = strings.ToLower(ownerUserEmail)
+	ownerUserEmail = strings.ReplaceAll(ownerUserEmail, " ", "")
 
 	//
 	// Generate our full name / lexical full name.

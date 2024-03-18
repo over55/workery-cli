@@ -189,6 +189,10 @@ func importUser(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.UserS
 	lexicalName = strings.Replace(lexicalName, ", , ", ", ", 0)
 	lexicalName = strings.Replace(lexicalName, "   ", "", 0)
 
+	// Defensive Code: For security purposes we need to remove all whitespaces from the email and lower the characters.
+	ou.Email = strings.ToLower(ou.Email)
+	ou.Email = strings.ReplaceAll(ou.Email, " ", "")
+
 	m := &user_ds.User{
 		PublicID:              ou.ID,
 		ID:                    primitive.NewObjectID(),

@@ -327,14 +327,18 @@ func importCustomer(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.U
 	// Check for unique email.
 	//
 
+	// Defensive Code: For security purposes we need to remove all whitespaces from the email and lower the characters.
+	email := strings.ToLower(ou.Email.ValueOrZero())
+	email = strings.ReplaceAll(email, " ", "")
+
 	u := &user_ds.User{}
 
-	emailExists, err := us.CheckIfExistsByEmail(ctx, ou.Email.ValueOrZero())
+	emailExists, err := us.CheckIfExistsByEmail(ctx, email)
 	if err != nil {
 		log.Panic(err)
 	}
 	if emailExists {
-		u, err = us.GetByEmail(ctx, ou.Email.ValueOrZero())
+		u, err = us.GetByEmail(ctx, email)
 		if err != nil {
 			log.Panic(err)
 		}
@@ -357,7 +361,7 @@ func importCustomer(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.U
 		u.OrganizationName = ou.OrganizationName.ValueOrZero()
 		u.OrganizationType = ou.OrganizationTypeOf
 		if ou.Email.IsZero() {
-			u.Email = ou.Email.ValueOrZero()
+			u.Email = email
 			u.Status = status
 		} else {
 			u.Email = fmt.Sprintf("customer_%s@workery.ca", customerID.Hex())
@@ -423,7 +427,7 @@ func importCustomer(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.U
 		LastName:                     ou.LastName.ValueOrZero(),
 		Name:                         name,
 		LexicalName:                  lexicalName,
-		Email:                        ou.Email.ValueOrZero(),
+		Email:                        email,
 		Phone:                        ou.Telephone.ValueOrZero(),
 		PhoneType:                    ou.TelephoneTypeOf,
 		PhoneExtension:               ou.TelephoneExtension.ValueOrZero(),

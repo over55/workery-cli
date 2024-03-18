@@ -242,6 +242,10 @@ func importAssociate(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.
 	lexicalName = strings.Replace(lexicalName, ", , ", ", ", 0)
 	lexicalName = strings.Replace(lexicalName, "   ", "", 0)
 
+	// Defensive Code: For security purposes we need to remove all whitespaces from the email and lower the characters.
+	email := strings.ToLower(ou.Email.ValueOrZero())
+	email = strings.ReplaceAll(email, " ", "")
+
 	//
 	// Compile the `full address` and `address url`.
 	//
@@ -352,12 +356,12 @@ func importAssociate(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.
 
 	u := &user_ds.User{}
 
-	emailExists, err := us.CheckIfExistsByEmail(ctx, ou.Email.ValueOrZero())
+	emailExists, err := us.CheckIfExistsByEmail(ctx, email)
 	if err != nil {
 		log.Panic(err)
 	}
 	if emailExists {
-		u, err = us.GetByEmail(ctx, ou.Email.ValueOrZero())
+		u, err = us.GetByEmail(ctx, email)
 		if err != nil {
 			log.Panic(err)
 		}
@@ -380,7 +384,7 @@ func importAssociate(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.
 		u.OrganizationName = ou.OrganizationName.ValueOrZero()
 		u.OrganizationType = ou.OrganizationTypeOf
 		if ou.Email.IsZero() {
-			u.Email = ou.Email.ValueOrZero()
+			u.Email = email
 			u.Status = status
 		} else {
 			u.Email = fmt.Sprintf("associate_%s@workery.ca", u.ID.Hex())
@@ -446,7 +450,7 @@ func importAssociate(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.
 		LastName:                     ou.LastName.ValueOrZero(),
 		Name:                         name,
 		LexicalName:                  lexicalName,
-		Email:                        ou.Email.ValueOrZero(),
+		Email:                        email,
 		Phone:                        ou.Telephone.ValueOrZero(),
 		PhoneType:                    ou.TelephoneTypeOf,
 		PhoneExtension:               ou.TelephoneExtension.ValueOrZero(),
