@@ -180,6 +180,9 @@ func importUser(ctx context.Context, ts tenant_ds.TenantStorer, us user_ds.UserS
 	if tenant == nil {
 		log.Fatal("missing tenant", tenantID)
 	}
+	if !strings.Contains(tenant.SchemaName, "london") {
+		fmt.Println("Skipped imported non-london tenant user ID#", ou.ID)
+	}
 
 	name := strings.Replace(ou.FirstName+" "+ou.LastName, "   ", "", 0)
 	name = strings.Replace(name, "  ", "", 0)

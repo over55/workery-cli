@@ -5,11 +5,13 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"strings"
 	"time"
+
+	"log/slog"
 
 	"github.com/spf13/cobra"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"log/slog"
 
 	"github.com/over55/workery-cli/adapter/storage/mongodb"
 	"github.com/over55/workery-cli/adapter/storage/postgres"
@@ -121,8 +123,11 @@ func RunImportTenant(cfg *config.Conf, public *sql.DB, london *sql.DB, tenantSto
 	}
 
 	for _, t := range tt {
-		importTenant(context.Background(), tenantStorer, t)
-		// runTenantInsert(v, r)
+		// Only import london tenant!
+		if strings.Contains(t.SchemaName, "london") {
+			importTenant(context.Background(), tenantStorer, t)
+			// runTenantInsert(v, r)
+		}
 	}
 	log.Println("Finished importing tenants")
 }
@@ -206,7 +211,7 @@ func ListAllTenants(db *sql.DB) ([]*OldTenant, error) {
 
 func importTenant(ctx context.Context, tenantStorer datastore.TenantStorer, t *OldTenant) {
 	m := &datastore.Tenant{
-		PublicID:              t.Id,
+		PublicID:           t.Id,
 		ID:                 primitive.NewObjectID(),
 		AlternateName:      t.AlternateName,
 		Description:        t.Description,
