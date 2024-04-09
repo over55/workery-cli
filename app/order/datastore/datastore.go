@@ -400,7 +400,7 @@ func NewDatastore(appCfg *c.Conf, loggerp *slog.Logger, client *mongo.Client) Or
 	// }
 
 	_, err := uc.Indexes().CreateMany(context.TODO(), []mongo.IndexModel{
-		{Keys: bson.D{{Key: "public_id", Value: 1}}},
+		{Keys: bson.D{{Key: "wjid", Value: 1}}},
 		{Keys: bson.D{{Key: "tenant_id", Value: 1}}},
 		{Keys: bson.D{{Key: "wjid", Value: -1}}},
 		{Keys: bson.D{{Key: "tenant_id_with_wjid", Value: 1}}},
@@ -414,7 +414,7 @@ func NewDatastore(appCfg *c.Conf, loggerp *slog.Logger, client *mongo.Client) Or
 		{Keys: bson.D{{Key: "customer_lexical_name", Value: 1}}},
 		{Keys: bson.D{{Key: "associate_lexical_name", Value: 1}}},
 		{Keys: bson.D{
-			{"public_id", "text"},
+			{"wjid", "text"},
 			{"customer_organization_name", "text"},
 			{"customer_name", "text"},
 			{"customer_lexical_name", "text"},

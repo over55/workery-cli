@@ -298,7 +298,6 @@ func NewDatastore(appCfg *c.Conf, loggerp *slog.Logger, client *mongo.Client) St
 	uc := client.Database(appCfg.DB.Name).Collection("staff")
 
 	_, err := uc.Indexes().CreateMany(context.TODO(), []mongo.IndexModel{
-		{Keys: bson.D{{Key: "public_id", Value: 1}}},
 		{Keys: bson.D{{Key: "tenant_id", Value: 1}}},
 		{Keys: bson.D{{Key: "email", Value: 1}}},
 		{Keys: bson.D{{Key: "last_name", Value: 1}}},
