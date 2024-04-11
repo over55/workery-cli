@@ -24,6 +24,15 @@ const (
 	OrderUnassignedReasonJobBiggerThanThought         = 3
 	OrderUnassignedReasonClientChangedJobRequirements = 4
 	OrderUnassignedReasonAssociateNeedsMoreTime       = 5
+
+	PaymentMethodOther          = 1
+	PaymentMethodCash           = 2
+	PaymentMethodCheque         = 3
+	PaymentMethodETransfer      = 4
+	PaymentMethodDebit          = 5
+	PaymentMethodCredit         = 6
+	PaymentMethodPurchaseOrder  = 7
+	PaymentMethodCryptocurrency = 8
 )
 
 var OrderUnassignedReasonToLabels = map[int8]string{
@@ -75,4 +84,15 @@ var OrderClosingReasonLabels = map[int8]string{
 	14: "Associate did not call client",
 	15: "Member issue",
 	16: "Client billing issue",
+}
+
+var PaymentMethodLabels = map[int8]string{
+	PaymentMethodOther:          "Other",
+	PaymentMethodCash:           "Cash",
+	PaymentMethodCheque:         "Cheque",
+	PaymentMethodETransfer:      "E-Transfer",
+	PaymentMethodDebit:          "Debit",
+	PaymentMethodCredit:         "Credit",
+	PaymentMethodPurchaseOrder:  "Purchase Order",
+	PaymentMethodCryptocurrency: "Cryptocurrency",
 }

@@ -249,11 +249,7 @@ type OrderInvoice struct {
 	Total                    float64            `bson:"total" json:"total"`
 	PaymentAmount            float64            `bson:"payment_amount" json:"payment_amount"`
 	DateClientPaidInvoice    time.Time          `bson:"date_client_paid_invoice" json:"date_client_paid_invoice"`
-	IsCash                   bool               `bson:"is_cash" json:"is_cash"`
-	IsCheque                 bool               `bson:"is_cheque" json:"is_cheque"`
-	IsDebit                  bool               `bson:"is_debit" json:"is_debit"`
-	IsCredit                 bool               `bson:"is_credit" json:"is_credit"`
-	IsOther                  bool               `bson:"is_other" json:"is_other"`
+	PaymentMethods           []int8             `bson:"payment_methods" json:"payment_methods,omitempty"`
 	ClientSignature          string             `bson:"client_signature" json:"client_signature"`
 	AssociateSignDate        time.Time          `bson:"associate_sign_date" json:"associate_sign_date"`
 	AssociateSignature       string             `bson:"associate_signature" json:"associate_signature"`

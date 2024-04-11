@@ -343,6 +343,27 @@ func importOrderInvoice(
 	}
 
 	//
+	// Create the payment methods
+	//
+
+	var paymentMethods []int8 = []int8{}
+	if oi.IsCash { // 85
+		paymentMethods = append(paymentMethods, o_ds.PaymentMethodCash)
+	}
+	if oi.IsCheque { // 86
+		paymentMethods = append(paymentMethods, o_ds.PaymentMethodCheque)
+	}
+	if oi.IsDebit { // 87
+		paymentMethods = append(paymentMethods, o_ds.PaymentMethodDebit)
+	}
+	if oi.IsCredit { // 88
+		paymentMethods = append(paymentMethods, o_ds.PaymentMethodCredit)
+	}
+	if oi.IsOther { // 89
+		paymentMethods = append(paymentMethods, o_ds.PaymentMethodOther)
+	}
+
+	//
 	// Create the order invoice.
 	//
 
@@ -431,15 +452,11 @@ func importOrderInvoice(
 		Tax:                      oi.Tax,                               // 81
 		Total:                    oi.Total,                             // 82
 		PaymentAmount:            oi.PaymentAmount,                     // 83
-		PaymentDate:              oi.PaymentDate,                       // 84
-		IsCash:                   oi.IsCash,                            // 85
-		IsCheque:                 oi.IsCheque,                          // 86
-		IsDebit:                  oi.IsDebit,                           // 87
-		IsCredit:                 oi.IsCredit,                          // 88
-		IsOther:                  oi.IsOther,                           // 89
-		ClientSignature:          oi.ClientSignature,                   // 90
-		AssociateSignDate:        oi.AssociateSignDate,                 // 91
-		AssociateSignature:       oi.AssociateSignature,                // 92
+		DateClientPaidInvoice:    oi.PaymentDate,                       // 84
+		PaymentMethods:           paymentMethods,
+		ClientSignature:          oi.ClientSignature,    // 90
+		AssociateSignDate:        oi.AssociateSignDate,  // 91
+		AssociateSignature:       oi.AssociateSignature, // 92
 		// WorkOrderId            uint64 `json:"work_order_id"`
 		CreatedAt:          oi.CreatedAt,      // 93
 		ModifiedAt:         oi.LastModifiedAt, // 94
