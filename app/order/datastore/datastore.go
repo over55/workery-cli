@@ -248,7 +248,7 @@ type OrderInvoice struct {
 	Tax                      float64            `bson:"tax" json:"tax"`
 	Total                    float64            `bson:"total" json:"total"`
 	PaymentAmount            float64            `bson:"payment_amount" json:"payment_amount"`
-	PaymentDate              time.Time          `bson:"payment_date" json:"payment_date"`
+	DateClientPaidInvoice    time.Time          `bson:"date_client_paid_invoice" json:"date_client_paid_invoice"`
 	IsCash                   bool               `bson:"is_cash" json:"is_cash"`
 	IsCheque                 bool               `bson:"is_cheque" json:"is_cheque"`
 	IsDebit                  bool               `bson:"is_debit" json:"is_debit"`
