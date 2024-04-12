@@ -364,6 +364,7 @@ func importTaskItem(
 		ClosingReasonOther:                    ti.ClosingReasonOther,
 		OrderID:                               order.ID,
 		OrderWJID:                             order.WJID,
+		OrderType:                             order.Type,
 		OrderTenantIDWithWJID:                 fmt.Sprintf("%v_%v", order.TenantID.Hex(), order.WJID),
 		OrderStartDate:                        order.StartDate,
 		OrderDescription:                      order.Description,
