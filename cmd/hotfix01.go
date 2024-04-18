@@ -130,7 +130,7 @@ func hotfix01Customer(
 		if newCustomer == nil {
 			err := fmt.Errorf("does not exist for Email: %v", oldCustomer.Email.ValueOrZero())
 			log.Println("err:", err)
-			return nil, err
+			return nil, nil
 			// return err
 		}
 
@@ -159,7 +159,7 @@ func hotfix01Customer(
 		if modifiedByCustomer == nil {
 			err := fmt.Errorf("does not exist for LastModifiedById: %v", oldCustomer.LastModifiedById.ValueOrZero())
 			log.Println("err:", err)
-			return nil, err
+			return nil, nil
 			// return err
 		}
 
@@ -214,7 +214,7 @@ func hotfix01Associate(
 		if newAssociate == nil {
 			err := fmt.Errorf("does not exist for Email: %v", oldAssociate.Email.ValueOrZero())
 			log.Println("err:", err)
-			return nil, err
+			return nil, nil // This is not an mistake, we simply want to stop this function.
 		}
 
 		//
@@ -242,7 +242,7 @@ func hotfix01Associate(
 		if modifiedByAssociate == nil {
 			err := fmt.Errorf("does not exist for LastModifiedByID: %v", oldAssociate.LastModifiedByID.ValueOrZero())
 			log.Println("err:", err)
-			return nil, err
+			return nil, nil // This is not an mistake, we simply want to stop this function.
 		}
 
 		newAssociate.ModifiedByUserID = modifiedByAssociate.ID
@@ -296,7 +296,7 @@ func hotfix01Staff(
 		if newStaff == nil {
 			err := fmt.Errorf("does not exist for Email: %v", oldStaff.Email.ValueOrZero())
 			log.Println("err:", err)
-			return nil, err
+			return nil, nil // This is not an mistake, we simply want to stop this function.
 		}
 
 		//
@@ -324,7 +324,7 @@ func hotfix01Staff(
 		if modifiedByStaff == nil {
 			err := fmt.Errorf("does not exist for LastModifiedByID: %v", oldStaff.LastModifiedByID.ValueOrZero())
 			log.Println("err:", err)
-			return nil, err
+			return nil, nil // This is not an mistake, we simply want to stop this function.
 		}
 
 		newStaff.ModifiedByUserID = modifiedByStaff.ID
