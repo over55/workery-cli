@@ -52,6 +52,9 @@ func (impl AttachmentStorerImpl) ListByFilter(ctx context.Context, f *Attachment
 	if f.Status != 0 {
 		filter["status"] = f.Status
 	}
+	if f.Type != 0 {
+		filter["type"] = f.Type
+	}
 
 	impl.Logger.Debug("listing filter:",
 		slog.Any("filter", filter))

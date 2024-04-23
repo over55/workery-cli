@@ -70,6 +70,7 @@ type AttachmentListFilter struct {
 	OrderWJID       uint64
 	StaffID         primitive.ObjectID
 	Status          int8
+	Type            int8
 	ExcludeArchived bool
 	SearchText      string
 }
@@ -98,6 +99,7 @@ type AttachmentStorer interface {
 	ListAsSelectOptionByFilter(ctx context.Context, f *AttachmentListFilter) ([]*AttachmentAsSelectOption, error)
 	ListByOrderID(ctx context.Context, orderID primitive.ObjectID) (*AttachmentListResult, error)
 	ListByOrderWJID(ctx context.Context, orderWJID uint64) (*AttachmentListResult, error)
+	ListByType(ctx context.Context, typeOf int8) (*AttachmentListResult, error)
 	DeleteByID(ctx context.Context, id primitive.ObjectID) error
 	PermanentlyDeleteAllByCustomerID(ctx context.Context, customerID primitive.ObjectID) error
 	PermanentlyDeleteAllByAssociateID(ctx context.Context, associateID primitive.ObjectID) error

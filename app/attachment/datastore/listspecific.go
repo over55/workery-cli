@@ -27,3 +27,14 @@ func (impl AttachmentStorerImpl) ListByOrderWJID(ctx context.Context, orderWJID 
 	}
 	return impl.ListByFilter(ctx, f)
 }
+
+func (impl AttachmentStorerImpl) ListByType(ctx context.Context, typeOf int8) (*AttachmentListResult, error) {
+	f := &AttachmentListFilter{
+		Cursor:    primitive.NilObjectID,
+		PageSize:  1_000_000,
+		SortField: "id",
+		SortOrder: OrderAscending,
+		Type:      typeOf,
+	}
+	return impl.ListByFilter(ctx, f)
+}
