@@ -13,6 +13,7 @@ import (
 	attachment "github.com/over55/workery-cli/app/attachment/datastore"
 	c_ds "github.com/over55/workery-cli/app/customer/datastore"
 	hh_ds "github.com/over55/workery-cli/app/howhear/datastore"
+	o_ds "github.com/over55/workery-cli/app/order/datastore"
 	s_ds "github.com/over55/workery-cli/app/staff/datastore"
 	tenant_ds "github.com/over55/workery-cli/app/tenant/datastore"
 	user_ds "github.com/over55/workery-cli/app/user/datastore"
@@ -42,6 +43,7 @@ var hotfix02Cmd = &cobra.Command{
 		cStorer := c_ds.NewDatastore(cfg, defaultLogger, mc)
 		aStorer := a_ds.NewDatastore(cfg, defaultLogger, mc)
 		sStorer := s_ds.NewDatastore(cfg, defaultLogger, mc)
+		oStorer := o_ds.NewDatastore(cfg, defaultLogger, mc)
 		hhStorer := hh_ds.NewDatastore(cfg, defaultLogger, mc)
 		attachStorer := attachment.NewDatastore(cfg, defaultLogger, mc)
 
@@ -50,7 +52,7 @@ var hotfix02Cmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		RunHotfix02(cfg, ppc, lpc, mc, tenantStorer, userStorer, cStorer, aStorer, sStorer, hhStorer, attachStorer, tenant)
+		RunHotfix02(cfg, ppc, lpc, mc, tenantStorer, userStorer, cStorer, aStorer, sStorer, oStorer, hhStorer, attachStorer, tenant)
 
 	},
 }
@@ -65,6 +67,7 @@ func RunHotfix02(
 	cStorer c_ds.CustomerStorer,
 	aStorer a_ds.AssociateStorer,
 	sStorer s_ds.StaffStorer,
+	oStorer o_ds.OrderStorer,
 	hhStorer hh_ds.HowHearAboutUsItemStorer,
 	attachStorer attachment.AttachmentStorer,
 	tenant *tenant_ds.Tenant,
@@ -76,6 +79,9 @@ func RunHotfix02(
 		log.Fatal(err)
 	}
 	if err := hotfix02Staff(mc, tenantStorer, userStorer, sStorer, hhStorer, attachStorer, tenant); err != nil {
+		log.Fatal(err)
+	}
+	if err := hotfix02Order(mc, tenantStorer, userStorer, oStorer, hhStorer, attachStorer, tenant); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -459,129 +465,129 @@ func hotfix02Staff(
 	return nil
 }
 
-//
-// func hotfix02Order(
-// 	mc *mongo.Client,
-// 	ts tenant_ds.TenantStorer,
-// 	userStorer user_ds.UserStorer,
-// 	orderStorer s_ds.OrderStorer,
-// 	hhStorer hh_ds.HowHearAboutUsItemStorer,
-// 	attachStorer attachment.AttachmentStorer,
-// 	tenant *tenant_ds.Tenant,
-// ) error {
-// 	////
-// 	//// Start the transaction.
-// 	////
-//
-// 	session, err := mc.StartSession()
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	defer session.EndSession(context.Background())
-//
-// 	// Define a transaction function with a series of operations
-// 	transactionFunc := func(sessCtx mongo.SessionContext) (interface{}, error) {
-// 		// STEP 1: Get all the attachments in our system that belong to
-// 		// orders only.
-// 		res, err := attachStorer.ListByType(sessCtx, attachment.AttachmentTypeOrder)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-//
-// 		// STEP 2: Group all the attachments per order.
-// 		orderAttachments := make(map[string][]*attachment.Attachment)
-// 		for _, a := range res.Results {
-// 			// // For debugging purposes only.
-// 			// log.Println("ID:", a.ID)
-// 			// log.Println("OrderID:", a.OrderID)
-// 			// log.Println("Filename:", a.Filename)
-// 			// log.Println("ObjectKey:", a.ObjectKey)
-// 			// log.Println("ObjectURL:", a.ObjectURL)
-// 			// log.Println()
-//
-// 			// Extract the array of attachments that belong to a particular
-// 			// order user.
-// 			arr := orderAttachments[a.OrderID.Hex()]
-//
-// 			// Add attachment to the order user's attachments.
-// 			arr = append(arr, a)
-//
-// 			// Update our order user's attachments array.
-// 			orderAttachments[a.OrderID.Hex()] = arr
-// 		}
-//
-// 		// log.Println(orderAttachments) // For debugging purposes only.
-//
-// 		// STEP 3: Iterate through all the orders.
-// 		for _, attachments := range orderAttachments {
-// 			// log.Println(orderID, attachments) // For debugging purposes only.
-//
-// 			// STEP 4: Iterate over all the attachments and group similar files.
-// 			similarAttachments := make(map[string][]*attachment.Attachment)
-// 			for _, a := range attachments {
-//
-// 				// Extract the array of attachments that are similar
-// 				arr := similarAttachments[a.ObjectKey]
-//
-// 				// Add attachment to the similar attachments.
-// 				arr = append(arr, a)
-//
-// 				// Update our order user's attachments array.
-// 				similarAttachments[a.ObjectKey] = arr
-// 			}
-// 			log.Println(similarAttachments) // For debugging purposes only.
-//
-// 			// DEVELOPERS NOTE:
-// 			// Once we are here then we need to (1) pick one attachment and
-// 			// (2) delete remaining similar attachments.
-//
-// 			// STEP 5: Iterate through all similar files.
-// 			for objectKey, attachmentsByObjectKey := range similarAttachments {
-// 				log.Println("////////////////////////////////////////////////////////////////////////////////////////////////////////////")
-// 				log.Println("////////////////////////////////////////////////////////////////////////////////////////////////////////////")
-// 				log.Println("////////////////////////////////////////////////////////////////////////////////////////////////////////////")
-// 				log.Println("objectKey:", objectKey)
-// 				log.Println("------------------------------------------------------------------------------------------------------------")
-//
-// 				var uniqueAttachment *attachment.Attachment
-// 				var duplicateAttachments []*attachment.Attachment
-//
-// 				for _, a := range attachmentsByObjectKey {
-// 					if uniqueAttachment == nil {
-// 						uniqueAttachment = a
-// 					} else {
-// 						duplicateAttachments = append(duplicateAttachments, a)
-// 					}
-//
-// 				}
-//
-// 				// STEP 6: Iterate over duplicates and delete RECORD ONLY, DO
-// 				// NOT DELETE FILE IN S3!
-//
-// 				log.Println("keeping --->", uniqueAttachment.ObjectKey, uniqueAttachment.ID)
-// 				for _, dup := range duplicateAttachments {
-//
-// 					// For defensive code purposes, just do a few tests to
-// 					// make sure the record is similar before proceeding to
-// 					// delete.
-// 					if uniqueAttachment.OrderID == dup.OrderID && uniqueAttachment.ObjectKey == dup.ObjectKey {
-// 						log.Println("remove --->", dup.ObjectKey, dup.ID)
-// 						// if err := attachStorer.DeleteByID(sessCtx, dup.ID); err != nil {
-// 						// 	log.Println("error deleting order attachment:", err)
-// 						// 	return nil, err
-// 						// }
-// 					}
-// 				}
-// 			}
-// 			//------ END
-// 		}
-//
-// 		return nil, nil
-// 	}
-//
-// 	// Start a transaction
-// 	if _, err := session.WithTransaction(context.Background(), transactionFunc); err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	return nil
-// }
+func hotfix02Order(
+	mc *mongo.Client,
+	ts tenant_ds.TenantStorer,
+	userStorer user_ds.UserStorer,
+	orderStorer o_ds.OrderStorer,
+	hhStorer hh_ds.HowHearAboutUsItemStorer,
+	attachStorer attachment.AttachmentStorer,
+	tenant *tenant_ds.Tenant,
+) error {
+	////
+	//// Start the transaction.
+	////
+
+	session, err := mc.StartSession()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer session.EndSession(context.Background())
+
+	// Define a transaction function with a series of operations
+	transactionFunc := func(sessCtx mongo.SessionContext) (interface{}, error) {
+		// STEP 1: Get all the attachments in our system that belong to
+		// orders only.
+		res, err := attachStorer.ListByType(sessCtx, attachment.AttachmentTypeOrder)
+		if err != nil {
+			return nil, err
+		}
+
+		// STEP 2: Group all the attachments per order.
+		orderAttachments := make(map[string][]*attachment.Attachment)
+		for _, a := range res.Results {
+			// // For debugging purposes only.
+			// log.Println("ID:", a.ID)
+			// log.Println("OrderID:", a.OrderID)
+			// log.Println("Filename:", a.Filename)
+			// log.Println("ObjectKey:", a.ObjectKey)
+			// log.Println("ObjectURL:", a.ObjectURL)
+			// log.Println()
+
+			// Extract the array of attachments that belong to a particular
+			// order user.
+			arr := orderAttachments[a.OrderID.Hex()]
+
+			// Add attachment to the order user's attachments.
+			arr = append(arr, a)
+
+			// Update our order user's attachments array.
+			orderAttachments[a.OrderID.Hex()] = arr
+		}
+
+		// log.Println(orderAttachments) // For debugging purposes only.
+
+		// STEP 3: Iterate through all the orders.
+		for _, attachments := range orderAttachments {
+			// log.Println(orderID, attachments) // For debugging purposes only.
+
+			// STEP 4: Iterate over all the attachments and group similar files.
+			similarAttachments := make(map[string][]*attachment.Attachment)
+			for _, a := range attachments {
+
+				// Extract the array of attachments that are similar
+				arr := similarAttachments[a.ObjectKey]
+
+				// Add attachment to the similar attachments.
+				arr = append(arr, a)
+
+				// Update our order user's attachments array.
+				similarAttachments[a.ObjectKey] = arr
+			}
+			log.Println(similarAttachments) // For debugging purposes only.
+
+			// DEVELOPERS NOTE:
+			// Once we are here then we need to (1) pick one attachment and
+			// (2) delete remaining similar attachments.
+
+			// STEP 5: Iterate through all similar files.
+			for objectKey, attachmentsByObjectKey := range similarAttachments {
+				log.Println("////////////////////////////////////////////////////////////////////////////////////////////////////////////")
+				log.Println("////////////////////////////////////////////////////////////////////////////////////////////////////////////")
+				log.Println("////////////////////////////////////////////////////////////////////////////////////////////////////////////")
+				log.Println("Order")
+				log.Println("objectKey:", objectKey)
+				log.Println("------------------------------------------------------------------------------------------------------------")
+
+				var uniqueAttachment *attachment.Attachment
+				var duplicateAttachments []*attachment.Attachment
+
+				for _, a := range attachmentsByObjectKey {
+					if uniqueAttachment == nil {
+						uniqueAttachment = a
+					} else {
+						duplicateAttachments = append(duplicateAttachments, a)
+					}
+
+				}
+
+				// STEP 6: Iterate over duplicates and delete RECORD ONLY, DO
+				// NOT DELETE FILE IN S3!
+
+				log.Println("keeping --->", uniqueAttachment.ObjectKey, uniqueAttachment.ID)
+				for _, dup := range duplicateAttachments {
+
+					// For defensive code purposes, just do a few tests to
+					// make sure the record is similar before proceeding to
+					// delete.
+					if uniqueAttachment.OrderID == dup.OrderID && uniqueAttachment.ObjectKey == dup.ObjectKey {
+						log.Println("remove --->", dup.ObjectKey, dup.ID)
+						if err := attachStorer.DeleteByID(sessCtx, dup.ID); err != nil {
+							log.Println("error deleting order attachment:", err)
+							return nil, err
+						}
+					}
+				}
+			}
+			//------ END
+		}
+
+		return nil, nil
+	}
+
+	// Start a transaction
+	if _, err := session.WithTransaction(context.Background(), transactionFunc); err != nil {
+		log.Fatal(err)
+	}
+	return nil
+}
