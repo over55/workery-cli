@@ -102,6 +102,9 @@ type TaskItem struct {
 	AssociateInsuranceRequirements        []*TaskItemInsuranceRequirement `bson:"associate_insurance_requirements" json:"associate_insurance_requirements,omitempty"`
 	AssociateVehicleTypes                 []*TaskItemVehicleType          `bson:"associate_vehicle_types" json:"associate_vehicle_types,omitempty"`
 	AssociateTaxID                        string                          `bson:"associate_tax_id" json:"associate_tax_id"`
+	AssociateServiceFeeID                 primitive.ObjectID              `bson:"associate_service_fee_id" json:"associate_service_fee_id"`
+	AssociateServiceFeeName               string                          `bson:"associate_service_fee_name" json:"associate_service_fee_name"`
+	AssociateServiceFeePercentage         float64                         `bson:"associate_service_fee_percentage" json:"associate_service_fee_percentage"`
 }
 
 type TaskItemTag struct {

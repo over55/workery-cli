@@ -27,3 +27,13 @@ func (impl AssociateStorerImpl) ListByHowDidYouHearAboutUsID(ctx context.Context
 	}
 	return impl.ListByFilter(ctx, f)
 }
+
+func (impl AssociateStorerImpl) ListAll(ctx context.Context) (*AssociatePaginationListResult, error) {
+	f := &AssociatePaginationListFilter{
+		Cursor:    "",
+		PageSize:  1_000_000_000, // Max
+		SortField: "",
+		SortOrder: 0,
+	}
+	return impl.ListByFilter(ctx, f)
+}

@@ -258,6 +258,7 @@ type AssociateStorer interface {
 	ListByHowDidYouHearAboutUsID(ctx context.Context, howDidYouHearAboutUsID primitive.ObjectID) (*AssociatePaginationListResult, error)
 	ListAsSelectOptionByFilter(ctx context.Context, f *AssociateListFilter) ([]*AssociateAsSelectOption, error)
 	LiteListByFilter(ctx context.Context, f *AssociatePaginationListFilter) (*AssociatePaginationLiteListResult, error)
+	ListAll(ctx context.Context) (*AssociatePaginationListResult, error)
 	DeleteByID(ctx context.Context, id primitive.ObjectID) error
 	CountByFilter(ctx context.Context, f *AssociateCountFilter) (int64, error)
 }
