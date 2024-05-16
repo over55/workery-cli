@@ -87,6 +87,7 @@ func RunHotfix05(
 				log.Printf("iterating through %v orders...", len(oo.Results))
 				for _, o := range oo.Results {
 					log.Println("A_ID", a.ID, "| O_ID", o.ID)
+					o.AssociateTaxID = a.TaxID
 					o.AssociateServiceFeeID = a.ServiceFeeID
 					o.AssociateServiceFeeName = a.ServiceFeeName
 					o.AssociateServiceFeePercentage = a.ServiceFeePercentage
@@ -106,6 +107,7 @@ func RunHotfix05(
 				log.Printf("iterating through %v task items...", len(titi.Results))
 				for _, ti := range titi.Results {
 					log.Println("A_ID", a.ID, "| TI_ID", ti.ID)
+					ti.AssociateTaxID = a.TaxID
 					ti.AssociateServiceFeeID = a.ServiceFeeID
 					ti.AssociateServiceFeeName = a.ServiceFeeName
 					ti.AssociateServiceFeePercentage = a.ServiceFeePercentage
