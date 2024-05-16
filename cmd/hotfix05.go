@@ -73,6 +73,7 @@ func RunHotfix05(
 		log.Println("fetching all associates...")
 		aa, err := aStorer.ListAll(context.Background())
 		if err != nil {
+			log.Println("error:", err)
 			return nil, err
 		}
 		log.Printf("iterating through %v associates...\n", len(aa.Results))
@@ -83,6 +84,7 @@ func RunHotfix05(
 				log.Println("error:", err)
 				return nil, err
 			}
+			log.Printf("associate orders count: %v...\n", len(oo.Results))
 			if len(oo.Results) > 0 {
 				log.Printf("iterating through %v orders...", len(oo.Results))
 				for _, o := range oo.Results {
@@ -103,6 +105,7 @@ func RunHotfix05(
 				return nil, err
 			}
 
+			log.Printf("associate task items count: %v...\n", len(titi.Results))
 			if len(titi.Results) > 0 {
 				log.Printf("iterating through %v task items...", len(titi.Results))
 				for _, ti := range titi.Results {
